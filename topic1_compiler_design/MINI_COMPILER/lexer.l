@@ -77,6 +77,22 @@ ws          {delim}+
 		 printf("%s : DIV\n", yytext);
 		}
 
+"{"     {chars++;
+         printf("%s : LBRACE\n", yytext);
+        }
+
+"}"     {chars++;
+         printf("%s : RBRACE\n", yytext);
+        }
+
+"("     {chars++;
+         printf("%s : LPAREN\n", yytext);
+        }
+
+")"     {chars++;
+         printf("%s : RPAREN\n", yytext);
+        }
+
 "if"	{words++;
 		 printf("%s : IF\n", yytext);
 		}
