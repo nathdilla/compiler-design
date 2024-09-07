@@ -93,6 +93,14 @@ ws          {delim}+
          printf("%s : RPAREN\n", yytext);
         }
 
+"["     {chars++;
+         printf("%s : LBRACK\n", yytext);
+        }
+
+"]"     {chars++;
+         printf("%s : RBRACK\n", yytext);
+        }
+
 "if"	{words++;
 		 printf("%s : IF\n", yytext);
 		}
