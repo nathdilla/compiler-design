@@ -81,7 +81,7 @@ ws          {delim}+
 		 printf("%s : IF\n", yytext);
 		}
 
-"else"	{word++;
+"else"	{words++;
 		 printf("%s : ELSE\n", yytext);
 		}
 
