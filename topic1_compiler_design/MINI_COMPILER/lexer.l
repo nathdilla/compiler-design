@@ -31,6 +31,18 @@ ws          {delim}+
 								}
 							}
 						}
+
+"if"	{words++;
+		 printf("%s : IF\n", yytext);
+		}
+
+"else"	{words++;
+		 printf("%s : ELSE\n", yytext);
+		}
+
+"return"	{words++;
+		 printf("%s : RETURN\n", yytext);
+		}
 						
 "int"	{words++; chars += strlen(yytext);
 		 printf("%s : TYPE\n", yytext);
@@ -77,17 +89,29 @@ ws          {delim}+
 		 printf("%s : DIV\n", yytext);
 		}
 
-"if"	{words++;
-		 printf("%s : IF\n", yytext);
-		}
+"{"     {chars++;
+         printf("%s : LBRACE\n", yytext);
+        }
 
-"else"	{word++;
-		 printf("%s : ELSE\n", yytext);
-		}
+"}"     {chars++;
+         printf("%s : RBRACE\n", yytext);
+        }
 
-"return"	{words++;
-		 printf("%s : RETURN\n", yytext);
-		}
+"("     {chars++;
+         printf("%s : LPAREN\n", yytext);
+        }
+
+")"     {chars++;
+         printf("%s : RPAREN\n", yytext);
+        }
+
+"["     {chars++;
+         printf("%s : LBRACK\n", yytext);
+        }
+
+"]"     {chars++;
+         printf("%s : RBRACK\n", yytext);
+        }
 		
 
 \n		{lines++; chars=0;}

@@ -10,3 +10,12 @@ x = a + a + 1;
 y = x + a + b + c + a + 5;
 write x;
 write y;
+g = x * 2;
+if(x = y)
+{
+    write x;
+}
+else
+{
+    write y;
+}
