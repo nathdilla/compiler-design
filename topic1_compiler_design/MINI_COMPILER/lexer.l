@@ -31,6 +31,18 @@ ws          {delim}+
 								}
 							}
 						}
+
+"if"	{words++;
+		 printf("%s : IF\n", yytext);
+		}
+
+"else"	{words++;
+		 printf("%s : ELSE\n", yytext);
+		}
+
+"return"	{words++;
+		 printf("%s : RETURN\n", yytext);
+		}
 						
 "int"	{words++; chars += strlen(yytext);
 		 printf("%s : TYPE\n", yytext);
@@ -100,18 +112,6 @@ ws          {delim}+
 "]"     {chars++;
          printf("%s : RBRACK\n", yytext);
         }
-
-"if"	{words++;
-		 printf("%s : IF\n", yytext);
-		}
-
-"else"	{words++;
-		 printf("%s : ELSE\n", yytext);
-		}
-
-"return"	{words++;
-		 printf("%s : RETURN\n", yytext);
-		}
 		
 
 \n		{lines++; chars=0;}
