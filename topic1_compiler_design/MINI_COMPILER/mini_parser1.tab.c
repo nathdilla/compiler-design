@@ -67,7 +67,7 @@
 
 
 /* First part of user prologue.  */
-#line 1 "mini_parser1.y"
+#line 1 "parser.y"
 
 
 #include <stdio.h>

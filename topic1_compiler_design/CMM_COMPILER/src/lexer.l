@@ -54,7 +54,7 @@ ws          {delim}+
 		
 "write"	{words++; 
 		 chars += strlen(yytext);
-		 printf("%s : KEYWORD\n", yytext);
+		 printf("%s : WRITE\n", yytext);
 		}
 		
 {ID}	{words++; chars += strlen(yytext);
