@@ -99,12 +99,12 @@ void freeAST(ASTNode* node) {
             free(node->varDecl.varName);
             break;
         case NodeType_SimpleExpr:
-            free(node->simpleExpr.number);
+            //free(node->simpleExpr.number);
             break;
         case NodeType_Expr:
             free(node->expr.left);
             free(node->expr.right);
-            free(node->expr.operator);
+            //free(node->expr.operator);
             break;
         case NodeType_StmtList:
             free(node->stmtList.stmt);
@@ -144,10 +144,10 @@ ASTNode* createNode(NodeType type) {
             newNode->varDecl.varName = NULL;
             break;
         case NodeType_SimpleExpr:
-            newNode->simpleExpr.number = NULL;
+            //newNode->simpleExpr.number = NULL;
             break;
         case NodeType_Expr:
-            newNode->expr.operator = NULL;  // Placeholder value
+            newNode->expr.operator = ' ';  // Placeholder value
             newNode->expr.left = NULL;
             newNode->expr.right = NULL;
             break;
