@@ -5,6 +5,7 @@
 #include <string.h>
 
 #define YY_DECL int yylex()
+#include "parser.tab.h"
 
 int words = 0;
 int chars = 0;
@@ -46,10 +47,8 @@ ws          {delim}+
 						
 "int"	{words++; chars += strlen(yytext);
 		 printf("%s : TYPE\n", yytext);
-		}
-
-"char"	{words++; chars += strlen(yytext);
-		 printf("%s : TYPE\n", yytext);
+		 yylval.string = strdup(yytext); 
+		 return TYPE;
 		}
 		
 "write"	{words++; 
@@ -58,16 +57,20 @@ ws          {delim}+
 		}
 		
 {ID}	{words++; chars += strlen(yytext);
-		 printf("%s : IDENTIFIER\n",yytext);
-		}
+			  printf("%s : IDENTIFIER\n",yytext);
+			  yylval.string = strdup(yytext); 
+			  return ID;
+			}
 			
 {NUMBER}	{words++; chars += strlen(yytext);
 			  printf("%s : NUMBER\n",yytext);
 			}
 			
 ";"		{chars++;
-		 printf("%s : SEMICOLON\n", yytext);
-		}
+		  printf("%s : SEMICOLON\n", yytext);
+		  yylval.string = strdup(yytext); 
+		  return SEMICOLON;
+	}
 		
 "="		{chars++;
 		 printf("%s : EQ\n", yytext);

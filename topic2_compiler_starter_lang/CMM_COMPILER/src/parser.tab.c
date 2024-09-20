@@ -100,8 +100,6 @@ extern int yylex();
 extern int yyparse();
 extern FILE* yyin;
 
-extern int yyparse();
-
 void yyerror(const char* s);
 
 ASTNode* root = NULL; 
@@ -127,7 +125,7 @@ ASTNode* root = NULL;
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 19 "parser.y"
+#line 17 "parser.y"
 {
 	int number;
 	char character;
@@ -136,7 +134,7 @@ typedef union YYSTYPE
 	struct ASTNode* ast;
 }
 /* Line 193 of yacc.c.  */
-#line 140 "parser.tab.c"
+#line 138 "parser.tab.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -149,7 +147,7 @@ typedef union YYSTYPE
 
 
 /* Line 216 of yacc.c.  */
-#line 153 "parser.tab.c"
+#line 151 "parser.tab.c"
 
 #ifdef short
 # undef short
@@ -435,8 +433,8 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    42,    42,    52,    53,    64,    71,    75,    76,    85,
-      94,    97,   108,   109,   118
+       0,    40,    40,    50,    51,    62,    69,    73,    74,    83,
+      92,    95,   106,   107,   116
 };
 #endif
 
@@ -676,9 +674,9 @@ yy_symbol_value_print (yyoutput, yytype, yyvaluep)
   switch (yytype)
     {
       case 4: /* "ID" */
-#line 35 "parser.y"
+#line 33 "parser.y"
 	{ fprintf(yyoutput, "%s", (yyvaluep->string)); };
-#line 682 "parser.tab.c"
+#line 680 "parser.tab.c"
 	break;
       default:
 	break;
@@ -1349,7 +1347,7 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 42 "parser.y"
+#line 40 "parser.y"
     { printf("The PARSER has started\n"); 
 									root = malloc(sizeof(ASTNode));
 									root->type = NodeType_Program;
@@ -1360,12 +1358,12 @@ yyreduce:
     break;
 
   case 3:
-#line 52 "parser.y"
+#line 50 "parser.y"
     {/*empty, i.e. it is possible not to declare a variable*/;}
     break;
 
   case 4:
-#line 53 "parser.y"
+#line 51 "parser.y"
     {  printf("PARSER: Recognized variable declaration list\n"); 
 							(yyval.ast) = malloc(sizeof(ASTNode));
 							(yyval.ast)->type = NodeType_VarDeclList;
@@ -1378,7 +1376,7 @@ yyreduce:
     break;
 
   case 5:
-#line 64 "parser.y"
+#line 62 "parser.y"
     { printf("PARSER: Recognized variable declaration: %s\n", (yyvsp[(2) - (3)].string));
 							    (yyval.ast) = malloc(sizeof(ASTNode));
     							(yyval.ast)->type = NodeType_VarDecl;
@@ -1389,19 +1387,19 @@ yyreduce:
     break;
 
   case 6:
-#line 71 "parser.y"
+#line 69 "parser.y"
     {
                   printf ("Missing semicolon after declaring variable: %s\n", (yyvsp[(2) - (2)].string));
              ;}
     break;
 
   case 7:
-#line 75 "parser.y"
+#line 73 "parser.y"
     {/*empty, i.e. it is possible not to have any statement*/;}
     break;
 
   case 8:
-#line 76 "parser.y"
+#line 74 "parser.y"
     { printf("PARSER: Recognized statement list\n");
 						(yyval.ast) = malloc(sizeof(ASTNode));
 						(yyval.ast)->type = NodeType_StmtList;
@@ -1412,7 +1410,7 @@ yyreduce:
     break;
 
   case 9:
-#line 85 "parser.y"
+#line 83 "parser.y"
     { /* code TBD */
 								printf("PARSER: Recognized assignment statement\n");
 								(yyval.ast) = malloc(sizeof(ASTNode));
@@ -1425,12 +1423,12 @@ yyreduce:
     break;
 
   case 10:
-#line 94 "parser.y"
+#line 92 "parser.y"
     { printf("PARSER: Recognized write statement\n"); ;}
     break;
 
   case 11:
-#line 97 "parser.y"
+#line 95 "parser.y"
     { 
 						printf("PARSER: Recognized binary operation\n");
 						/*
@@ -1445,12 +1443,12 @@ yyreduce:
     break;
 
   case 12:
-#line 108 "parser.y"
+#line 106 "parser.y"
     { printf("ASSIGNMENT statement \n"); ;}
     break;
 
   case 13:
-#line 109 "parser.y"
+#line 107 "parser.y"
     { 
 				printf("PARSER: Recognized number\n");
 				(yyval.ast) = malloc(sizeof(ASTNode));
@@ -1461,13 +1459,13 @@ yyreduce:
     break;
 
   case 14:
-#line 118 "parser.y"
+#line 116 "parser.y"
     { /* code TBD */ ;}
     break;
 
 
 /* Line 1267 of yacc.c.  */
-#line 1471 "parser.tab.c"
+#line 1469 "parser.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1681,7 +1679,7 @@ yyreturn:
 }
 
 
-#line 121 "parser.y"
+#line 119 "parser.y"
 
 
 int main() {

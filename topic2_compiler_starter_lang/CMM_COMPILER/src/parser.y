@@ -9,8 +9,6 @@ extern int yylex();
 extern int yyparse();
 extern FILE* yyin;
 
-extern int yyparse();
-
 void yyerror(const char* s);
 
 ASTNode* root = NULL; 
