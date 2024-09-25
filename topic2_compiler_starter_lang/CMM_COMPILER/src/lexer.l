@@ -32,18 +32,6 @@ ws          {delim}+
 								}
 							}
 						}
-
-"if"	{words++;
-		 printf("%s : IF\n", yytext);
-		}
-
-"else"	{words++;
-		 printf("%s : ELSE\n", yytext);
-		}
-
-"return"	{words++;
-		 printf("%s : RETURN\n", yytext);
-		}
 						
 "int"	{words++; chars += strlen(yytext);
 		 printf("%s : TYPE\n", yytext);
@@ -54,67 +42,40 @@ ws          {delim}+
 "write"	{words++; 
 		 chars += strlen(yytext);
 		 printf("%s : WRITE\n", yytext);
+		 yylval.string = strdup(yytext);
+		 return WRITE;
 		}
-		
-{ID}	{words++; chars += strlen(yytext);
-			  printf("%s : IDENTIFIER\n",yytext);
-			  yylval.string = strdup(yytext); 
-			  return ID;
-			}
 			
-{NUMBER}	{words++; chars += strlen(yytext);
-			  printf("%s : NUMBER\n",yytext);
-			}
-			
-";"		{chars++;
-		  printf("%s : SEMICOLON\n", yytext);
-		  yylval.string = strdup(yytext); 
-		  return SEMICOLON;
-	}
-		
 "="		{chars++;
 		 printf("%s : EQ\n", yytext);
+		 yylval.operator = strdup(yytext);
+		 return EQ;
 		}
 
 "+"		{chars++;
 		 printf("%s : PLUS\n", yytext);
+		 yylval.operator = strdup(yytext);
+		 return PLUS;
 		}
 
-"-"		{chars++;
-		 printf("%s : MINUS\n", yytext);
+{ID}	{words++; chars += strlen(yytext);
+			  printf("%s : IDENTIFIER\n",yytext);
+			  yylval.string = strdup(yytext); 
+			  return ID;
+		}
+			
+{NUMBER}	{words++; chars += strlen(yytext);
+			  printf("%s : NUMBER\n",yytext);
+			  yylval.number = atoi(yytext);
+			  return NUMBER;
+			}
+
+";"		{chars++;
+		  printf("%s : SEMICOLON\n", yytext);
+		  yylval.string = strdup(yytext); 
+		  return SEMICOLON;
 		}
 
-"*"		{chars++;
-		 printf("%s : MULT\n", yytext);
-		}
-
-"/"		{chars++;
-		 printf("%s : DIV\n", yytext);
-		}
-
-"{"     {chars++;
-         printf("%s : LBRACE\n", yytext);
-        }
-
-"}"     {chars++;
-         printf("%s : RBRACE\n", yytext);
-        }
-
-"("     {chars++;
-         printf("%s : LPAREN\n", yytext);
-        }
-
-")"     {chars++;
-         printf("%s : RPAREN\n", yytext);
-        }
-
-"["     {chars++;
-         printf("%s : LBRACK\n", yytext);
-        }
-
-"]"     {chars++;
-         printf("%s : RBRACK\n", yytext);
-        }
 		
 
 \n		{lines++; chars=0;}
