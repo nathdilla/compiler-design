@@ -42,20 +42,38 @@
      TYPE = 258,
      ID = 259,
      SEMICOLON = 260,
-     EQ = 261,
-     PLUS = 262,
-     NUMBER = 263,
-     WRITE = 264
+     LBRACK = 261,
+     RBRACK = 262,
+     LPAREN = 263,
+     RPAREN = 264,
+     COMMA = 265,
+     EQ = 266,
+     PLUS = 267,
+     MINUS = 268,
+     STAR = 269,
+     FSLASH = 270,
+     NUMBER = 271,
+     WRITE = 272,
+     RETURN = 273
    };
 #endif
 /* Tokens.  */
 #define TYPE 258
 #define ID 259
 #define SEMICOLON 260
-#define EQ 261
-#define PLUS 262
-#define NUMBER 263
-#define WRITE 264
+#define LBRACK 261
+#define RBRACK 262
+#define LPAREN 263
+#define RPAREN 264
+#define COMMA 265
+#define EQ 266
+#define PLUS 267
+#define MINUS 268
+#define STAR 269
+#define FSLASH 270
+#define NUMBER 271
+#define WRITE 272
+#define RETURN 273
 
 
 
@@ -71,7 +89,7 @@ typedef union YYSTYPE
 	struct ASTNode* ast;
 }
 /* Line 1529 of yacc.c.  */
-#line 75 "parser.tab.h"
+#line 93 "parser.tab.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

@@ -15,6 +15,9 @@ typedef enum {
     NodeType_SimpleExpr,
     NodeType_SimpleID,
     NodeType_Expr, 
+    NodeType_FuncDecl,
+    NodeType_FuncDeclList,
+    NodeType_Params,
     NodeType_StmtList,
     NodeType_Stmt,
     NodeType_AssignStmt,
@@ -58,6 +61,20 @@ typedef struct ASTNode {
             struct ASTNode* right; // Right operand
             char* temp; // Temporary variable for TAC
         } expr;
+
+        struct {
+            struct ASTNode* funcDecl;
+            struct ASTNode* funcDeclList;
+        } funcDeclList;
+
+        struct {
+            struct ASTNode* params;
+        } funcDecl;
+
+        struct {
+            struct ASTNode* params;
+            struct ASTNode* paramList;
+        } params;
 
         struct {
             // StatementList-specific fields

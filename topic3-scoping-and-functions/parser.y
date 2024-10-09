@@ -29,20 +29,30 @@ ASTNode* root = NULL;
 %token <string> TYPE
 %token <string> ID
 %token <char> SEMICOLON
+%token <char> LBRACK
+%token <char> RBRACK
+%token <char> LPAREN
+%token <char> RPAREN
+%token <char> COMMA
 %token <operator> EQ
 %token <operator> PLUS
+%token <operator> MINUS
+%token <operator> STAR 
+%token <operator> FSLASH
 %token <number> NUMBER
 %token <string> WRITE
+%token <string> RETURN
+
 
 %printer { fprintf(yyoutput, "%s", $$); } ID;
 
-%type <ast> Program VarDecl VarDeclList Stmt StmtList Expr BinOp
+%type <ast> Program VarDecl VarDeclList FuncDecl FuncDeclList params Stmt StmtList Expr BinOp
 %start Program
 
 %%
 
 Program
-	  	: VarDeclList StmtList  { printf("The PARSER has started\n"); 
+	  	: VarDeclList FuncDeclList StmtList  { printf("The PARSER has started\n"); 
 									root = malloc(sizeof(ASTNode));
 									root->type = NodeType_Program;
 									root->program.varDeclList = $1;
@@ -82,6 +92,52 @@ VarDecl
 									printf ("Missing semicolon after declaring variable: %s\n", $2);
 									}
 ;
+
+FuncDeclList
+		  	: 						{/*empty, i.e. it is possible not to declare a variable*/}
+		  	| 	FuncDecl FuncDeclList {  printf("PARSER: Recognized function declaration list\n"); 
+									$$ = malloc(sizeof(ASTNode));
+									$$->type = NodeType_FuncDeclList;
+									$$->funcDeclList.funcDecl = $1;
+									$$->funcDeclList.funcDeclList = $2;
+									printASTNode($$);
+									// Set other fields as necessary
+									}
+;
+
+FuncDecl
+	  	:    	TYPE ID LPAREN {currentscope = strdup($3);} params RPAREN   { printf("PARSER: Recognized function declaration: %s\n", $2);
+									// symbol *entry = lookup(sym_table, $2);
+									// if (entry != NULL) {
+										// yyerror("Variable already declared");
+									// } else {
+										$$ = malloc(sizeof(ASTNode));
+										$$->type = NodeType_VarDecl;
+										$$->funcDecl.varType = strdup($1);
+										$$->funcDecl.varName = strdup($2);
+										// Set other fields as necessary
+
+									// }
+									}
+;
+
+params
+	  	: 						{/*empty, i.e. it is possible not to declare a variable*/}
+	  	| 	TYPE ID COMMA params 		{  printf("PARSER: Recognized parameter list\n"); 
+									$$ = malloc(sizeof(ASTNode));
+									$$->type = NodeType_Params;
+									$$->params.varType = $1;
+									$$->params.varName = $2;
+									$$->params.params = $3;
+									// Set other fields as necessary
+									}
+		| 	TYPE ID 			{  printf("PARSER: Recognized parameter list\n"); 
+									$$ = malloc(sizeof(ASTNode));
+									$$->type = NodeType_Params;
+									$$->params.varType = $1;
+									$$->params.varName = $2;
+									// Set other fields as necessary
+									}
 
 StmtList
 	   	:   				{/*empty, i.e. it is possible not to have any statement*/}

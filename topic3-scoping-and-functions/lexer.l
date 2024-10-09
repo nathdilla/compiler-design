@@ -38,12 +38,37 @@ ws          {delim}+
 		 yylval.string = strdup(yytext); 
 		 return TYPE;
 		}
+
+"float"	{words++; chars += strlen(yytext);
+		 printf("%s : TYPE\n", yytext);
+		 yylval.string = strdup(yytext); 
+		 return TYPE;
+		}
+
+"bool"	{words++; chars += strlen(yytext);
+		 printf("%s : TYPE\n", yytext);
+		 yylval.string = strdup(yytext); 
+		 return TYPE;
+		}
+
+"void"	{words++; chars += strlen(yytext);
+		 printf("%s : TYPE\n", yytext);
+		 yylval.string = strdup(yytext); 
+		 return TYPE;
+		}
 		
 "write"	{words++; 
 		 chars += strlen(yytext);
 		 printf("%s : WRITE\n", yytext);
 		 yylval.string = strdup(yytext);
 		 return WRITE;
+		}
+
+"return"	{words++; 
+		 chars += strlen(yytext);
+		 printf("%s : RETURN\n", yytext);
+		 yylval.string = strdup(yytext);
+		 return RETURN;
 		}
 			
 "="		{chars++;
@@ -56,6 +81,24 @@ ws          {delim}+
 		 printf("%s : PLUS\n", yytext);
 		 yylval.operator = strdup(yytext);
 		 return PLUS;
+		}
+
+"-"		{chars++;
+		 printf("%s : MINUS\n", yytext);
+		 yylval.operator = strdup(yytext);
+		 return MINUS;
+		}
+
+"*"		{chars++;
+		 printf("%s : STAR\n", yytext);
+		 yylval.operator = strdup(yytext);
+		 return STAR;
+		}
+
+"/"		{chars++;
+		 printf("%s : FSLASH\n", yytext);
+		 yylval.operator = strdup(yytext);
+		 return FSLASH;
 		}
 
 {ID}	{words++; chars += strlen(yytext);
@@ -74,6 +117,36 @@ ws          {delim}+
 		  printf("%s : SEMICOLON\n", yytext);
 		  yylval.string = strdup(yytext); 
 		  return SEMICOLON;
+		}
+
+"["		{chars++;
+		  printf("%s : LBRACK\n", yytext);
+		  yylval.string = strdup(yytext); 
+		  return LBRACK;
+		}
+
+"]"		{chars++;
+		  printf("%s : RBRACK\n", yytext);
+		  yylval.string = strdup(yytext); 
+		  return RBRACK;
+		}
+
+"("		{chars++;
+		  printf("%s : LPAREN\n", yytext);
+		  yylval.string = strdup(yytext); 
+		  return LPAREN;
+		}
+
+")"		{chars++;
+		  printf("%s : RPAREN\n", yytext);
+		  yylval.string = strdup(yytext); 
+		  return RPAREN;
+		}
+
+","		{chars++;
+		  printf("%s : COMMA\n", yytext);
+		  yylval.string = strdup(yytext); 
+		  return COMMA;
 		}
 
 		
