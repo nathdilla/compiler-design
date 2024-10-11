@@ -55,88 +55,60 @@ ASTNode* root = NULL;
 %%
 
 Program
-	  	: VarDeclList FuncDeclList  { printf("The PARSER has started\n"); 
+	  	: VarDeclList FuncDeclList  { 
+									printf("The PARSER has started\n"); 
 									root = malloc(sizeof(ASTNode));
 									root->type = NodeType_Program;
 									root->program.varDeclList = $1;
 									root->program.stmtList = $2;
-									// Set other fields as necessary
-								}
+									}
 ;
 
 VarDeclList
 		  	: 						{/*empty, i.e. it is possible not to declare a variable*/}
-		  	| 	VarDecl VarDeclList {  printf("PARSER: Recognized variable declaration list\n"); 
+		  	| 	VarDecl VarDeclList {  
+									printf("PARSER: Recognized variable declaration list\n"); 
 									$$ = malloc(sizeof(ASTNode));
 									$$->type = NodeType_VarDeclList;
 									$$->varDeclList.varDecl = $1;
 									$$->varDeclList.varDeclList = $2;
 									printASTNode($$);
-									// Set other fields as necessary
 									}
 ;
 
 VarDecl
-	  	:    	TYPE ID SEMICOLON   { printf("PARSER: Recognized variable declaration: %s\n", $2);
-									// symbol *entry = lookup(sym_table, $2);
-									// if (entry != NULL) {
-										// yyerror("Variable already declared");
-									// } else {
-										$$ = malloc(sizeof(ASTNode));
-										$$->type = NodeType_VarDecl;
-										$$->varDecl.varType = strdup($1);
-										$$->varDecl.varName = strdup($2);
-										// Set other fields as necessary
-
-									// }
+	  	:    	TYPE ID SEMICOLON   { 
+									printf("PARSER: Recognized variable declaration: %s\n", $2);
+									$$ = malloc(sizeof(ASTNode));
+									$$->type = NodeType_VarDecl;
+									$$->varDecl.varType = strdup($1);
+									$$->varDecl.varName = strdup($2);
 									}
-	  	// |   	TYPE ID 			{ 
-		// 							yyerror("Missing semicolon after declaring variable");
-		// 							printf ("Missing semicolon after declaring variable: %s\n", $2);
-		// 							}
 ;
 
 FuncDeclList
-		  	: 						{/*empty, i.e. it is possible not to declare a variable*/}
-		  	| 	FuncDecl FuncDeclList {  printf("PARSER: Recognized function declaration list\n"); 
-									$$ = malloc(sizeof(ASTNode));
-									$$->type = NodeType_FuncDeclList;
-									$$->funcDeclList.funcDecl = $1;
-									$$->funcDeclList.funcDeclList = $2;
-									printASTNode($$);
-									// Set other fields as necessary
-									}
+		  	: 							{/*empty, i.e. it is possible not to declare a variable*/}
+		  	| 	FuncDecl FuncDeclList 	{  
+										printf("PARSER: Recognized function declaration list\n"); 
+										$$ = malloc(sizeof(ASTNode));
+										$$->type = NodeType_FuncDeclList;
+										$$->funcDeclList.funcDecl = $1;
+										$$->funcDeclList.funcDeclList = $2;
+										printASTNode($$);
+										}
 ;
 
 FuncDecl
-	  	:    	FUNC TYPE ID LPAREN {current_scope = strdup($3);} ParamList RPAREN Block  { printf("PARSER: Recognized function declaration: %s\n", $2);
-									// symbol *entry = lookup(sym_table, $2);
-									// if (entry != NULL) {
-										// yyerror("Variable already declared");
-									// } else {
-										$$ = malloc(sizeof(ASTNode));
-										$$->type = NodeType_FuncDecl;
-										$$->funcDecl.funcType = strdup($2);
-										$$->funcDecl.funcName = strdup($3);
-										$$->funcDecl.paramList = $6;
-										$$->funcDecl.block = $8;
-										// Set other fields as necessary
-
-									// }
+	  	:    	FUNC TYPE ID LPAREN { current_scope = strdup($3);} ParamList RPAREN Block  
+									{ 
+									printf("PARSER: Recognized function declaration: %s\n", $2);
+									$$ = malloc(sizeof(ASTNode));
+									$$->type = NodeType_FuncDecl;
+									$$->funcDecl.funcType = strdup($2);
+									$$->funcDecl.funcName = strdup($3);
+									$$->funcDecl.paramList = $6;
+									$$->funcDecl.block = $8;
 									}
-		// :    	FUNC TYPE ID  { printf("PARSER: Recognized function declaration: %s\n", $3);
-		// 							// symbol *entry = lookup(sym_table, $2);
-		// 							// if (entry != NULL) {
-		// 								// yyerror("Variable already declared");
-		// 							// } else {
-		// 								$$ = malloc(sizeof(ASTNode));
-		// 								$$->type = NodeType_FuncDecl;
-		// 								$$->funcDecl.paramList = $6;
-		// 								$$->funcDecl.block = $8;
-		// 								// Set other fields as necessary
-
-		// 							// }
-		// 							}
 ;
 
 ParamList
@@ -146,40 +118,33 @@ ParamList
 								$$->type = NodeType_ParamList;
 								$$->paramList.param = $1;
 								$$->paramList.paramList = NULL;
-								// Set other fields as necessary
 								}
-		| 	Param COMMA ParamList { printf("PARSER: Recognized parameter list with comma\n");
-								$$ = malloc(sizeof(ASTNode));
-								$$->type = NodeType_ParamList;
-								$$->paramList.param = $1;
-								$$->paramList.paramList = $3;
-								// Set other fields as necessary
-								}
+		| 	Param COMMA ParamList 	{ 
+									printf("PARSER: Recognized parameter list with comma\n");
+									$$ = malloc(sizeof(ASTNode));
+									$$->type = NodeType_ParamList;
+									$$->paramList.param = $1;
+									$$->paramList.paramList = $3;
+									}
 ;
 
 Param
-	  	:    	TYPE ID 			{ printf("PARSER: Recognized parameter: %s\n", $2);
-									// symbol *entry = lookup(sym_table, $2);
-									// if (entry != NULL) {
-										// yyerror("Variable already declared");
-									// } else {
-										$$ = malloc(sizeof(ASTNode));
-										$$->type = NodeType_Param;
-										$$->param.varType = strdup($1);
-										$$->param.varName = strdup($2);
-										// Set other fields as necessary
-
-									// }
+	  	:    	TYPE ID 			{
+									printf("PARSER: Recognized parameter: %s\n", $2);
+									$$ = malloc(sizeof(ASTNode));
+									$$->type = NodeType_Param;
+									$$->param.varType = strdup($1);
+									$$->param.varName = strdup($2);
 									}
 
 Block
-	  	:    	LBRACK VarDeclList StmtList RBRACK { printf("PARSER: Recognized block\n"); 
-									$$ = malloc(sizeof(ASTNode));
-									$$->type = NodeType_Block;
-									$$->block.varDeclList = $2;
-									$$->block.stmtList = $3;
-									// Set other fields as necessary
-									}
+	  	:    	LBRACK VarDeclList StmtList RBRACK 	{ 
+													printf("PARSER: Recognized block\n"); 
+													$$ = malloc(sizeof(ASTNode));
+													$$->type = NodeType_Block;
+													$$->block.varDeclList = $2;
+													$$->block.stmtList = $3;
+													}
 
 ;
 
@@ -190,51 +155,36 @@ StmtList
 							$$->type = NodeType_StmtList;
 							$$->stmtList.stmt = $1;
 							$$->stmtList.stmtList = $2;
-							// Set other fields as necessary
 							}
 ;
 
 Stmt
-  	: 	ID EQ Expr SEMICOLON 	{ /* code TBD */
-								//symbol* existingSymbol = lookup(sym_table, $1);
-								// if (existingSymbol != NULL) {
+  	: 	ID EQ Expr SEMICOLON 	{
 									printf("Parsed Assignment Statement: %s = ...\n", $1);
 									$$ = malloc(sizeof(ASTNode));
 									$$->type = NodeType_AssignStmt;
 									$$->assignStmt.varName = strdup($1);
 									$$->assignStmt.expr = $3;
-								// } else {
-									// printf("Error: Variable %s not declared\n", $1);
-									// yyerror("Undeclared variable");
-								// }
  								}
    	| 	WRITE ID SEMICOLON 		{
-								//symbol* existingSymbol = lookup(sym_table, $2);
-								// if (existingSymbol != NULL) {
 									printf("Parsed Write Statement: %s\n", $2);
 									$$ = malloc(sizeof(ASTNode));
 									$$->type = NodeType_WriteStmt;
 									$$->writeStmt.varName = strdup($2);
-								// } else {
-								// 	printf("Error: Variable %s not declared\n", $2);
-								// 	yyerror("Undeclared variable");
-								// }
 								}
 ;
 
 Expr
    	: 	Expr BinOp Expr { 
 						printf("PARSER: Recognized binary operation\n");
-						
 						$$ = malloc(sizeof(ASTNode));
 						$$->type = NodeType_Expr;
 						$$->expr.left = $1;
 						$$->expr.right = $3;
 						$$->expr.operator = $2->binOp.operator;
-						
-						// Set other fields as necessary
  						}
-	| 	ID 				{ printf("ASSIGNMENT statement \n"); 
+	| 	ID 				{ 
+						printf("ASSIGNMENT statement \n"); 
 						$$ = malloc(sizeof(ASTNode));
 						$$->type = NodeType_SimpleID;
 						$$->simpleID.name = $1;
@@ -249,10 +199,10 @@ Expr
 ;
 
 BinOp: PLUS {
-				printf("PARSER: Recognized binary operation\n");	
-				$$ = malloc(sizeof(ASTNode));
-				$$->type = NodeType_BinOp;
-				$$->binOp.operator = *$1;
+			printf("PARSER: Recognized binary operation\n");	
+			$$ = malloc(sizeof(ASTNode));
+			$$->type = NodeType_BinOp;
+			$$->binOp.operator = *$1;
 			}
 ;
 
