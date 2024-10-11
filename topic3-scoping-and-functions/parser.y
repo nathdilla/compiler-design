@@ -199,11 +199,34 @@ Expr
 ;
 
 BinOp: PLUS {
-			printf("PARSER: Recognized binary operation\n");	
+			printf("PARSER: Recognized binary operation (addition)\n");	
 			$$ = malloc(sizeof(ASTNode));
 			$$->type = NodeType_BinOp;
 			$$->binOp.operator = *$1;
-			}
+}
+
+BinOp: MINUS {
+				printf("PARSER: Recognized binary operation (subtraction)\n");
+				$$ = malloc(sizeof(ASTNode));
+				$$->type = NodeType_BinOp;
+				$$->binOp.operator = *$1;
+}
+
+BinOp: STAR {
+				printf("PARSER: Recognized binary operation (multiplication)\n");
+				$$ = malloc(sizeof(ASTNode));
+				$$->type = NodeType_BinOp;
+				$$->binOp.operator = *$1;
+}
+
+BinOp: FSLASH {
+				printf("PARSER: Recognized binary operation (division)\n");
+				$$ = malloc(sizeof(ASTNode));
+				$$->type = NodeType_BinOp;
+				$$->binOp.operator = *$1;
+				// Note: Division by zero check should be implemented in the semantic analysis or code generation phase
+				printf("WARNING: Remember to check for division by zero during semantic analysis or code generation\n");
+}
 ;
 
 %%
