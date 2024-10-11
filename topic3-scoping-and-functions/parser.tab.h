@@ -54,7 +54,8 @@
      FSLASH = 270,
      NUMBER = 271,
      WRITE = 272,
-     RETURN = 273
+     RETURN = 273,
+     FUNC = 274
    };
 #endif
 /* Tokens.  */
@@ -74,13 +75,14 @@
 #define NUMBER 271
 #define WRITE 272
 #define RETURN 273
+#define FUNC 274
 
 
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 21 "parser.y"
+#line 23 "parser.y"
 {
 	int number;
 	char character;
@@ -89,7 +91,7 @@ typedef union YYSTYPE
 	struct ASTNode* ast;
 }
 /* Line 1529 of yacc.c.  */
-#line 93 "parser.tab.h"
+#line 95 "parser.tab.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

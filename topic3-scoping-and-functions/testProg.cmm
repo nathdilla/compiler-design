@@ -1,10 +1,5 @@
 int x;
 int y;
-
-int add(int a, int b) {
-    return a + b;
+function int add(int a, int b) {
+    int result;
 }
-
-int result;
-result  = add(x, y);
-write result;

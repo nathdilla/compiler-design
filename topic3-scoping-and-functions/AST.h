@@ -17,7 +17,9 @@ typedef enum {
     NodeType_Expr, 
     NodeType_FuncDecl,
     NodeType_FuncDeclList,
-    NodeType_Params,
+    NodeType_ParamList,
+    NodeType_Param,
+    NodeType_Block,
     NodeType_StmtList,
     NodeType_Stmt,
     NodeType_AssignStmt,
@@ -68,13 +70,26 @@ typedef struct ASTNode {
         } funcDeclList;
 
         struct {
-            struct ASTNode* params;
+            char* funcType;
+            char* funcName;
+            struct ASTNode* paramList;
+            struct ASTNode* block;
         } funcDecl;
 
         struct {
-            struct ASTNode* params;
+            struct ASTNode* param;
             struct ASTNode* paramList;
-        } params;
+        } paramList;
+
+        struct {
+            char* varType;
+            char* varName;
+        } param;
+
+        struct {
+            struct ASTNode* varDeclList;
+            struct ASTNode* stmtList;
+        } block;
 
         struct {
             // StatementList-specific fields

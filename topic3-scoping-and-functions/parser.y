@@ -13,6 +13,8 @@ extern FILE* yyin;    // Declare yyin, the file pointer for the input file
 
 void yyerror(const char* s);
 
+char* current_scope = "global";
+
 #define TABLE_SIZE 100
 
 ASTNode* root = NULL; 
@@ -42,17 +44,18 @@ ASTNode* root = NULL;
 %token <number> NUMBER
 %token <string> WRITE
 %token <string> RETURN
+%token <string> FUNC
 
 
 %printer { fprintf(yyoutput, "%s", $$); } ID;
 
-%type <ast> Program VarDecl VarDeclList FuncDecl FuncDeclList params Stmt StmtList Expr BinOp
+%type <ast> Program VarDecl VarDeclList FuncDecl FuncDeclList ParamList Param Block Stmt StmtList Expr BinOp
 %start Program
 
 %%
 
 Program
-	  	: VarDeclList FuncDeclList StmtList  { printf("The PARSER has started\n"); 
+	  	: VarDeclList FuncDeclList  { printf("The PARSER has started\n"); 
 									root = malloc(sizeof(ASTNode));
 									root->type = NodeType_Program;
 									root->program.varDeclList = $1;
@@ -87,10 +90,10 @@ VarDecl
 
 									// }
 									}
-	  	|   	TYPE ID 			{ 
-									yyerror("Missing semicolon after declaring variable");
-									printf ("Missing semicolon after declaring variable: %s\n", $2);
-									}
+	  	// |   	TYPE ID 			{ 
+		// 							yyerror("Missing semicolon after declaring variable");
+		// 							printf ("Missing semicolon after declaring variable: %s\n", $2);
+		// 							}
 ;
 
 FuncDeclList
@@ -106,38 +109,79 @@ FuncDeclList
 ;
 
 FuncDecl
-	  	:    	TYPE ID LPAREN {currentscope = strdup($3);} params RPAREN   { printf("PARSER: Recognized function declaration: %s\n", $2);
+	  	:    	FUNC TYPE ID LPAREN {current_scope = strdup($3);} ParamList RPAREN Block  { printf("PARSER: Recognized function declaration: %s\n", $2);
 									// symbol *entry = lookup(sym_table, $2);
 									// if (entry != NULL) {
 										// yyerror("Variable already declared");
 									// } else {
 										$$ = malloc(sizeof(ASTNode));
-										$$->type = NodeType_VarDecl;
-										$$->funcDecl.varType = strdup($1);
-										$$->funcDecl.varName = strdup($2);
+										$$->type = NodeType_FuncDecl;
+										$$->funcDecl.funcType = strdup($2);
+										$$->funcDecl.funcName = strdup($3);
+										$$->funcDecl.paramList = $6;
+										$$->funcDecl.block = $8;
 										// Set other fields as necessary
 
 									// }
 									}
+		// :    	FUNC TYPE ID  { printf("PARSER: Recognized function declaration: %s\n", $3);
+		// 							// symbol *entry = lookup(sym_table, $2);
+		// 							// if (entry != NULL) {
+		// 								// yyerror("Variable already declared");
+		// 							// } else {
+		// 								$$ = malloc(sizeof(ASTNode));
+		// 								$$->type = NodeType_FuncDecl;
+		// 								$$->funcDecl.paramList = $6;
+		// 								$$->funcDecl.block = $8;
+		// 								// Set other fields as necessary
+
+		// 							// }
+		// 							}
 ;
 
-params
-	  	: 						{/*empty, i.e. it is possible not to declare a variable*/}
-	  	| 	TYPE ID COMMA params 		{  printf("PARSER: Recognized parameter list\n"); 
+ParamList
+		: 						{/*empty, i.e. it is possible not to have any parameters*/}
+		| 	Param 				{ printf("PARSER: Recognized single parameter\n");
+								$$ = malloc(sizeof(ASTNode));
+								$$->type = NodeType_ParamList;
+								$$->paramList.param = $1;
+								$$->paramList.paramList = NULL;
+								// Set other fields as necessary
+								}
+		| 	Param COMMA ParamList { printf("PARSER: Recognized parameter list with comma\n");
+								$$ = malloc(sizeof(ASTNode));
+								$$->type = NodeType_ParamList;
+								$$->paramList.param = $1;
+								$$->paramList.paramList = $3;
+								// Set other fields as necessary
+								}
+;
+
+Param
+	  	:    	TYPE ID 			{ printf("PARSER: Recognized parameter: %s\n", $2);
+									// symbol *entry = lookup(sym_table, $2);
+									// if (entry != NULL) {
+										// yyerror("Variable already declared");
+									// } else {
+										$$ = malloc(sizeof(ASTNode));
+										$$->type = NodeType_Param;
+										$$->param.varType = strdup($1);
+										$$->param.varName = strdup($2);
+										// Set other fields as necessary
+
+									// }
+									}
+
+Block
+	  	:    	LBRACK VarDeclList StmtList RBRACK { printf("PARSER: Recognized block\n"); 
 									$$ = malloc(sizeof(ASTNode));
-									$$->type = NodeType_Params;
-									$$->params.varType = $1;
-									$$->params.varName = $2;
-									$$->params.params = $3;
+									$$->type = NodeType_Block;
+									$$->block.varDeclList = $2;
+									$$->block.stmtList = $3;
 									// Set other fields as necessary
 									}
-		| 	TYPE ID 			{  printf("PARSER: Recognized parameter list\n"); 
-									$$ = malloc(sizeof(ASTNode));
-									$$->type = NodeType_Params;
-									$$->params.varType = $1;
-									$$->params.varName = $2;
-									// Set other fields as necessary
-									}
+
+;
 
 StmtList
 	   	:   				{/*empty, i.e. it is possible not to have any statement*/}

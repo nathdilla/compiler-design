@@ -25,7 +25,7 @@ void traverseAST(ASTNode* node, int level) {
             break;
         case NodeType_VarDeclList:
             printIndent(level);
-           // printf("Variable Declaration List\n");
+            printf("Variable Declaration List\n");
             traverseAST(node->varDeclList.varDecl, level + indentValue);
             traverseAST(node->varDeclList.varDeclList, level + indentValue);
             break;
@@ -73,6 +73,34 @@ void traverseAST(ASTNode* node, int level) {
             traverseAST(node->binOp.left, level + indentValue);
             traverseAST(node->binOp.right, level + indentValue);
             break;
+        case NodeType_FuncDeclList:
+            printIndent(level);
+            printf("Function Declaration List\n");
+            traverseAST(node->funcDeclList.funcDecl, level + indentValue);
+            traverseAST(node->funcDeclList.funcDeclList, level + indentValue);
+            break;
+        case NodeType_FuncDecl:
+            printIndent(level);
+            printf("Function Declaration: %s\n", node->funcDecl.funcName);
+            traverseAST(node->funcDecl.paramList, level + indentValue);
+            traverseAST(node->funcDecl.block, level + indentValue);
+            break;
+        case NodeType_Block:
+            printIndent(level);
+            printf("Block\n");
+            traverseAST(node->block.varDeclList, level + indentValue);
+            traverseAST(node->block.stmtList, level + indentValue);
+            break;
+        case NodeType_ParamList:
+            printIndent(level);
+            printf("Parameter List\n");
+            traverseAST(node->paramList.param, level + indentValue);
+            traverseAST(node->paramList.paramList, level + indentValue);
+            break;
+        case NodeType_Param:
+            printIndent(level);
+            printf("Parameter: %s %s\n", node->param.varName, node->param.varType);
+            break;
     }
 }
 
@@ -115,6 +143,21 @@ void printASTNode(ASTNode* node) {
             break;
         case NodeType_WriteStmt:
             printf("Write: %s\n", node->writeStmt.varName);
+            break;
+        case NodeType_FuncDeclList:
+            printf("Function Declaration List\n");
+            break;
+        case NodeType_FuncDecl:
+            printf("Function Declaration: %s\n", node->funcDecl.funcName);
+            break;
+        case NodeType_Block:
+            printf("Block\n");
+            break;
+        case NodeType_ParamList:
+            printf("Parameter List\n");
+            break;
+        case NodeType_Param:
+            printf("Parameter: %s %s\n", node->param.varName, node->param.varType);
             break;
     }
 } 
@@ -167,6 +210,27 @@ void freeAST(ASTNode* node) {
             free(node->binOp.right);
             // free(node->binOp.operator);
             break;  
+        case NodeType_FuncDeclList:
+            free(node->funcDeclList.funcDecl);
+            free(node->funcDeclList.funcDeclList);
+            break;
+        case NodeType_FuncDecl:
+            free(node->funcDecl.funcName);
+            free(node->funcDecl.paramList);
+            free(node->funcDecl.block);
+            break;
+        case NodeType_Block:
+            free(node->block.varDeclList);
+            free(node->block.stmtList);
+            break;
+        case NodeType_ParamList:
+            free(node->paramList.param);
+            free(node->paramList.paramList);
+            break;
+        case NodeType_Param:
+            free(node->param.varName);
+            free(node->param.varType);
+            break;
     }
 
     free(node);
@@ -228,6 +292,27 @@ ASTNode* createNode(NodeType type) {
             newNode->binOp.right = NULL;
             break;
         // Add more cases as necessary for other node types
+        case NodeType_FuncDeclList:
+            newNode->funcDeclList.funcDecl = NULL;
+            newNode->funcDeclList.funcDeclList = NULL;
+            break;
+        case NodeType_FuncDecl:
+            newNode->funcDecl.funcName = NULL;
+            newNode->funcDecl.paramList = NULL;
+            newNode->funcDecl.block = NULL;
+            break;
+        case NodeType_Block:
+            newNode->block.varDeclList = NULL;
+            newNode->block.stmtList = NULL;
+            break;
+        case NodeType_ParamList:
+            newNode->paramList.param = NULL;
+            newNode->paramList.paramList = NULL;
+            break;
+        case NodeType_Param:
+            newNode->param.varName = NULL;
+            newNode->param.varType = NULL;
+            break;
     }
 
     return newNode;

@@ -70,6 +70,12 @@ ws          {delim}+
 		 yylval.string = strdup(yytext);
 		 return RETURN;
 		}
+
+"function" {words++; chars += strlen(yytext);
+		 printf("%s : FUNC\n", yytext);
+		 yylval.string = strdup(yytext); 
+		 return FUNC;
+		}
 			
 "="		{chars++;
 		 printf("%s : EQ\n", yytext);
@@ -119,13 +125,13 @@ ws          {delim}+
 		  return SEMICOLON;
 		}
 
-"["		{chars++;
+"{"		{chars++;
 		  printf("%s : LBRACK\n", yytext);
 		  yylval.string = strdup(yytext); 
 		  return LBRACK;
 		}
 
-"]"		{chars++;
+"}"		{chars++;
 		  printf("%s : RBRACK\n", yytext);
 		  yylval.string = strdup(yytext); 
 		  return RBRACK;
