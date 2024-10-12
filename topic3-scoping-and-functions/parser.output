@@ -47,7 +47,7 @@ Grammar
    22 BinOp: PLUS
    23      | MINUS
    24      | STAR
-   25      | FSLASH
+   25      | BSLASH
 
 
 Terminals, with rules where they appear
@@ -66,7 +66,7 @@ EQ (266) 17
 PLUS (267) 22
 MINUS (268) 23
 STAR (269) 24
-FSLASH (270) 25
+BSLASH (270) 25
 NUMBER (271) 21
 WRITE (272) 18
 RETURN (273)
@@ -435,7 +435,7 @@ state 37
     PLUS       shift, and go to state 41
     MINUS      shift, and go to state 42
     STAR       shift, and go to state 43
-    FSLASH     shift, and go to state 44
+    BSLASH     shift, and go to state 44
 
     BinOp  go to state 45
 
@@ -484,7 +484,7 @@ state 43
 
 state 44
 
-   25 BinOp: FSLASH .
+   25 BinOp: BSLASH .
 
     $default  reduce using rule 25 (BinOp)
 
@@ -507,12 +507,12 @@ state 46
     PLUS    shift, and go to state 41
     MINUS   shift, and go to state 42
     STAR    shift, and go to state 43
-    FSLASH  shift, and go to state 44
+    BSLASH  shift, and go to state 44
 
     PLUS      [reduce using rule 19 (Expr)]
     MINUS     [reduce using rule 19 (Expr)]
     STAR      [reduce using rule 19 (Expr)]
-    FSLASH    [reduce using rule 19 (Expr)]
+    BSLASH    [reduce using rule 19 (Expr)]
     $default  reduce using rule 19 (Expr)
 
     BinOp  go to state 45

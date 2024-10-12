@@ -56,7 +56,7 @@ symbol_table* current_scope = NULL;
 %token <operator> PLUS
 %token <operator> MINUS
 %token <operator> STAR 
-%token <operator> FSLASH
+%token <operator> BSLASH
 %token <number> NUMBER
 %token <string> WRITE
 %token <string> RETURN
@@ -257,7 +257,7 @@ BinOp: STAR {
 				$$->binOp.operator = *$1;
 }
 
-BinOp: FSLASH {
+BinOp: BSLASH {
 				printf("PARSER: Recognized binary operation (division)\n");
 				$$ = malloc(sizeof(ASTNode));
 				$$->type = NodeType_BinOp;

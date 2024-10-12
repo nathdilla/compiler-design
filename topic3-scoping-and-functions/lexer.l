@@ -102,9 +102,9 @@ ws          {delim}+
 		}
 
 "/"		{chars++;
-		 printf("%s : FSLASH\n", yytext);
+		 printf("%s : BSLASH\n", yytext);
 		 yylval.operator = strdup(yytext);
-		 return FSLASH;
+		 return BSLASH;
 		}
 
 {ID}	{words++; chars += strlen(yytext);

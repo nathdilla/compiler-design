@@ -51,7 +51,7 @@
      PLUS = 267,
      MINUS = 268,
      STAR = 269,
-     FSLASH = 270,
+     BSLASH = 270,
      NUMBER = 271,
      WRITE = 272,
      RETURN = 273,
@@ -71,7 +71,7 @@
 #define PLUS 267
 #define MINUS 268
 #define STAR 269
-#define FSLASH 270
+#define BSLASH 270
 #define NUMBER 271
 #define WRITE 272
 #define RETURN 273
