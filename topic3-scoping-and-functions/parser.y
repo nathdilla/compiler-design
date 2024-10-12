@@ -1,9 +1,23 @@
 %{
+	
+/*
+ * File:        parser.y
+ * Author:      Nathan Dilla, Eli Streitmatter, Isac Artzi
+ * Date:        October 11, 2024
+ * Description: Bison grammar for the C-Minus Minus language.
+ * Version:     3.0
+ * 
+ * This current yacc file can parse the following grammar:
+ * 1. Function calls
+ * 2. Variable declarations
+ * 3. Assignment statements
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "AST.h"
+#include "symbol_table.h"
 
 
 extern int yylex();
@@ -13,11 +27,13 @@ extern FILE* yyin;    // Declare yyin, the file pointer for the input file
 
 void yyerror(const char* s);
 
-char* current_scope = "global";
+// char* current_scope = "global";
 
 #define TABLE_SIZE 100
 
 ASTNode* root = NULL; 
+symbol_table* previous_scope = NULL;
+symbol_table* current_scope = NULL;
 %}
 
 %union {
@@ -78,11 +94,20 @@ VarDeclList
 
 VarDecl
 	  	:    	TYPE ID SEMICOLON   { 
-									printf("PARSER: Recognized variable declaration: %s\n", $2);
-									$$ = malloc(sizeof(ASTNode));
-									$$->type = NodeType_VarDecl;
-									$$->varDecl.varType = strdup($1);
-									$$->varDecl.varName = strdup($2);
+										symbol *entry = lookup(current_scope, $2);
+										if (entry != NULL) {
+											yyerror("Variable already declared");
+										} else {
+											printf("PARSER: Recognized variable declaration: %s\n", $2);
+											$$ = malloc(sizeof(ASTNode));
+											$$->type = NodeType_VarDecl;
+											$$->varDecl.varType = strdup($1);
+											$$->varDecl.varName = strdup($2);
+
+											printf("\nAdding symbol: {%s} to table {%s}\n", $2, current_scope->scope_name);
+											add_symbol(current_scope, $2, $1);
+											print_table(current_scope);
+										}
 									}
 ;
 
@@ -99,15 +124,16 @@ FuncDeclList
 ;
 
 FuncDecl
-	  	:    	FUNC TYPE ID LPAREN { current_scope = strdup($3);} ParamList RPAREN Block  
+	  	:    	FUNC TYPE ID LPAREN ParamList RPAREN Block
 									{ 
-									printf("PARSER: Recognized function declaration: %s\n", $2);
+									// Scopes will be made compile-time. runtime scopes will be dealt with in the future.
+									printf("PARSER: Recognized function declaration\n");
 									$$ = malloc(sizeof(ASTNode));
 									$$->type = NodeType_FuncDecl;
 									$$->funcDecl.funcType = strdup($2);
 									$$->funcDecl.funcName = strdup($3);
-									$$->funcDecl.paramList = $6;
-									$$->funcDecl.block = $8;
+									$$->funcDecl.paramList = $5;
+									$$->funcDecl.block = $7;
 									}
 ;
 
@@ -138,13 +164,26 @@ Param
 									}
 
 Block
-	  	:    	LBRACK VarDeclList StmtList RBRACK 	{ 
-													printf("PARSER: Recognized block\n"); 
-													$$ = malloc(sizeof(ASTNode));
-													$$->type = NodeType_Block;
-													$$->block.varDeclList = $2;
-													$$->block.stmtList = $3;
-													}
+	  	:    	LBRACK 
+			{ 
+				printf("PARSER: Entering block\n");
+				symbol_table* local_table = create_symbol_table(TABLE_SIZE, "local"); 
+				local_table->parent = current_scope;
+				previous_scope = current_scope;
+				current_scope = local_table; 
+			} 	VarDeclList StmtList 
+			{
+				printf("PARSER: Exiting block\n");
+				current_scope = previous_scope;
+			}
+				RBRACK 	
+			{ 
+				printf("PARSER: Recognized block\n"); 
+				$$ = malloc(sizeof(ASTNode));
+				$$->type = NodeType_Block;
+				$$->block.varDeclList = $3;
+				$$->block.stmtList = $4;
+			}
 
 ;
 
@@ -194,7 +233,6 @@ Expr
 						$$ = malloc(sizeof(ASTNode));
 						$$->type = NodeType_SimpleExpr;
 						$$->simpleExpr.number = ($1);
-						// Set other fields as necessary
 						}
 ;
 
@@ -234,11 +272,21 @@ BinOp: FSLASH {
 int main() {
     // Initialize file or input source
     yyin = fopen("testProg.cmm", "r");
+	printf("Creating scope stack..\n");
+	create_scope_stack();
+	printf("Creating global symbol table..\n");
+	symbol_table* global_sym_table = create_symbol_table(TABLE_SIZE, "global");
+	current_scope = global_sym_table;
+	push_scope(global_sym_table);
+	
+	// if (sym_table == NULL) {
+    //     // Handle error
+    //     return EXIT_FAILURE;
+    // }
     if (yyparse() == 0) {
-        // Successfully parsed
-		printf("Parsing successful!\n");
+		printf("\n\n\nParsing successful!\n");
         traverseAST(root, 0);
-
+		printf("\n\n\n");
         freeAST(root);
     } else {
         fprintf(stderr, "Parsing failed\n");

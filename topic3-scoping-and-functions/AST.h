@@ -70,8 +70,8 @@ typedef struct ASTNode {
         } funcDeclList;
 
         struct {
-            char* funcType;
             char* funcName;
+            char* funcType;
             struct ASTNode* paramList;
             struct ASTNode* block;
         } funcDecl;

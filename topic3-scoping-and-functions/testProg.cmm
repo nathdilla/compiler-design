@@ -2,4 +2,8 @@ int x;
 int y;
 function int add(int a, int b) {
     int result;
+    bool z;
+}
+function int subtract(int a, int b) {
+    int result;
 }

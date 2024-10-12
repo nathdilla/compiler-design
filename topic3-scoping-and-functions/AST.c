@@ -81,9 +81,8 @@ void traverseAST(ASTNode* node, int level) {
             break;
         case NodeType_FuncDecl:
             printIndent(level);
-            printf("Function Declaration: %s\n", node->funcDecl.funcName);
-            traverseAST(node->funcDecl.paramList, level + indentValue);
             traverseAST(node->funcDecl.block, level + indentValue);
+            traverseAST(node->funcDecl.paramList, level + indentValue);
             break;
         case NodeType_Block:
             printIndent(level);
@@ -215,7 +214,6 @@ void freeAST(ASTNode* node) {
             free(node->funcDeclList.funcDeclList);
             break;
         case NodeType_FuncDecl:
-            free(node->funcDecl.funcName);
             free(node->funcDecl.paramList);
             free(node->funcDecl.block);
             break;
@@ -297,9 +295,8 @@ ASTNode* createNode(NodeType type) {
             newNode->funcDeclList.funcDeclList = NULL;
             break;
         case NodeType_FuncDecl:
-            newNode->funcDecl.funcName = NULL;
-            newNode->funcDecl.paramList = NULL;
             newNode->funcDecl.block = NULL;
+            newNode->funcDecl.paramList = NULL;
             break;
         case NodeType_Block:
             newNode->block.varDeclList = NULL;
