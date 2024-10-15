@@ -18,16 +18,16 @@
 #include <string.h>
 #include "AST.h"
 #include "symbol_table.h"
+#include "semantic.h"
 
 
 extern int yylex();
 extern int yyparse();
 extern FILE* yyin;    // Declare yyin, the file pointer for the input file
-
+extern int yylineno;  // Declare yylineno, the line number counter
+extern TAC* tac_head;  // Declare the head of the linked list of TAC entries
 
 void yyerror(const char* s);
-
-// char* current_scope = "global";
 
 #define TABLE_SIZE 100
 
@@ -65,13 +65,20 @@ symbol_table* current_scope = NULL;
 
 %printer { fprintf(yyoutput, "%s", $$); } ID;
 
-%type <ast> Program VarDecl VarDeclList FuncDecl FuncDeclList ParamList Param Block Stmt StmtList Expr BinOp
+%type <ast> Program VarDecl VarDeclList FuncDecl FuncDeclList ParamList Param Block Stmt StmtList Expr BinOp WriteStmt
 %start Program
 
 %%
 
 Program
-	  	: VarDeclList FuncDeclList  { 
+	  	: VarDeclList FuncDeclList StmtList { 
+									printf("The PARSER has started\n"); 
+									root = malloc(sizeof(ASTNode));
+									root->type = NodeType_Program;
+									root->program.varDeclList = $1;
+									root->program.stmtList = $2;
+									}
+		| VarDeclList StmtList { 
 									printf("The PARSER has started\n"); 
 									root = malloc(sizeof(ASTNode));
 									root->type = NodeType_Program;
@@ -93,22 +100,22 @@ VarDeclList
 ;
 
 VarDecl
-	  	:    	TYPE ID SEMICOLON   { 
-										symbol *entry = lookup(current_scope, $2);
-										if (entry != NULL) {
-											yyerror("Variable already declared");
-										} else {
-											printf("PARSER: Recognized variable declaration: %s\n", $2);
-											$$ = malloc(sizeof(ASTNode));
-											$$->type = NodeType_VarDecl;
-											$$->varDecl.varType = strdup($1);
-											$$->varDecl.varName = strdup($2);
+	  	:    TYPE ID SEMICOLON   { 
+									symbol *entry = lookup(current_scope, $2);
+									if (entry != NULL) {
+										yyerror("Variable already declared");
+									} else {
+										printf("PARSER: Recognized variable declaration: %s\n", $2);
+										$$ = malloc(sizeof(ASTNode));
+										$$->type = NodeType_VarDecl;
+										$$->varDecl.varType = strdup($1);
+										$$->varDecl.varName = strdup($2);
 
-											printf("\nAdding symbol: {%s} to table {%s}\n", $2, current_scope->scope_name);
-											add_symbol(current_scope, $2, $1);
-											print_table(current_scope);
-										}
+										printf("\nAdding symbol: {%s} to table {%s}\n", $2, current_scope->scope_name);
+										add_symbol(current_scope, $2, $1);
+										print_table(current_scope);
 									}
+								}
 ;
 
 FuncDeclList
@@ -265,6 +272,13 @@ BinOp: BSLASH {
 				// Note: Division by zero check should be implemented in the semantic analysis or code generation phase
 				printf("WARNING: Remember to check for division by zero during semantic analysis or code generation\n");
 }
+
+WriteStmt : WRITE ID SEMICOLON {
+									printf("PARSER: Recognized write statement\n");
+									$$ = malloc(sizeof(ASTNode));
+									$$->type = NodeType_WriteStmt;
+									$$->writeStmt.varName = strdup($2);
+								}
 ;
 
 %%
@@ -279,14 +293,17 @@ int main() {
 	current_scope = global_sym_table;
 	push_scope(global_sym_table);
 	
-	// if (sym_table == NULL) {
-    //     // Handle error
-    //     return EXIT_FAILURE;
-    // }
     if (yyparse() == 0) {
 		printf("\n\n\nParsing successful!\n");
         traverseAST(root, 0);
-		printf("\n\n\n");
+		printf("\n\n");
+		printf("\n=== SEMANTIC ANALYSIS ===\n\n");
+		semantic_analysis(root, global_sym_table);
+		printf("\n");
+		printf("\n=== TAC GENERATION ===\n");
+		print_TAC_to_file("TAC.ir", tac_head);
+		printf("\n");
+		
         freeAST(root);
     } else {
         fprintf(stderr, "Parsing failed\n");

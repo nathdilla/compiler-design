@@ -1,9 +1,6 @@
 int x;
 int y;
-function int add(int a, int b) {
-    int result;
-    bool z;
-}
-function int subtract(int a, int b) {
-    int result;
-}
+x = 1;
+y = 2;
+x = x + y + 5;
+write x;
