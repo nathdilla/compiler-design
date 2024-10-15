@@ -3,4 +3,8 @@ int y;
 x = 1;
 y = 2;
 x = x + y + 5;
+y = x + 2;
+y = y + y + x + 10;
+x = y;
+x = x + 2;
 write x;

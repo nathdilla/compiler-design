@@ -137,13 +137,20 @@ TAC* tac_expr(ASTNode* expr, symbol_table* sym_table) {
         // }
 
         case NodeType_SimpleID: {
-            printf("Generating TAC for simple ID\n");
-            instruction->arg1 = create_operand(expr);
-            instruction->op = strdup("load");
-            instruction->result = create_temp_var();
-            expr->simpleID.temp = instruction->result;
-            symbol* sym = lookup(sym_table, expr->simpleID.name);
-            sym->temp_var = instruction->result;
+            symbol* sym = lookup(scope, expr->simpleID.name);
+            if (sym != NULL && sym->temp_var == NULL) {
+                printf("Generating TAC for simple ID\n");
+                instruction->arg1 = create_operand(expr);
+                instruction->op = strdup("load");
+                instruction->result = create_temp_var();
+                expr->simpleID.temp = instruction->result;
+                
+                sym->temp_var = instruction->result;
+            } else {
+                instruction->arg1 = "";
+                instruction->op = "";
+                instruction->result = "";
+            }
             break;
         }
 
@@ -159,6 +166,10 @@ TAC* tac_expr(ASTNode* expr, symbol_table* sym_table) {
             instruction->arg1 = create_operand(expr->assignStmt.expr);
             instruction->op = strdup("assign");
             instruction->result = expr->assignStmt.varName;
+            symbol* sym = lookup(scope, instruction->result);
+            if (sym->temp_var != NULL) {
+                sym->temp_var = instruction->arg1;
+            }
             break;
         }
 
