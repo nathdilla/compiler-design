@@ -12,6 +12,7 @@ typedef struct symbol {
     char* type;
     struct symbol* next;
     char* temp_var; // Temporary variable for code generation
+    char* value; // Constant value for constant folding
     // Add other fields of Symbol
 } symbol;
 

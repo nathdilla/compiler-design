@@ -47,7 +47,7 @@ typedef struct ASTNode {
         } varDecl;
 
         struct {
-            int number;
+            char* number;
             char* temp;
         } simpleExpr;
 

@@ -19,6 +19,7 @@
 #include "AST.h"
 #include "symbol_table.h"
 #include "semantic.h"
+#include "optimizer.h"
 
 
 extern int yylex();
@@ -211,6 +212,13 @@ Stmt
 									$$->type = NodeType_AssignStmt;
 									$$->assignStmt.varName = strdup($1);
 									$$->assignStmt.expr = $3;
+									symbol *entry = lookup(current_scope, $1);
+									if (entry == NULL) {
+										yyerror("Variable not declared");
+									} else if ($3->type == NodeType_SimpleExpr) {
+										entry->value = $3->simpleExpr.number;
+										print_table(current_scope);
+									}
  								}
    	| 	WRITE ID SEMICOLON 		{
 									printf("Parsed Write Statement: %s\n", $2);
@@ -239,7 +247,9 @@ Expr
 						printf("PARSER: Recognized number\n");
 						$$ = malloc(sizeof(ASTNode));
 						$$->type = NodeType_SimpleExpr;
-						$$->simpleExpr.number = ($1);
+						char buffer[20];
+						snprintf(buffer, sizeof(buffer), "%d", $1);
+						$$->simpleExpr.number = strdup(buffer);
 						}
 ;
 
@@ -303,6 +313,9 @@ int main() {
 		printf("\n=== TAC GENERATION ===\n");
 		print_TAC_to_file("TAC.ir", tac_head);
 		printf("\n");
+		printf("\n=== TAC OPTIMIZATION ===\n");
+		optimize_TAC(&tac_head);
+		print_optimized_TAC("optimized_TAC.ir", tac_head);
 		
         freeAST(root);
     } else {

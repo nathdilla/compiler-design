@@ -5,6 +5,7 @@
 #include "symbol_table.h"   // definition of symbol_table
 
 #include "temp.h"
+#include <stdbool.h>
 
 /*
     TAC stands for Three Address Code. It is a simple intermediate representation
@@ -18,6 +19,7 @@ typedef struct TAC {
     char* arg2; // Argument 2
     char* result; // Result
     struct TAC* next; // Next instruction
+    symbol_table* scope; // Scope of the instruction
 } TAC;
 
 /*
@@ -28,6 +30,7 @@ extern int temp_vars[10]; // Declaration only
 extern TAC* tac_head; // Global head of the TAC instructions list
 
 int allocate_temp_var(int temp_vars[]);
+bool is_temp_var(const char* str);
 void semantic_analysis(ASTNode* node, symbol_table* symTab);
 TAC* tac_expr(ASTNode* expr, symbol_table* sym_table); //returns the TAC for the expression to print on console
 char* create_temp_var();

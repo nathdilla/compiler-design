@@ -130,6 +130,7 @@
 #include "AST.h"
 #include "symbol_table.h"
 #include "semantic.h"
+#include "optimizer.h"
 
 
 extern int yylex();
@@ -167,7 +168,7 @@ symbol_table* current_scope = NULL;
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 39 "parser.y"
+#line 40 "parser.y"
 {
 	int number;
 	char character;
@@ -176,7 +177,7 @@ typedef union YYSTYPE
 	struct ASTNode* ast;
 }
 /* Line 193 of yacc.c.  */
-#line 180 "parser.tab.c"
+#line 181 "parser.tab.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -189,7 +190,7 @@ typedef union YYSTYPE
 
 
 /* Line 216 of yacc.c.  */
-#line 193 "parser.tab.c"
+#line 194 "parser.tab.c"
 
 #ifdef short
 # undef short
@@ -481,9 +482,9 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,    74,    74,    81,    91,    92,   103,   122,   123,   134,
-     148,   149,   155,   165,   175,   182,   174,   198,   199,   208,
-     215,   224,   232,   238,   246,   253,   260,   267
+       0,    75,    75,    82,    92,    93,   104,   123,   124,   135,
+     149,   150,   156,   166,   176,   183,   175,   199,   200,   209,
+     223,   232,   240,   246,   256,   263,   270,   277
 };
 #endif
 
@@ -742,9 +743,9 @@ yy_symbol_value_print (yyoutput, yytype, yyvaluep)
   switch (yytype)
     {
       case 4: /* "ID" */
-#line 66 "parser.y"
+#line 67 "parser.y"
 	{ fprintf(yyoutput, "%s", (yyvaluep->string)); };
-#line 748 "parser.tab.c"
+#line 749 "parser.tab.c"
 	break;
       default:
 	break;
@@ -1415,7 +1416,7 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 74 "parser.y"
+#line 75 "parser.y"
     { 
 									printf("The PARSER has started\n"); 
 									root = malloc(sizeof(ASTNode));
@@ -1426,7 +1427,7 @@ yyreduce:
     break;
 
   case 3:
-#line 81 "parser.y"
+#line 82 "parser.y"
     { 
 									printf("The PARSER has started\n"); 
 									root = malloc(sizeof(ASTNode));
@@ -1437,12 +1438,12 @@ yyreduce:
     break;
 
   case 4:
-#line 91 "parser.y"
+#line 92 "parser.y"
     {/*empty, i.e. it is possible not to declare a variable*/;}
     break;
 
   case 5:
-#line 92 "parser.y"
+#line 93 "parser.y"
     {  
 									printf("PARSER: Recognized variable declaration list\n"); 
 									(yyval.ast) = malloc(sizeof(ASTNode));
@@ -1454,7 +1455,7 @@ yyreduce:
     break;
 
   case 6:
-#line 103 "parser.y"
+#line 104 "parser.y"
     { 
 									symbol *entry = lookup(current_scope, (yyvsp[(2) - (3)].string));
 									if (entry != NULL) {
@@ -1474,12 +1475,12 @@ yyreduce:
     break;
 
   case 7:
-#line 122 "parser.y"
+#line 123 "parser.y"
     {/*empty, i.e. it is possible not to declare a variable*/;}
     break;
 
   case 8:
-#line 123 "parser.y"
+#line 124 "parser.y"
     {  
 										printf("PARSER: Recognized function declaration list\n"); 
 										(yyval.ast) = malloc(sizeof(ASTNode));
@@ -1491,7 +1492,7 @@ yyreduce:
     break;
 
   case 9:
-#line 135 "parser.y"
+#line 136 "parser.y"
     { 
 									// Scopes will be made compile-time. runtime scopes will be dealt with in the future.
 									printf("PARSER: Recognized function declaration\n");
@@ -1505,12 +1506,12 @@ yyreduce:
     break;
 
   case 10:
-#line 148 "parser.y"
+#line 149 "parser.y"
     {/*empty, i.e. it is possible not to have any parameters*/;}
     break;
 
   case 11:
-#line 149 "parser.y"
+#line 150 "parser.y"
     { printf("PARSER: Recognized single parameter\n");
 								(yyval.ast) = malloc(sizeof(ASTNode));
 								(yyval.ast)->type = NodeType_ParamList;
@@ -1520,7 +1521,7 @@ yyreduce:
     break;
 
   case 12:
-#line 155 "parser.y"
+#line 156 "parser.y"
     { 
 									printf("PARSER: Recognized parameter list with comma\n");
 									(yyval.ast) = malloc(sizeof(ASTNode));
@@ -1531,7 +1532,7 @@ yyreduce:
     break;
 
   case 13:
-#line 165 "parser.y"
+#line 166 "parser.y"
     {
 									printf("PARSER: Recognized parameter: %s\n", (yyvsp[(2) - (2)].string));
 									(yyval.ast) = malloc(sizeof(ASTNode));
@@ -1542,7 +1543,7 @@ yyreduce:
     break;
 
   case 14:
-#line 175 "parser.y"
+#line 176 "parser.y"
     { 
 				printf("PARSER: Entering block\n");
 				symbol_table* local_table = create_symbol_table(TABLE_SIZE, "local"); 
@@ -1553,7 +1554,7 @@ yyreduce:
     break;
 
   case 15:
-#line 182 "parser.y"
+#line 183 "parser.y"
     {
 				printf("PARSER: Exiting block\n");
 				current_scope = previous_scope;
@@ -1561,7 +1562,7 @@ yyreduce:
     break;
 
   case 16:
-#line 187 "parser.y"
+#line 188 "parser.y"
     { 
 				printf("PARSER: Recognized block\n"); 
 				(yyval.ast) = malloc(sizeof(ASTNode));
@@ -1572,12 +1573,12 @@ yyreduce:
     break;
 
   case 17:
-#line 198 "parser.y"
+#line 199 "parser.y"
     {/*empty, i.e. it is possible not to have any statement*/;}
     break;
 
   case 18:
-#line 199 "parser.y"
+#line 200 "parser.y"
     { printf("PARSER: Recognized statement list\n");
 							(yyval.ast) = malloc(sizeof(ASTNode));
 							(yyval.ast)->type = NodeType_StmtList;
@@ -1587,18 +1588,25 @@ yyreduce:
     break;
 
   case 19:
-#line 208 "parser.y"
+#line 209 "parser.y"
     {
 									printf("Parsed Assignment Statement: %s = ...\n", (yyvsp[(1) - (4)].string));
 									(yyval.ast) = malloc(sizeof(ASTNode));
 									(yyval.ast)->type = NodeType_AssignStmt;
 									(yyval.ast)->assignStmt.varName = strdup((yyvsp[(1) - (4)].string));
 									(yyval.ast)->assignStmt.expr = (yyvsp[(3) - (4)].ast);
+									symbol *entry = lookup(current_scope, (yyvsp[(1) - (4)].string));
+									if (entry == NULL) {
+										yyerror("Variable not declared");
+									} else if ((yyvsp[(3) - (4)].ast)->type == NodeType_SimpleExpr) {
+										entry->value = (yyvsp[(3) - (4)].ast)->simpleExpr.number;
+										print_table(current_scope);
+									}
  								;}
     break;
 
   case 20:
-#line 215 "parser.y"
+#line 223 "parser.y"
     {
 									printf("Parsed Write Statement: %s\n", (yyvsp[(2) - (3)].string));
 									(yyval.ast) = malloc(sizeof(ASTNode));
@@ -1608,7 +1616,7 @@ yyreduce:
     break;
 
   case 21:
-#line 224 "parser.y"
+#line 232 "parser.y"
     { 
 						printf("PARSER: Recognized binary operation\n");
 						(yyval.ast) = malloc(sizeof(ASTNode));
@@ -1620,7 +1628,7 @@ yyreduce:
     break;
 
   case 22:
-#line 232 "parser.y"
+#line 240 "parser.y"
     { 
 						printf("ASSIGNMENT statement \n"); 
 						(yyval.ast) = malloc(sizeof(ASTNode));
@@ -1630,17 +1638,19 @@ yyreduce:
     break;
 
   case 23:
-#line 238 "parser.y"
+#line 246 "parser.y"
     { 
 						printf("PARSER: Recognized number\n");
 						(yyval.ast) = malloc(sizeof(ASTNode));
 						(yyval.ast)->type = NodeType_SimpleExpr;
-						(yyval.ast)->simpleExpr.number = ((yyvsp[(1) - (1)].number));
+						char buffer[20];
+						snprintf(buffer, sizeof(buffer), "%d", (yyvsp[(1) - (1)].number));
+						(yyval.ast)->simpleExpr.number = strdup(buffer);
 						;}
     break;
 
   case 24:
-#line 246 "parser.y"
+#line 256 "parser.y"
     {
 			printf("PARSER: Recognized binary operation (addition)\n");	
 			(yyval.ast) = malloc(sizeof(ASTNode));
@@ -1650,7 +1660,7 @@ yyreduce:
     break;
 
   case 25:
-#line 253 "parser.y"
+#line 263 "parser.y"
     {
 				printf("PARSER: Recognized binary operation (subtraction)\n");
 				(yyval.ast) = malloc(sizeof(ASTNode));
@@ -1660,7 +1670,7 @@ yyreduce:
     break;
 
   case 26:
-#line 260 "parser.y"
+#line 270 "parser.y"
     {
 				printf("PARSER: Recognized binary operation (multiplication)\n");
 				(yyval.ast) = malloc(sizeof(ASTNode));
@@ -1670,7 +1680,7 @@ yyreduce:
     break;
 
   case 27:
-#line 267 "parser.y"
+#line 277 "parser.y"
     {
 				printf("PARSER: Recognized binary operation (division)\n");
 				(yyval.ast) = malloc(sizeof(ASTNode));
@@ -1683,7 +1693,7 @@ yyreduce:
 
 
 /* Line 1267 of yacc.c.  */
-#line 1687 "parser.tab.c"
+#line 1697 "parser.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1897,7 +1907,7 @@ yyreturn:
 }
 
 
-#line 284 "parser.y"
+#line 294 "parser.y"
 
 
 int main() {
@@ -1920,6 +1930,9 @@ int main() {
 		printf("\n=== TAC GENERATION ===\n");
 		print_TAC_to_file("TAC.ir", tac_head);
 		printf("\n");
+		printf("\n=== TAC OPTIMIZATION ===\n");
+		optimize_TAC(&tac_head);
+		print_optimized_TAC("optimized_TAC.ir", tac_head);
 		
         freeAST(root);
     } else {
