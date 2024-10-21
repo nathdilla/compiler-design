@@ -103,7 +103,15 @@ void semantic_analysis(ASTNode* node, symbol_table* sym_table) {
 // You can add more functions related to semantic analysis here
 // Implement functions to generate TAC expressions
 
-
+bool is_temp_var(const char* str) {
+    if (str == NULL || *str == '\0') {
+        return false;
+    }
+    if (str[0] == 't') {
+        return true;
+    }
+    return false;
+}
 
 TAC* tac_expr(ASTNode* expr, symbol_table* sym_table) {
 
@@ -115,6 +123,8 @@ TAC* tac_expr(ASTNode* expr, symbol_table* sym_table) {
     TAC* instruction = (TAC*)malloc(sizeof(TAC));
     if (!instruction) return NULL;
 
+    instruction->scope = sym_table;
+    printf("Generating TAC in the scope %s\n", sym_table->scope_name);
     switch (expr->type) {
         case NodeType_Expr: {
             printf("Generating TAC for expression\n");
@@ -147,9 +157,9 @@ TAC* tac_expr(ASTNode* expr, symbol_table* sym_table) {
                 
                 sym->temp_var = instruction->result;
             } else {
-                instruction->arg1 = "";
-                instruction->op = "";
-                instruction->result = "";
+                instruction->arg1 = sym->name;
+                instruction->op = strdup("load");
+                instruction->result = sym->temp_var;
             }
             break;
         }
@@ -167,7 +177,7 @@ TAC* tac_expr(ASTNode* expr, symbol_table* sym_table) {
             instruction->op = strdup("assign");
             instruction->result = expr->assignStmt.varName;
             symbol* sym = lookup(scope, instruction->result);
-            if (sym->temp_var != NULL) {
+            if (sym->temp_var != NULL && is_temp_var(instruction->arg1)) {
                 sym->temp_var = instruction->arg1;
             }
             break;
@@ -207,7 +217,7 @@ char* create_temp_var() {
 
 char* create_operand(ASTNode* node) {
     char buffer[20]; // Declare buffer here
-    switch (node->type) {
+    switch (node->type) {   
         case NodeType_SimpleID: {
             symbol* sym = lookup(scope, node->simpleID.name);
             if (sym != NULL && sym->temp_var != NULL) {
@@ -217,7 +227,7 @@ char* create_operand(ASTNode* node) {
         }
         case NodeType_SimpleExpr:
             // return  node->simpleExpr.number in string format
-            snprintf(buffer, 20, "%d", node->simpleExpr.number);
+            snprintf(buffer, 20, "%s", node->simpleExpr.number);
             return strdup(buffer);
             // return node->simpleExpr.temp;
         case NodeType_Expr:
@@ -241,14 +251,17 @@ void print_TAC_to_file(const char* filename, TAC* tac) {
     }   
     TAC* current = tac;
     while (current != NULL) {
+        // fprintf(file, "%s : ", current->op);
         if (strcmp(current->op, "declare") == 0) {
-            fprintf(file, "%s = 0\n", current->result);
+            fprintf(file, "%s declare\n", current->result);
         } else if (strcmp(current->op, "assign") == 0) {
             fprintf(file, "%s = %s\n", current->result, current->arg1);
         } else if (strcmp(current->op, "load") == 0) {
             fprintf(file, "%s = %s\n", current->result, current->arg1);
         } else if (strcmp(current->op, "+") == 0) {
             fprintf(file, "%s = %s + %s\n", current->result, current->arg1, current->arg2);
+        } else if (strcmp(current->op, "write") == 0) {
+            fprintf(file, "write %s\n", current->result);
         }
         current = current->next;
     }   

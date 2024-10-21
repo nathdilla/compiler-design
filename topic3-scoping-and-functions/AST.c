@@ -35,7 +35,7 @@ void traverseAST(ASTNode* node, int level) {
             break;
         case NodeType_SimpleExpr:
             printIndent(level);
-            printf("Simple Expression: %d\n", node->simpleExpr.number);
+            printf("Simple Expression: %s\n", node->simpleExpr.number);
             break;
         case NodeType_SimpleID:
             printIndent(level);

@@ -150,7 +150,7 @@ void print_table(symbol_table* table) {
     for (int i = 0; i < table->size; i++) {
         symbol* sym = table->table[i];
         while (sym != 0) {
-            printf("Name: %s, Type: %s\n", sym->name, sym->type);
+            printf("Name: %s, Type: %s, Value: %s\n", sym->name, sym->type, sym->value);
             // Print other fields of Symbol
             sym = sym->next;
         }
