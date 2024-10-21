@@ -20,6 +20,7 @@
 #include "symbol_table.h"
 #include "semantic.h"
 #include "optimizer.h"
+#include "code_generator.h"
 
 
 extern int yylex();
@@ -316,6 +317,12 @@ int main() {
 		printf("\n=== TAC OPTIMIZATION ===\n");
 		optimize_TAC(&tac_head);
 		print_optimized_TAC("optimized_TAC.ir", tac_head);
+
+		// Code generation
+		printf("\n=== CODE GENERATION ===\n");
+		init_code_generator("output.s");
+		generate_MIPS(tac_head);
+		finalize_code_generator("output.s");
 		
         freeAST(root);
     } else {

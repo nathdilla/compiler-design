@@ -20,6 +20,7 @@ typedef struct TAC {
     char* result; // Result
     struct TAC* next; // Next instruction
     symbol_table* scope; // Scope of the instruction
+    bool dead; // Add this field
 } TAC;
 
 /*

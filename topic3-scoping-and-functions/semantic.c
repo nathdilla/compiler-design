@@ -251,14 +251,17 @@ void print_TAC_to_file(const char* filename, TAC* tac) {
     }   
     TAC* current = tac;
     while (current != NULL) {
+        // fprintf(file, "%s : ", current->op);
         if (strcmp(current->op, "declare") == 0) {
-            fprintf(file, "%s = 0\n", current->result);
+            fprintf(file, "%s declare\n", current->result);
         } else if (strcmp(current->op, "assign") == 0) {
             fprintf(file, "%s = %s\n", current->result, current->arg1);
         } else if (strcmp(current->op, "load") == 0) {
             fprintf(file, "%s = %s\n", current->result, current->arg1);
         } else if (strcmp(current->op, "+") == 0) {
             fprintf(file, "%s = %s + %s\n", current->result, current->arg1, current->arg2);
+        } else if (strcmp(current->op, "write") == 0) {
+            fprintf(file, "write %s\n", current->result);
         }
         current = current->next;
     }   

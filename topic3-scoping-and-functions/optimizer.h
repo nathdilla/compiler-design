@@ -9,7 +9,6 @@
 
 TAC* live_definitions[MAX_TAC];
 
-
 void add_live_definition(TAC* tac);
 void remove_live_definition(const char* var);
 char* lookup_live_definition(const char* var);

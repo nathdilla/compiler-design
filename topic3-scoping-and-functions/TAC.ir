@@ -1,5 +1,5 @@
-x = 0
-y = 0
+x declare
+y declare
 x = 1
 t0 = x
 t1 = 2 + 6
@@ -16,3 +16,5 @@ y = 1
 t5 = y
 t6 = t5 + 2
 y = t6
+write x
+write y
