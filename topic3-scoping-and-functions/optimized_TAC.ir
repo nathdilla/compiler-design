@@ -2,7 +2,6 @@ x declare
 y declare
 x = 1
 t1 li 8
-t2 = 1 + t1
 y = t2
 t3 li 6
 x = t3
