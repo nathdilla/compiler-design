@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "symbol_table.h"
+
 // NodeType enum to differentiate between different 
 // kinds of AST nodes
 typedef enum { 
@@ -15,6 +17,7 @@ typedef enum {
     NodeType_SimpleExpr,
     NodeType_SimpleID,
     NodeType_Expr, 
+    NodeType_FuncSignature,
     NodeType_FuncDecl,
     NodeType_FuncDeclList,
     NodeType_ParamList,
@@ -25,6 +28,7 @@ typedef enum {
     NodeType_AssignStmt,
     NodeType_BinOp,
     NodeType_WriteStmt,
+    NodeType_ReturnStmt
 } NodeType;
 
 // Structure for AST nodes
@@ -74,7 +78,14 @@ typedef struct ASTNode {
             char* funcType;
             struct ASTNode* paramList;
             struct ASTNode* block;
+            struct ASTNode* funcSignature;
+            symbol_table* scope;    
         } funcDecl;
+
+        struct {
+            char* funcName;
+            char* funcType;
+        } funcSignature;
 
         struct {
             struct ASTNode* param;
@@ -89,7 +100,13 @@ typedef struct ASTNode {
         struct {
             struct ASTNode* varDeclList;
             struct ASTNode* stmtList;
+            struct ASTNode* returnStmt;
+            symbol_table* scope;
         } block;
+
+        struct {
+            struct ASTNode* expr;
+        } returnStmt;
 
         struct {
             // StatementList-specific fields

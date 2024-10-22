@@ -81,14 +81,26 @@ void traverseAST(ASTNode* node, int level) {
             break;
         case NodeType_FuncDecl:
             printIndent(level);
+            printf("Function Declaration: %s\n", node->funcDecl.funcName);
+            traverseAST(node->funcDecl.funcSignature, level + indentValue);
             traverseAST(node->funcDecl.block, level + indentValue);
             traverseAST(node->funcDecl.paramList, level + indentValue);
+            break;
+        case NodeType_FuncSignature:
+            printIndent(level);
+            printf("Function Signature: %s %s\n", node->funcSignature.funcName, node->funcSignature.funcType);
             break;
         case NodeType_Block:
             printIndent(level);
             printf("Block\n");
             traverseAST(node->block.varDeclList, level + indentValue);
             traverseAST(node->block.stmtList, level + indentValue);
+            traverseAST(node->block.returnStmt, level + indentValue);
+            break;
+        case NodeType_ReturnStmt:
+            printIndent(level);
+            printf("Return\n");
+            traverseAST(node->returnStmt.expr, level + indentValue);
             break;
         case NodeType_ParamList:
             printIndent(level);
@@ -149,8 +161,14 @@ void printASTNode(ASTNode* node) {
         case NodeType_FuncDecl:
             printf("Function Declaration: %s\n", node->funcDecl.funcName);
             break;
+        case NodeType_FuncSignature:
+            printf("Function Signature: %s %s\n", node->funcSignature.funcName, node->funcSignature.funcType);
+            break;
         case NodeType_Block:
             printf("Block\n");
+            break;
+        case NodeType_ReturnStmt:
+            printf("Return\n");
             break;
         case NodeType_ParamList:
             printf("Parameter List\n");
@@ -214,12 +232,21 @@ void freeAST(ASTNode* node) {
             free(node->funcDeclList.funcDeclList);
             break;
         case NodeType_FuncDecl:
+            free(node->funcDecl.funcSignature);
             free(node->funcDecl.paramList);
             free(node->funcDecl.block);
+            break;
+        case NodeType_FuncSignature:
+            free(node->funcSignature.funcName);
+            free(node->funcSignature.funcType);
             break;
         case NodeType_Block:
             free(node->block.varDeclList);
             free(node->block.stmtList);
+            free(node->block.returnStmt);
+            break;
+        case NodeType_ReturnStmt:
+            free(node->returnStmt.expr);
             break;
         case NodeType_ParamList:
             free(node->paramList.param);
@@ -295,12 +322,21 @@ ASTNode* createNode(NodeType type) {
             newNode->funcDeclList.funcDeclList = NULL;
             break;
         case NodeType_FuncDecl:
+            newNode->funcDecl.funcSignature = NULL;
             newNode->funcDecl.block = NULL;
             newNode->funcDecl.paramList = NULL;
+            break;
+        case NodeType_FuncSignature:
+            newNode->funcSignature.funcName = NULL;
+            newNode->funcSignature.funcType = NULL;
             break;
         case NodeType_Block:
             newNode->block.varDeclList = NULL;
             newNode->block.stmtList = NULL;
+            newNode->block.returnStmt = NULL;
+            break;
+        case NodeType_ReturnStmt:
+            newNode->returnStmt.expr = NULL;
             break;
         case NodeType_ParamList:
             newNode->paramList.param = NULL;

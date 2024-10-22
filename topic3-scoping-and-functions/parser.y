@@ -67,7 +67,7 @@ symbol_table* current_scope = NULL;
 
 %printer { fprintf(yyoutput, "%s", $$); } ID;
 
-%type <ast> Program VarDecl VarDeclList FuncDecl FuncDeclList ParamList Param Block Stmt StmtList Expr BinOp WriteStmt
+%type <ast> Program VarDecl VarDeclList FuncDecl FuncDeclList ParamList Param Block Stmt StmtList Expr BinOp WriteStmt ReturnStmt FuncSignature
 %start Program
 
 %%
@@ -132,18 +132,39 @@ FuncDeclList
 										}
 ;
 
+FuncSignature
+	  	:    	FUNC TYPE ID 	{ 
+								printf("PARSER: Recognized function signature\n");
+								$$ = malloc(sizeof(ASTNode));
+								$$->type = NodeType_FuncSignature;
+								$$->funcSignature.funcType = strdup($2);
+								$$->funcSignature.funcName = strdup($3);
+								}
+
 FuncDecl
-	  	:    	FUNC TYPE ID LPAREN ParamList RPAREN Block
-									{ 
-									// Scopes will be made compile-time. runtime scopes will be dealt with in the future.
-									printf("PARSER: Recognized function declaration\n");
-									$$ = malloc(sizeof(ASTNode));
-									$$->type = NodeType_FuncDecl;
-									$$->funcDecl.funcType = strdup($2);
-									$$->funcDecl.funcName = strdup($3);
-									$$->funcDecl.paramList = $5;
-									$$->funcDecl.block = $7;
-									}
+	  	:    	FuncSignature 
+				{
+					printf("PARSER: Entering function scope\n");
+					symbol_table* local_table = create_symbol_table(TABLE_SIZE, "local"); 
+					local_table->parent = current_scope;
+					previous_scope = current_scope;
+					current_scope = local_table; 
+				} 
+				LPAREN ParamList RPAREN Block
+				{ 
+					// Scopes will be made compile-time. runtime scopes will be dealt with in the future.
+					printf("PARSER: Recognized function declaration\n");
+					$$ = malloc(sizeof(ASTNode));
+					$$->type = NodeType_FuncDecl;
+					$$->funcDecl.funcType = strdup($1->funcSignature.funcType);
+					$$->funcDecl.funcName = strdup($1->funcSignature.funcName);
+					$$->funcDecl.funcSignature = $1;
+					$$->funcDecl.paramList = $4;
+					$$->funcDecl.block = $6;
+					$$->funcDecl.scope = current_scope;
+					printf("PARSER: Exiting function scope\n");
+					current_scope = previous_scope;
+				}
 ;
 
 ParamList
@@ -170,20 +191,18 @@ Param
 									$$->type = NodeType_Param;
 									$$->param.varType = strdup($1);
 									$$->param.varName = strdup($2);
+									printf("\nAdding PARAMETER symbol: {%s} to table {%s}\n", $2, current_scope->scope_name);
+									add_symbol(current_scope, $2, $1);
+									print_table(current_scope);
 									}
 
 Block
 	  	:    	LBRACK 
 			{ 
-				printf("PARSER: Entering block\n");
-				symbol_table* local_table = create_symbol_table(TABLE_SIZE, "local"); 
-				local_table->parent = current_scope;
-				previous_scope = current_scope;
-				current_scope = local_table; 
-			} 	VarDeclList StmtList 
+				
+			} 	VarDeclList StmtList ReturnStmt
 			{
-				printf("PARSER: Exiting block\n");
-				current_scope = previous_scope;
+				
 			}
 				RBRACK 	
 			{ 
@@ -192,9 +211,20 @@ Block
 				$$->type = NodeType_Block;
 				$$->block.varDeclList = $3;
 				$$->block.stmtList = $4;
+				$$->block.returnStmt = $5;
+				// $$->block.scope = current_scope;
+				// printf("setting block scope to %s\n", current_scope->scope_name);
 			}
 
 ;
+
+ReturnStmt
+	  	:    	RETURN Expr SEMICOLON 	{ 
+										printf("PARSER: Recognized return statement\n");
+										$$ = malloc(sizeof(ASTNode));
+										$$->type = NodeType_ReturnStmt;
+										$$->returnStmt.expr = $2;
+										}
 
 StmtList
 	   	:   				{/*empty, i.e. it is possible not to have any statement*/}
@@ -314,9 +344,12 @@ int main() {
 		printf("\n=== TAC GENERATION ===\n");
 		print_TAC_to_file("TAC.ir", tac_head);
 		printf("\n");
+		print_all_TAC(tac_head); 
 		printf("\n=== TAC OPTIMIZATION ===\n");
 		optimize_TAC(&tac_head);
 		print_optimized_TAC("optimized_TAC.ir", tac_head);
+		printf("\n");
+		print_all_TAC(tac_head);
 
 		// Code generation
 		printf("\n=== CODE GENERATION ===\n");

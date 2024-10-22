@@ -1,16 +1,7 @@
 x declare
-y declare
-x = 1
-t1 li 8
-t2 = 1 + t1
-y = t2
-t3 li 6
-x = t3
-x = 6
-t4 li 8
-x = t4
-y = 1
-t6 li 3
-y = t6
-write x
-write y
+result declare
+t0 = (null)
+t1 = (null)
+t2 = t0 + t1
+result = t2
+t3 = (null)

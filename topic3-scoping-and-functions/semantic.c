@@ -4,15 +4,20 @@
 
 // Perform semantic analysis on the AST
 TAC* tac_head = NULL;
+TACStack* tac_buffer_head = NULL;
 
 int temp_vars[10] = {0}; // Definition and initialization
 symbol_table* scope = NULL;
 
+bool buffering_tac = false;
+
 /*
 Recursively traverse the AST and perform semantic analysis
 */
+
 void semantic_analysis(ASTNode* node, symbol_table* sym_table) {
     scope = sym_table;
+    printf("%s  :   ", scope->scope_name);
     if (node == NULL) return;
 
     switch (node->type) {
@@ -22,10 +27,12 @@ void semantic_analysis(ASTNode* node, symbol_table* sym_table) {
             semantic_analysis(node->program.stmtList, sym_table);
             break;
         case NodeType_VarDeclList:
+            printf("Performing semantic analysis on variable declaration list\n");
             semantic_analysis(node->varDeclList.varDecl, sym_table);
             semantic_analysis(node->varDeclList.varDeclList, sym_table);
             break;
         case NodeType_VarDecl:
+            printf("Performing semantic analysis on variable declaration\n");   
             // if (lookup(sym_table, node->varDecl.varName) != NULL) {
             //     fprintf(stderr, "Error: Variable '%s' redeclared.\n", node->varDecl.varName);
             // } else {
@@ -34,22 +41,27 @@ void semantic_analysis(ASTNode* node, symbol_table* sym_table) {
             
             break;
         case NodeType_StmtList:
+            printf("Performing semantic analysis on statement list\n");
             semantic_analysis(node->stmtList.stmt, sym_table);
             semantic_analysis(node->stmtList.stmtList, sym_table);
             break;
         case NodeType_Stmt:
+            printf("Performing semantic analysis on statement\n");
             semantic_analysis(node->stmt.expr, sym_table);
             break;  
         case NodeType_AssignStmt:
+            printf("Performing semantic analysis on assignment statement\n");
             semantic_analysis(node->assignStmt.expr, sym_table);
             break;
         case NodeType_Expr:
+            printf("Performing semantic analysis on expression\n");
             semantic_analysis(node->expr.left, sym_table);
             semantic_analysis(node->expr.right, sym_table);
             break;
         // default:
         //     fprintf(stderr, "Unknown Node Type\n");
         case NodeType_BinOp:
+            printf("Performing semantic analysis on binary operation\n");
             // Check for declaration of variables
             if (lookup(sym_table, node->binOp.left->varDecl.varName) == NULL) {
                 fprintf(stderr, "Semantic error: Variable %s has not been declared\n", node->varDecl.varName);
@@ -60,19 +72,62 @@ void semantic_analysis(ASTNode* node, symbol_table* sym_table) {
             semantic_analysis(node->binOp.left, sym_table);
             break;
         case NodeType_SimpleID:
+            printf("Performing semantic analysis on simple ID\n");
             // Check for declaration of variable
             if (lookup(sym_table, node->simpleID.name) == NULL) {
                 fprintf(stderr, "Semantic error: Variable %s has not been declared\n", node->simpleID.name);
             }
             break;
         case NodeType_SimpleExpr:
+            printf("Performing semantic analysis on simple expression\n");
             // no checks necessary for number
             break;
         case NodeType_WriteStmt:
+            printf("Performing semantic analysis on write statement\n");
             // no checks necessary... for now
             if (lookup(sym_table, node->writeStmt.varName) == NULL) {
                 fprintf(stderr, "Semantic error: Variable %s has not been declared\n", node->simpleID.name);
             }
+            break;
+        case NodeType_FuncDeclList:
+            printf("Performing semantic analysis on function declaration list\n");
+            semantic_analysis(node->funcDeclList.funcDecl, sym_table);
+            semantic_analysis(node->funcDeclList.funcDeclList, sym_table);
+            break;
+        case NodeType_FuncDecl:
+            printf("Performing semantic analysis on function declaration\n");
+            semantic_analysis(node->funcDecl.funcSignature, node->funcDecl.scope);
+            semantic_analysis(node->funcDecl.paramList, node->funcDecl.scope);
+            semantic_analysis(node->funcDecl.block, node->funcDecl.scope);
+            // buffering_tac = false;
+            break;
+        case NodeType_FuncSignature:
+            printf("Performing semantic analysis on function signature\n");
+            // no checks necessary... for now
+            break;
+        case NodeType_Block:
+            printf("Performing semantic analysis on block\n");
+            semantic_analysis(node->block.varDeclList, sym_table);
+            semantic_analysis(node->block.stmtList, sym_table);
+            semantic_analysis(node->block.returnStmt, sym_table);
+            break;
+        case NodeType_ReturnStmt:
+            printf("Performing semantic analysis on return statement====================================\n");
+            semantic_analysis(node->returnStmt.expr, sym_table);
+            buffering_tac = true;
+            break;
+        case NodeType_ParamList:
+            printf("Performing semantic analysis on parameter list\n");
+            semantic_analysis(node->paramList.param, sym_table);
+            semantic_analysis(node->paramList.paramList, sym_table);
+            break;
+        case NodeType_Param:
+            printf("Performing semantic analysis on parameter\n");
+            // if (lookup(sym_table, node->param.varName) != NULL) {
+            //     fprintf(stderr, "Error: Variable '%s' redeclared.\n", node->param.varName);
+            // } else {
+            //     add_symbol(sym_table, node->param.varName, node->param.varType); // Assuming 0 as initial value
+            // }
             break;
         // ... handle other node types ...
         default:
@@ -84,7 +139,9 @@ void semantic_analysis(ASTNode* node, symbol_table* sym_table) {
     if (node->type == NodeType_VarDecl || node->type == NodeType_SimpleExpr || 
         node->type == NodeType_SimpleID || node->type == NodeType_AssignStmt || 
         node->type == NodeType_Expr || node->type == NodeType_WriteStmt ||
-        node->type == NodeType_BinOp) {
+        node->type == NodeType_BinOp || node->type == NodeType_FuncSignature ||
+        node->type == NodeType_Param || node->type == NodeType_Block ||
+        node->type == NodeType_ReturnStmt) {
         TAC* tac = tac_expr(node, sym_table);
         print_TAC(tac);
     }
@@ -95,6 +152,11 @@ void semantic_analysis(ASTNode* node, symbol_table* sym_table) {
             node->simpleID.temp = sym->temp_var;
         }
     }
+
+    // if (node->type == NodeType_Block) {
+    //     printf("Block scope: %s\n", node->block.scope->scope_name);
+    //     scope = node->block.scope;
+    // }
 
     // ... other code ...
 
@@ -122,6 +184,10 @@ TAC* tac_expr(ASTNode* expr, symbol_table* sym_table) {
 
     TAC* instruction = (TAC*)malloc(sizeof(TAC));
     if (!instruction) return NULL;
+
+    if (buffering_tac) {
+        push_TAC(&tac_buffer_head, instruction);
+    }
 
     instruction->scope = sym_table;
     printf("Generating TAC in the scope %s\n", sym_table->scope_name);
@@ -193,15 +259,43 @@ TAC* tac_expr(ASTNode* expr, symbol_table* sym_table) {
         }
         // Add cases for other expression types...
 
+        case NodeType_FuncSignature: {
+            printf("Generating TAC for function declaration\n");
+            instruction->op = strdup("func");
+            instruction->result = strdup(expr->funcDecl.funcName);
+            buffering_tac = false;
+            break;
+        }
+
+        case NodeType_ReturnStmt: {
+            printf("Generating TAC for return statement\n");
+            instruction->arg1 = create_operand(expr->returnStmt.expr);
+            instruction->op = strdup("return");
+            instruction->result = "";
+            break;
+        }
+
+        case NodeType_Param: {
+            printf("Generating TAC for parameter\n");
+            instruction->op = strdup("param");
+            instruction->result = strdup(expr->param.varName);
+            break;
+        }
+
         default:
             free(instruction);
             return NULL;
     }
+    
 
     instruction->next = NULL; // Make sure to null-terminate the new instruction
 
     // Append to the global TAC list
     append_TAC(&tac_head, instruction);
+
+    // if (buffering_tac) {
+    //     push_TAC(&tac_buffer_head, instruction);
+    // }
 
     return instruction;
 }
@@ -257,11 +351,17 @@ void print_TAC_to_file(const char* filename, TAC* tac) {
         } else if (strcmp(current->op, "assign") == 0) {
             fprintf(file, "%s = %s\n", current->result, current->arg1);
         } else if (strcmp(current->op, "load") == 0) {
-            fprintf(file, "%s = %s\n", current->result, current->arg1);
+            fprintf(file, "%s load %s\n", current->result, current->arg1);
         } else if (strcmp(current->op, "+") == 0) {
             fprintf(file, "%s = %s + %s\n", current->result, current->arg1, current->arg2);
         } else if (strcmp(current->op, "write") == 0) {
             fprintf(file, "write %s\n", current->result);
+        } else if (strcmp(current->op, "func") == 0) {
+            fprintf(file, "func %s\n", current->result);
+        } else if (strcmp(current->op, "return") == 0) {
+            fprintf(file, "return %s\n", current->arg1);
+        } else if (strcmp(current->op, "param") == 0) {
+            fprintf(file, "param %s\n", current->result);
         }
         current = current->next;
     }   
@@ -317,8 +417,51 @@ void append_TAC(TAC** head, TAC* new_instruction) {
 void print_TAC(TAC* tac) {
     if (!tac) return;
     if (strcmp(tac->op, "declare") == 0) {
-        printf("%s = 0\n", tac->result);
-    } else {
-        printf("%s = %s %s %s\n", tac->result, tac->arg1, tac->op, tac->arg2);
+            printf("%s declare\n", tac->result);
+        } else if (strcmp(tac->op, "assign") == 0) {
+            printf("%s = %s\n", tac->result, tac->arg1);
+        } else if (strcmp(tac->op, "load") == 0) {
+            printf("%s load %s\n", tac->result, tac->arg1);
+        } else if (strcmp(tac->op, "+") == 0) {
+            printf("%s = %s + %s\n", tac->result, tac->arg1, tac->arg2);
+        } else if (strcmp(tac->op, "write") == 0) {
+            printf("write %s\n", tac->result);
+        } else if (strcmp(tac->op, "func") == 0) {
+            printf("func %s\n", tac->result);
+        } else if (strcmp(tac->op, "return") == 0) {
+            printf("return %s\n", tac->arg1);
+        } else if (strcmp(tac->op, "param") == 0) {
+            printf("param %s\n", tac->result);
+        }
+}
+
+void print_all_TAC(TAC* tac) {
+    TAC* current = tac;
+    while (current != NULL) {
+        print_TAC(current);
+        current = current->next;
     }
 }
+
+// Function declarations for TAC stack operations
+void push_TAC(TACStack** stack, TAC* tac) {
+    TACStack* new_node = (TACStack*)malloc(sizeof(TACStack));
+    if (!new_node) return;
+    new_node->tac = tac;
+    new_node->next = *stack;
+    *stack = new_node;
+    printf("Pushed TAC onto stack\n");
+}
+
+// TAC* pop_TAC(TACStack** stack) {
+//     if (is_TAC_stack_empty(*stack)) return NULL;
+//     TACStack* top = *stack;
+//     TAC* tac = top->tac;
+//     *stack = top->next;
+//     free(top);
+//     return tac;
+// }
+
+// bool is_TAC_stack_empty(TACStack* stack) {
+//     return stack == NULL;
+// }

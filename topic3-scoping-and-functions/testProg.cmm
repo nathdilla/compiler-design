@@ -1,11 +1,7 @@
 int x;
-int y;
-x = 1;
-y = x + 2 + 6;
-x = x + 5;
-x = 6;
-x = x + 2;
-y = 1;
-y = y + 2;
+function int add(int a, int b) {
+    int result;
+    result = a + b;
+    return result;
+}
 write x;
-write y;

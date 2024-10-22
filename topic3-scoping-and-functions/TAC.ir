@@ -1,20 +1,11 @@
 x declare
-y declare
-x = 1
-t0 = x
-t1 = 2 + 6
+func add
+param a
+param b
+result declare
+t0 load a
+t1 load b
 t2 = t0 + t1
-y = t2
-t0 = x
-t3 = t0 + 5
-x = t3
-x = 6
-t3 = x
-t4 = t3 + 2
-x = t4
-y = 1
-t5 = y
-t6 = t5 + 2
-y = t6
-write x
-write y
+result = t2
+t3 load result
+return t3

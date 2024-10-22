@@ -22,11 +22,17 @@ typedef struct TAC {
     symbol_table* scope; // Scope of the instruction
     bool dead; // Add this field
 } TAC;
+// Stack to hold TAC instructions for backpatching
+typedef struct TACStack {
+    TAC* tac;
+    struct TACStack* next;
+} TACStack;
 
-/*
-We are setting the maximum number of temporary variables to 20 because we are not
-implementing register allocation in this project
-*/
+// Function declarations for TAC stack operations
+void push_TAC(TACStack** stack, TAC* tac);
+TAC* pop_TAC(TACStack** stack);
+bool is_TAC_stack_empty(TACStack* stack);
+
 extern int temp_vars[10]; // Declaration only
 extern TAC* tac_head; // Global head of the TAC instructions list
 
@@ -41,6 +47,7 @@ void initialize_temp_vars();
 void deallocate_temp_var(int tempVars[], int index);
 void append_TAC(TAC** head, TAC* newInstruction);
 void print_TAC_to_file(const char* filename, TAC* tac);
+void print_all_TAC(TAC* tac);
 // You can add more function declarations related to semantic analysis here
 
 #endif // SEMANTIC_H
