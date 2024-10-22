@@ -112,6 +112,10 @@ void traverseAST(ASTNode* node, int level) {
             printIndent(level);
             printf("Parameter: %s %s\n", node->param.varName, node->param.varType);
             break;
+        case NodeType_FuncCall:
+            printIndent(level);
+            printf("Function Call\n");
+            break;
     }
 }
 
@@ -175,6 +179,9 @@ void printASTNode(ASTNode* node) {
             break;
         case NodeType_Param:
             printf("Parameter: %s %s\n", node->param.varName, node->param.varType);
+            break;
+        case NodeType_FuncCall:
+            printf("Function Call\n");
             break;
     }
 } 
@@ -255,6 +262,8 @@ void freeAST(ASTNode* node) {
         case NodeType_Param:
             free(node->param.varName);
             free(node->param.varType);
+            break;
+        case NodeType_FuncCall:
             break;
     }
 
@@ -345,6 +354,9 @@ ASTNode* createNode(NodeType type) {
         case NodeType_Param:
             newNode->param.varName = NULL;
             newNode->param.varType = NULL;
+            break;
+        case NodeType_FuncCall:
+            newNode->funcCall.funcName = NULL;
             break;
     }
 

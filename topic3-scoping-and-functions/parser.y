@@ -257,6 +257,13 @@ Stmt
 									$$->type = NodeType_WriteStmt;
 									$$->writeStmt.varName = strdup($2);
 								}
+	|   ID LPAREN RPAREN SEMICOLON {
+									printf("Parsed Function Call: %s()\n", $1);
+									$$ = malloc(sizeof(ASTNode));
+									$$->type = NodeType_FuncCall;
+									$$->funcCall.funcName = strdup($1);
+									// $$->funcCall.paramList = NULL;
+								}
 ;
 
 Expr
@@ -281,6 +288,12 @@ Expr
 						char buffer[20];
 						snprintf(buffer, sizeof(buffer), "%d", $1);
 						$$->simpleExpr.number = strdup(buffer);
+						}
+	|   ID LPAREN RPAREN 	{
+						printf("PARSER: Recognized function call\n");
+						$$ = malloc(sizeof(ASTNode));
+						$$->type = NodeType_FuncCall;
+						$$->funcCall.funcName = strdup($1);
 						}
 ;
 

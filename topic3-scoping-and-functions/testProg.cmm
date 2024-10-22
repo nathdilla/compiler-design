@@ -4,4 +4,6 @@ function int add(int a, int b) {
     result = a + b;
     return result;
 }
+add();
+x = add();
 write x;

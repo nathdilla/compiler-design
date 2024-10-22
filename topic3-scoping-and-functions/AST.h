@@ -28,7 +28,8 @@ typedef enum {
     NodeType_AssignStmt,
     NodeType_BinOp,
     NodeType_WriteStmt,
-    NodeType_ReturnStmt
+    NodeType_ReturnStmt,
+    NodeType_FuncCall
 } NodeType;
 
 // Structure for AST nodes
@@ -135,6 +136,10 @@ typedef struct ASTNode {
             struct ASTNode* left;
             struct ASTNode* right;
         } binOp;
+
+        struct {
+            char* funcName;
+        } funcCall;
     };
 } ASTNode;
 

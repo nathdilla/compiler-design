@@ -202,16 +202,6 @@ TAC* tac_expr(ASTNode* expr, symbol_table* sym_table) {
             break;
         }
 
-        // case NodeType_BinOp: {
-        //     printf("Generating TAC for binary operation\n");
-        //     instruction->arg1 = create_operand(expr->binOp.left);
-        //     instruction->arg2 = create_operand(expr->binOp.right);
-        //     instruction->op = strdup("+"); //strdup(expr->binOp.operator);
-        //     instruction->result = create_temp_var();
-        //     // expr->binOp.temp = instruction->result;
-        //     break;
-        // }
-
         case NodeType_SimpleID: {
             symbol* sym = lookup(scope, expr->simpleID.name);
             if (sym != NULL && sym->temp_var == NULL) {
