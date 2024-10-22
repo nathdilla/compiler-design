@@ -1,7 +1,7 @@
 all: parser
 
 parser.tab.c parser.tab.h:	parser.y
-	bison -t -v -d parser.y
+	bison -t -v -d parser.y -Wcounterexamples
 
 lex.yy.c: lexer.l parser.tab.h
 	flex lexer.l

@@ -1,15 +1,18 @@
 x declare
 y declare
-x = 1
-t1 li 8
-y = t2
-t3 li 6
-x = t3
+z declare
+x = 10
+y = 5
+t1 = 5
+z = t2
+write z
 x = 6
-t4 li 8
-x = t4
-y = 1
-t6 li 3
-y = t6
-write x
-write y
+y = 7
+t1 = 7
+z = t3
+write z
+x = 20
+y = 4
+t1 = 4
+z = t4
+write z
