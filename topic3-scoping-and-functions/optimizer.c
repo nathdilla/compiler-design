@@ -130,7 +130,7 @@ void constant_propagation(TAC **head)
             add_live_definition(current);
         }
         if (is_variable(current->arg1))
-        { // change it only if the this is the most recent definition
+        { // change it only if this is the most recent definition
             printf("Replacing %s with %s\n", current->arg1, lookup_live_definition(current->arg1));
             current->arg1 = lookup_live_definition(current->arg1);
         }
@@ -139,9 +139,23 @@ void constant_propagation(TAC **head)
             char *definition = lookup_live_definition(current->arg1);
             if (definition != NULL)
             {
-                printf("Replacing %s with %s\n", current->arg1, definition);
-                current->arg1 = definition;
-            };
+            printf("Replacing %s with %s\n", current->arg1, definition);
+            current->arg1 = definition;
+            }
+        }
+        if (is_variable(current->arg2))
+        { // change it only if this is the most recent definition
+            printf("Replacing %s with %s\n", current->arg2, lookup_live_definition(current->arg2));
+            current->arg2 = lookup_live_definition(current->arg2);
+        }
+        if (is_temp_var(current->arg2))
+        {
+            char *definition = lookup_live_definition(current->arg2);
+            if (definition != NULL)
+            {
+            printf("Replacing %s with %s\n", current->arg2, definition);
+            current->arg2 = definition;
+            }
         }
         current = current->next;
     }
@@ -153,21 +167,34 @@ void constant_folding(TAC **head)
     TAC *current = *head;
     while (current != NULL)
     {
-        if (strcmp(current->op, "+") == 0 && is_constant(current->arg1) && is_constant(current->arg2))
+        if (is_constant(current->arg1) && is_constant(current->arg2))
         {
             int arg1 = atoi(current->arg1);
             int arg2 = atoi(current->arg2);
-            int result = arg1 + arg2;
+            int result;
+            if (strcmp(current->op, "+") == 0)
+                result = arg1 + arg2;
+            else if (strcmp(current->op, "-") == 0)
+                result = arg1 - arg2;
+            else if (strcmp(current->op, "*") == 0)
+                result = arg1 * arg2;
+            else if (strcmp(current->op, "/") == 0 && arg2 != 0)
+                result = arg1 / arg2;
+            else
+            {
+                current = current->next;
+                continue;
+            }
             char *result_str = (char *)malloc(20);
             sprintf(result_str, "%d", result);
             current->op = "li";
             current->arg1 = result_str;
             current->arg2 = NULL;
+            printf("Folded constant operation: %s = %d\n", current->result, result);
         }
         current = current->next;
     }
 }
-
 void print_optimized_TAC(const char *filename, TAC *head)
 {
     FILE *file = fopen(filename, "w");
@@ -268,8 +295,8 @@ void dead_code_elimination(TAC **tac)
     {
         TAC *instr = tac_list[i];
 
-        // Always keep declare statements
-        if (strcmp(instr->op, "declare") == 0)
+        // Always keep declare statements and write statements
+        if (strcmp(instr->op, "declare") == 0 || strcmp(instr->op, "write") == 0)
         {
             continue;
         }
@@ -311,7 +338,13 @@ void dead_code_elimination(TAC **tac)
             }
             else if (is_variable(instr->result))
             {
-                // For variables (like x and y), we always keep the assignments
+                // For variables, keep all assignments and arithmetic operations
+                if (strcmp(instr->op, "+") == 0 || strcmp(instr->op, "-") == 0 ||
+                    strcmp(instr->op, "*") == 0 || strcmp(instr->op, "/") == 0 ||
+                    strcmp(instr->op, "assign") == 0)
+                {
+                    is_dead = false;
+                }
                 // Remove the variable from live_vars if it's there
                 if (is_live_var(instr->result, live_vars, live_vars_count))
                 {
