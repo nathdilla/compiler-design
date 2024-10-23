@@ -36,7 +36,14 @@ bool is_TAC_stack_empty(TACStack* stack);
 extern int temp_vars[10]; // Declaration only
 extern TAC* tac_head; // Global head of the TAC instructions list
 
+// Function to allocate argument registers for parameters
+int allocate_arg_register(int arg_regs[], int num_args);
+// Function to deallocate argument registers
+void deallocate_arg_register(int arg_regs[], int index);
+// Function to check if a given string is an argument register
+bool is_arg_register(const char* str);
 int allocate_temp_var(int temp_vars[]);
+char* create_arg_register();
 bool is_temp_var(const char* str);
 void semantic_analysis(ASTNode* node, symbol_table* symTab);
 TAC* tac_expr(ASTNode* expr, symbol_table* sym_table); //returns the TAC for the expression to print on console

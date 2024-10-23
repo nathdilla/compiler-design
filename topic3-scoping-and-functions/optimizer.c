@@ -99,16 +99,18 @@ void constant_propagation(TAC** head) {
         if (strcmp(current->op, "load") == 0 && is_variable(current->arg1)) {
             add_live_definition(current);
         }
-        if (is_variable(current->arg1)) { // change it only if the this is the most recent definition
+        if (is_variable(current->arg1) && lookup_live_definition(current->arg1)) { // change it only if the this is the most recent definition
             printf("Replacing %s with %s\n", current->arg1, lookup_live_definition(current->arg1));
             current->arg1 = lookup_live_definition(current->arg1);
         }
-        if (is_temp_var(current->arg1)) {
+        if (is_temp_var(current->arg1) && lookup_live_definition(current->arg1)) {
             char* definition = lookup_live_definition(current->arg1);
-            if (definition != NULL) {
-                printf("Replacing %s with %s\n", current->arg1, definition);
-                current->arg1 = definition;
-            };
+            if (is_constant(lookup_live_definition(definition))) {
+                if (definition != NULL) {
+                    printf("Replacing %s with %s\n", current->arg1, definition);
+                    current->arg1 = definition;
+                };
+            }
         }
         current = current->next;
     }

@@ -1,7 +1,9 @@
 x declare
 result declare
-t0 = (null)
-t1 = (null)
+t0 = a
+t1 = b
 t2 = t0 + t1
 result = t2
-t3 = (null)
+t3 = result
+x = t4
+write x

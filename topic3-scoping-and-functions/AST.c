@@ -20,6 +20,7 @@ void traverseAST(ASTNode* node, int level) {
             printIndent(level);
             printf("Program\n");
             traverseAST(node->program.varDeclList, level + indentValue);
+            traverseAST(node->program.funcDeclList, level + indentValue);
             traverseAST(node->program.stmtList, level + indentValue);
             printf("|");
             break;
@@ -115,6 +116,17 @@ void traverseAST(ASTNode* node, int level) {
         case NodeType_FuncCall:
             printIndent(level);
             printf("Function Call\n");
+            traverseAST(node->funcCall.inputParamList, level + indentValue);
+            break;
+        case NodeType_InputParam:
+            printIndent(level);
+            printf("Input Parameter\n");
+            break;
+        case NodeType_InputParamList:
+            printIndent(level);
+            printf("Input Parameter List\n");
+            traverseAST(node->inputParamList.inputParam, level + indentValue);
+            traverseAST(node->inputParamList.inputParamList, level + indentValue);
             break;
     }
 }
@@ -183,6 +195,12 @@ void printASTNode(ASTNode* node) {
         case NodeType_FuncCall:
             printf("Function Call\n");
             break;
+        case NodeType_InputParam:
+            printf("Input Parameter\n");
+            break;
+        case NodeType_InputParamList:  
+            printf("Input Parameter List\n");
+            break;
     }
 } 
 
@@ -193,6 +211,7 @@ void freeAST(ASTNode* node) {
         case NodeType_Program:
             free(node->program.varDeclList);
             free(node->program.stmtList);
+            free(node->program.funcDeclList);
             break;
         case NodeType_VarDeclList:
             free(node->varDeclList.varDecl);
@@ -265,6 +284,10 @@ void freeAST(ASTNode* node) {
             break;
         case NodeType_FuncCall:
             break;
+        case NodeType_InputParam:
+            break;
+        case NodeType_InputParamList:  
+            break;
     }
 
     free(node);
@@ -284,6 +307,7 @@ ASTNode* createNode(NodeType type) {
         case NodeType_Program:
             newNode->program.varDeclList = NULL;
             newNode->program.stmtList = NULL;
+            newNode->program.funcDeclList = NULL;
             break;
         case NodeType_VarDeclList:
             newNode->varDeclList.varDecl = NULL;
@@ -357,6 +381,13 @@ ASTNode* createNode(NodeType type) {
             break;
         case NodeType_FuncCall:
             newNode->funcCall.funcName = NULL;
+            break;
+        case NodeType_InputParam:
+            newNode->inputParam.value = NULL;
+            break;
+        case NodeType_InputParamList:  
+            newNode->inputParamList.inputParam = NULL;  
+            newNode->inputParamList.inputParamList = NULL;
             break;
     }
 

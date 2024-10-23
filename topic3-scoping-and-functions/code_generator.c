@@ -118,6 +118,13 @@ void generate_MIPS(TAC* tac_instructions) {
 
             // Perform the addition with the appropriate registers
             fprintf(output_file, "\tadd %s, %s, %s\n", temp_registers[regIndex].name, arg1_reg, arg2_reg);
+        } else if (strcmp(current->op, "func") == 0) {
+            fprintf(output_file, "\n%s:\n", current->result);
+            // Function prologue
+            fprintf(output_file, "\taddi $sp, $sp, -12\n");
+            fprintf(output_file, "\tsw $ra, 8($sp)\n"); // save return address
+            fprintf(output_file, "\tsw $fp, 4($sp)\n"); // save frame pointer
+            fprintf(output_file, "\tmove $fp, $sp\n"); // set up new frame pointer
         }
         // Add more operations here (subtraction, multiplication, etc.)
 

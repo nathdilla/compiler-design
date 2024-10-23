@@ -29,7 +29,9 @@ typedef enum {
     NodeType_BinOp,
     NodeType_WriteStmt,
     NodeType_ReturnStmt,
-    NodeType_FuncCall
+    NodeType_FuncCall,
+    NodeType_InputParam,
+    NodeType_InputParamList
 } NodeType;
 
 // Structure for AST nodes
@@ -39,6 +41,7 @@ typedef struct ASTNode {
         struct{
             struct ASTNode* varDeclList;
             struct ASTNode* stmtList;
+            struct ASTNode* funcDeclList;
         } program;
 
         struct {
@@ -139,7 +142,18 @@ typedef struct ASTNode {
 
         struct {
             char* funcName;
+            struct ASTNode* inputParamList;
+            char* temp;
         } funcCall;
+
+        struct {
+            char* value;
+        } inputParam;
+
+        struct {
+            struct ASTNode* inputParam;
+            struct ASTNode* inputParamList;
+        } inputParamList;
     };
 } ASTNode;
 

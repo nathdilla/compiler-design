@@ -7,6 +7,7 @@ TAC* tac_head = NULL;
 TACStack* tac_buffer_head = NULL;
 
 int temp_vars[10] = {0}; // Definition and initialization
+int arg_regs[10] = {0}; // Definition and initialization
 symbol_table* scope = NULL;
 
 bool buffering_tac = false;
@@ -24,6 +25,7 @@ void semantic_analysis(ASTNode* node, symbol_table* sym_table) {
         case NodeType_Program:
             printf("Performing semantic analysis on program\n");
             semantic_analysis(node->program.varDeclList, sym_table);
+            semantic_analysis(node->program.funcDeclList, sym_table);
             semantic_analysis(node->program.stmtList, sym_table);
             break;
         case NodeType_VarDeclList:
@@ -129,6 +131,20 @@ void semantic_analysis(ASTNode* node, symbol_table* sym_table) {
             //     add_symbol(sym_table, node->param.varName, node->param.varType); // Assuming 0 as initial value
             // }
             break;
+        case NodeType_FuncCall:
+            printf("Performing semantic analysis on function call\n");
+            semantic_analysis(node->funcCall.inputParamList, sym_table);
+            // no checks necessary... for now
+            break;
+        case NodeType_InputParamList:
+            printf("Performing semantic analysis on input parameter list\n");
+            semantic_analysis(node->inputParamList.inputParam, sym_table);
+            semantic_analysis(node->inputParamList.inputParamList, sym_table);
+            break;
+        case NodeType_InputParam:
+            printf("Performing semantic analysis on input parameter\n");
+            // no checks necessary... for now
+            break;
         // ... handle other node types ...
         default:
             fprintf(stderr, "Unknown Node Type\n");
@@ -136,15 +152,8 @@ void semantic_analysis(ASTNode* node, symbol_table* sym_table) {
 
        // ... other code ...
 
-    if (node->type == NodeType_VarDecl || node->type == NodeType_SimpleExpr || 
-        node->type == NodeType_SimpleID || node->type == NodeType_AssignStmt || 
-        node->type == NodeType_Expr || node->type == NodeType_WriteStmt ||
-        node->type == NodeType_BinOp || node->type == NodeType_FuncSignature ||
-        node->type == NodeType_Param || node->type == NodeType_Block ||
-        node->type == NodeType_ReturnStmt) {
-        TAC* tac = tac_expr(node, sym_table);
-        print_TAC(tac);
-    }
+    TAC* tac = tac_expr(node, sym_table);
+    print_TAC(tac);
 
     if (node->type == NodeType_SimpleID) {
         symbol* sym = lookup(sym_table, node->simpleID.name);
@@ -185,9 +194,9 @@ TAC* tac_expr(ASTNode* expr, symbol_table* sym_table) {
     TAC* instruction = (TAC*)malloc(sizeof(TAC));
     if (!instruction) return NULL;
 
-    if (buffering_tac) {
-        push_TAC(&tac_buffer_head, instruction);
-    }
+    // if (buffering_tac) {
+    //     push_TAC(&tac_buffer_head, instruction);
+    // }
 
     instruction->scope = sym_table;
     printf("Generating TAC in the scope %s\n", sym_table->scope_name);
@@ -268,7 +277,25 @@ TAC* tac_expr(ASTNode* expr, symbol_table* sym_table) {
         case NodeType_Param: {
             printf("Generating TAC for parameter\n");
             instruction->op = strdup("param");
-            instruction->result = strdup(expr->param.varName);
+            instruction->result = create_arg_register();
+            instruction->arg1 = strdup(expr->param.varName);
+            break;
+        }
+
+        case NodeType_InputParam: {
+            printf("Generating TAC for input parameter\n");
+            instruction->op = strdup("param_in");
+            instruction->result = create_arg_register();
+            instruction->arg1 = strdup(expr->inputParam.value);
+            break;
+        }
+
+        case NodeType_FuncCall: {
+            printf("Generating TAC for function call\n");
+            instruction->op = strdup("call");
+            instruction->arg1 = strdup(expr->funcCall.funcName);
+            instruction->result = create_temp_var();
+            expr->funcCall.temp = instruction->result;
             break;
         }
 
@@ -316,6 +343,8 @@ char* create_operand(ASTNode* node) {
             // return node->simpleExpr.temp;
         case NodeType_Expr:
             return node->expr.temp;
+        case NodeType_FuncCall:
+            return node->funcCall.temp;
         case NodeType_AssignStmt:
             return "t9";
         default:
@@ -347,11 +376,17 @@ void print_TAC_to_file(const char* filename, TAC* tac) {
         } else if (strcmp(current->op, "write") == 0) {
             fprintf(file, "write %s\n", current->result);
         } else if (strcmp(current->op, "func") == 0) {
+            fprintf(file, "\n");
             fprintf(file, "func %s\n", current->result);
         } else if (strcmp(current->op, "return") == 0) {
             fprintf(file, "return %s\n", current->arg1);
+            fprintf(file, "\n");
         } else if (strcmp(current->op, "param") == 0) {
-            fprintf(file, "param %s\n", current->result);
+            fprintf(file, "%s param %s\n", current->result, current->arg1);
+        } else if (strcmp(current->op, "param_in") == 0) {
+            fprintf(file, "%s param_in %s\n", current->result, current->arg1);
+        } else if (strcmp(current->op, "call") == 0) {
+            fprintf(file, "%s call %s\n", current->result, current->arg1);
         }
         current = current->next;
     }   
@@ -417,11 +452,17 @@ void print_TAC(TAC* tac) {
         } else if (strcmp(tac->op, "write") == 0) {
             printf("write %s\n", tac->result);
         } else if (strcmp(tac->op, "func") == 0) {
+            printf("\n");
             printf("func %s\n", tac->result);
         } else if (strcmp(tac->op, "return") == 0) {
             printf("return %s\n", tac->arg1);
+            printf("\n");
         } else if (strcmp(tac->op, "param") == 0) {
-            printf("param %s\n", tac->result);
+            printf("%s param %s\n", tac->result, tac->arg1);
+        } else if (strcmp(tac->op, "param_in") == 0) {
+            printf("%s param_in %s\n", tac->result, tac->arg1);
+        } else if (strcmp(tac->op, "call") == 0) {
+            printf("%s = call %s\n", tac->result, tac->arg1);
         }
 }
 
@@ -455,3 +496,31 @@ void push_TAC(TACStack** stack, TAC* tac) {
 // bool is_TAC_stack_empty(TACStack* stack) {
 //     return stack == NULL;
 // }
+
+// Function to allocate argument registers for parameters
+int allocate_arg_register(int arg_regs[], int num_args) {
+    for (int i = 0; i < num_args; i++) {
+        if (arg_regs[i] == 0) { // Check if the register is free
+            arg_regs[i] = 1; // Mark the register as used
+            return i; // Return the register index
+        }
+    }
+    return -1; // No free register found
+}
+
+// Function to deallocate argument registers
+void deallocate_arg_register(int arg_regs[], int index) {
+    if (index >= 0 && index < 10) {
+        arg_regs[index] = 0; // Mark the register as free
+    }
+}
+
+// Function to check if a given string is an argument register
+bool is_arg_register(const char* str) {
+    return str != NULL && str[0] == 'a' && str[1] >= '0' && str[1] <= '9' && str[2] == '\0';
+}
+
+// Function to create a new argument register name using allocate_arg_register
+char* create_arg_register() {
+    return strdup("a0"); // For simplicity, always return the first argument register
+}

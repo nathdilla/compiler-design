@@ -67,7 +67,7 @@ symbol_table* current_scope = NULL;
 
 %printer { fprintf(yyoutput, "%s", $$); } ID;
 
-%type <ast> Program VarDecl VarDeclList FuncDecl FuncDeclList ParamList Param Block Stmt StmtList Expr BinOp WriteStmt ReturnStmt FuncSignature
+%type <ast> Program VarDecl VarDeclList FuncDecl FuncDeclList ParamList Param Block Stmt StmtList Expr BinOp WriteStmt ReturnStmt FuncSignature InputParamList InputParam
 %start Program
 
 %%
@@ -78,7 +78,8 @@ Program
 									root = malloc(sizeof(ASTNode));
 									root->type = NodeType_Program;
 									root->program.varDeclList = $1;
-									root->program.stmtList = $2;
+									root->program.funcDeclList = $2;
+									root->program.stmtList = $3;
 									}
 		| VarDeclList StmtList { 
 									printf("The PARSER has started\n"); 
@@ -196,6 +197,41 @@ Param
 									print_table(current_scope);
 									}
 
+InputParamList
+		: 						{/*empty, i.e. it is possible not to have any input parameters*/}
+		| 	InputParam 			{ 
+								printf("PARSER: Recognized single input parameter\n");
+								$$ = malloc(sizeof(ASTNode));
+								$$->type = NodeType_InputParamList;
+								$$->inputParamList.inputParam = $1;
+								$$->inputParamList.inputParamList = NULL;
+								}
+		| 	InputParam COMMA InputParamList 	{ 
+											printf("PARSER: Recognized input parameter list with comma\n");
+											$$ = malloc(sizeof(ASTNode));
+											$$->type = NodeType_InputParamList;
+											$$->inputParamList.inputParam = $1;
+											$$->inputParamList.inputParamList = $3;
+											}
+;
+
+InputParam
+		:    	ID 			{
+							printf("PARSER: Recognized input parameter ID: %s\n", $1);
+							$$ = malloc(sizeof(ASTNode));
+							$$->type = NodeType_InputParam;
+							$$->inputParam.value = strdup($1);
+							}
+		| 	NUMBER 		{
+							printf("PARSER: Recognized input parameter number: %d\n", $1);
+							$$ = malloc(sizeof(ASTNode));
+							$$->type = NodeType_InputParam;
+							char buffer[20];
+							snprintf(buffer, sizeof(buffer), "%d", $1);
+							$$->inputParam.value = strdup(buffer);
+							}
+;
+
 Block
 	  	:    	LBRACK 
 			{ 
@@ -257,7 +293,7 @@ Stmt
 									$$->type = NodeType_WriteStmt;
 									$$->writeStmt.varName = strdup($2);
 								}
-	|   ID LPAREN RPAREN SEMICOLON {
+	|   ID LPAREN InputParamList RPAREN SEMICOLON {
 									printf("Parsed Function Call: %s()\n", $1);
 									$$ = malloc(sizeof(ASTNode));
 									$$->type = NodeType_FuncCall;
@@ -289,11 +325,12 @@ Expr
 						snprintf(buffer, sizeof(buffer), "%d", $1);
 						$$->simpleExpr.number = strdup(buffer);
 						}
-	|   ID LPAREN RPAREN 	{
+	|   ID LPAREN InputParamList RPAREN 	{
 						printf("PARSER: Recognized function call\n");
 						$$ = malloc(sizeof(ASTNode));
 						$$->type = NodeType_FuncCall;
 						$$->funcCall.funcName = strdup($1);
+						$$->funcCall.inputParamList = $3;
 						}
 ;
 
