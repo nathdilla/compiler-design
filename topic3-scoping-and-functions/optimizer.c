@@ -130,7 +130,7 @@ void constant_propagation(TAC **head)
             add_live_definition(current);
         }
         if (is_variable(current->arg1))
-        { // change it only if the this is the most recent definition
+        { // change it only if this is the most recent definition
             printf("Replacing %s with %s\n", current->arg1, lookup_live_definition(current->arg1));
             current->arg1 = lookup_live_definition(current->arg1);
         }
@@ -139,9 +139,23 @@ void constant_propagation(TAC **head)
             char *definition = lookup_live_definition(current->arg1);
             if (definition != NULL)
             {
-                printf("Replacing %s with %s\n", current->arg1, definition);
-                current->arg1 = definition;
-            };
+            printf("Replacing %s with %s\n", current->arg1, definition);
+            current->arg1 = definition;
+            }
+        }
+        if (is_variable(current->arg2))
+        { // change it only if this is the most recent definition
+            printf("Replacing %s with %s\n", current->arg2, lookup_live_definition(current->arg2));
+            current->arg2 = lookup_live_definition(current->arg2);
+        }
+        if (is_temp_var(current->arg2))
+        {
+            char *definition = lookup_live_definition(current->arg2);
+            if (definition != NULL)
+            {
+            printf("Replacing %s with %s\n", current->arg2, definition);
+            current->arg2 = definition;
+            }
         }
         current = current->next;
     }

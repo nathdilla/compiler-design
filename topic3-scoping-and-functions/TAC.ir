@@ -3,16 +3,22 @@ y declare
 z declare
 x = 10
 y = 5
-t2 li 5
+t0 = x
+t1 = y
+t2 = t0 - t1
 z = t2
 write z
 x = 6
 y = 7
-t3 li 42
+t0 = x
+t1 = y
+t3 = t0 * t1
 z = t3
 write z
 x = 20
 y = 4
-t4 li 5
+t0 = x
+t1 = y
+t4 = t0 / t1
 z = t4
 write z
