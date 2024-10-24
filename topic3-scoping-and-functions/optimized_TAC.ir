@@ -1,9 +1,5 @@
 x declare
-result declare
-t0 = a
-t1 = b
-t2 = t0 + t1
-result = t2
-t3 = result
-x = t4
+x = 2
+t0 = 2 + 3
+x = t0
 write x

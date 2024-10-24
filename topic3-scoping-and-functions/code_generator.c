@@ -98,7 +98,7 @@ void generate_MIPS(TAC* tac_instructions) {
             char* temp_reg1 = "$t9"; // Designated temp register for arg1 if not a temp
             char* temp_reg2 = "$t8"; // Designated temp register for arg2 if not a temp
 
-            if (current->arg1[0] == 't') {
+            if (current->arg1[0] == 't' || current->arg1[0] == 'a') {
             // arg1 is a temporary, so add $ in front
             snprintf(arg1_reg, sizeof(arg1_reg), "$%s", current->arg1);
             } else {
@@ -107,7 +107,7 @@ void generate_MIPS(TAC* tac_instructions) {
             strcpy(arg1_reg, temp_reg1);
             }
 
-            if (current->arg2[0] == 't') {
+            if (current->arg2[0] == 't' || current->arg2[0] == 'a') {
             // arg2 is a temporary, so add $ in front
             snprintf(arg2_reg, sizeof(arg2_reg), "$%s", current->arg2);
             } else {
@@ -125,6 +125,9 @@ void generate_MIPS(TAC* tac_instructions) {
             fprintf(output_file, "\tsw $ra, 8($sp)\n"); // save return address
             fprintf(output_file, "\tsw $fp, 4($sp)\n"); // save frame pointer
             fprintf(output_file, "\tmove $fp, $sp\n"); // set up new frame pointer
+        } else if (strcmp(current->op, "param") == 0) {
+            // int tempRegIndex = allocate_register();
+            fprintf(output_file, "\tmove $%s, $%s\n", current->arg2, current->result);
         }
         // Add more operations here (subtraction, multiplication, etc.)
 

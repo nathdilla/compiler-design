@@ -41,6 +41,7 @@ int allocate_arg_register(int arg_regs[], int num_args);
 // Function to deallocate argument registers
 void deallocate_arg_register(int arg_regs[], int index);
 // Function to check if a given string is an argument register
+char* get_arg_register(int index);
 bool is_arg_register(const char* str);
 int allocate_temp_var(int temp_vars[]);
 char* create_arg_register();

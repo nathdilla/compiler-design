@@ -1,18 +1,5 @@
 x declare
-
-func add
-a0 param a
-a0 param b
-result declare
-t0 load a
-t1 load b
-t2 = t0 + t1
-result = t2
-t3 load result
-return t3
-
-a0 param_in 1
-a0 param_in 2
-t4 call add
-x = t4
+x = 2
+t0 = x + 3
+x = t0
 write x

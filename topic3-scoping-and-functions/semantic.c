@@ -8,6 +8,8 @@ TACStack* tac_buffer_head = NULL;
 
 int temp_vars[10] = {0}; // Definition and initialization
 int arg_regs[10] = {0}; // Definition and initialization
+int arg_reg_index = 0;
+int allocated_arg_regs = -1;
 symbol_table* scope = NULL;
 
 bool buffering_tac = false;
@@ -117,6 +119,7 @@ void semantic_analysis(ASTNode* node, symbol_table* sym_table) {
             printf("Performing semantic analysis on return statement====================================\n");
             semantic_analysis(node->returnStmt.expr, sym_table);
             buffering_tac = true;
+            allocated_arg_regs = -1;
             break;
         case NodeType_ParamList:
             printf("Performing semantic analysis on parameter list\n");
@@ -211,23 +214,23 @@ TAC* tac_expr(ASTNode* expr, symbol_table* sym_table) {
             break;
         }
 
-        case NodeType_SimpleID: {
-            symbol* sym = lookup(scope, expr->simpleID.name);
-            if (sym != NULL && sym->temp_var == NULL) {
-                printf("Generating TAC for simple ID\n");
-                instruction->arg1 = create_operand(expr);
-                instruction->op = strdup("load");
-                instruction->result = create_temp_var();
-                expr->simpleID.temp = instruction->result;
+        // case NodeType_SimpleID: {
+        //     symbol* sym = lookup(scope, expr->simpleID.name);
+        //     if (sym != NULL && sym->temp_var == NULL) {
+        //         printf("Generating TAC for simple ID\n");
+        //         instruction->arg1 = create_operand(expr);
+        //         instruction->op = strdup("load");
+        //         instruction->result = create_temp_var();
+        //         expr->simpleID.temp = instruction->result;
                 
-                sym->temp_var = instruction->result;
-            } else {
-                instruction->arg1 = sym->name;
-                instruction->op = strdup("load");
-                instruction->result = sym->temp_var;
-            }
-            break;
-        }
+        //         sym->temp_var = instruction->result;
+        //     } else {
+        //         instruction->arg1 = sym->name;
+        //         instruction->op = strdup("load");
+        //         instruction->result = sym->temp_var;
+        //     }
+        //     break;
+        // }
 
         case NodeType_VarDecl: {
             printf("Generating TAC for variable declaration\n");
@@ -263,6 +266,7 @@ TAC* tac_expr(ASTNode* expr, symbol_table* sym_table) {
             instruction->op = strdup("func");
             instruction->result = strdup(expr->funcDecl.funcName);
             buffering_tac = false;
+            allocated_arg_regs = -1;
             break;
         }
 
@@ -279,6 +283,12 @@ TAC* tac_expr(ASTNode* expr, symbol_table* sym_table) {
             instruction->op = strdup("param");
             instruction->result = create_arg_register();
             instruction->arg1 = strdup(expr->param.varName);
+            instruction->arg2 = create_temp_var();
+            symbol* sym = lookup(scope, instruction->arg1);
+            if (sym->temp_var != NULL && is_temp_var(instruction->arg1)) {
+                printf("Setting temp var %s to %s\n", sym->temp_var, instruction->arg2);
+                sym->temp_var = instruction->arg2;
+            }
             break;
         }
 
@@ -331,6 +341,13 @@ char* create_operand(ASTNode* node) {
     switch (node->type) {   
         case NodeType_SimpleID: {
             symbol* sym = lookup(scope, node->simpleID.name);
+            if (sym != NULL && sym->temp_var != NULL) {
+                return sym->temp_var;
+            }
+            return node->simpleID.name;
+        }
+        case NodeType_Param: {
+            symbol* sym = lookup(scope, node->param.varName);
             if (sym != NULL && sym->temp_var != NULL) {
                 return sym->temp_var;
             }
@@ -508,19 +525,28 @@ int allocate_arg_register(int arg_regs[], int num_args) {
     return -1; // No free register found
 }
 
-// Function to deallocate argument registers
-void deallocate_arg_register(int arg_regs[], int index) {
-    if (index >= 0 && index < 10) {
-        arg_regs[index] = 0; // Mark the register as free
-    }
-}
-
 // Function to check if a given string is an argument register
 bool is_arg_register(const char* str) {
     return str != NULL && str[0] == 'a' && str[1] >= '0' && str[1] <= '9' && str[2] == '\0';
 }
 
+// Function to deallocate argument registers
+void deallocate_arg_register(int arg_regs[], int index) {
+    allocated_arg_regs -= 1;
+}
+
 // Function to create a new argument register name using allocate_arg_register
 char* create_arg_register() {
-    return strdup("a0"); // For simplicity, always return the first argument register
+    allocated_arg_regs += 1;
+    char* arg_reg = (char*)malloc(10); // Enough space for "a" + number
+    if (!arg_reg) return NULL;
+    snprintf(arg_reg, 10, "a%d", allocated_arg_regs);
+    return arg_reg;
+}
+
+char* get_arg_register(int index) {
+    char* arg_reg = (char*)malloc(10); // Enough space for "a" + number
+    if (!arg_reg) return NULL;
+    snprintf(arg_reg, 10, "a%d", index);
+    return arg_reg;
 }

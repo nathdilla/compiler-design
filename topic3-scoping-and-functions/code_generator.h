@@ -9,6 +9,11 @@
 
 #define NUM_TEMP_REGISTERS 10
 
+// typedef struct {
+//     TAC* head;
+//     function_heads* next;
+// } function_heads;
+
 // Initializes code generation, setting up any necessary structures
 void init_code_generator(const char* outputFilename);
 
