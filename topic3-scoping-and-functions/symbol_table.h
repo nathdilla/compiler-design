@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 // Symbol structure
 
@@ -13,6 +14,9 @@ typedef struct symbol {
     struct symbol* next;
     char* temp_var; // Temporary variable for code generation
     char* value; // Constant value for constant folding
+    int stack_offset; // Stack offset for local variables
+    bool is_local;
+    bool is_param;
     // Add other fields of Symbol
 } symbol;
 

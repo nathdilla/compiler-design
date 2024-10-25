@@ -5,7 +5,7 @@
 
 void optimize_TAC(TAC** head) {
     constant_propagation(head);
-    // constant_folding(head);
+    constant_folding(head);
     // copy_Propagation(head);
     dead_code_elimination(head);
 }
@@ -99,7 +99,7 @@ void constant_propagation(TAC** head) {
         if (strcmp(current->op, "load") == 0 && is_variable(current->arg1)) {
             add_live_definition(current);
         }
-        if (is_variable(current->arg1) && lookup_live_definition(current->arg1)) { // change it only if the this is the most recent definition
+        if (is_variable(current->arg1) && lookup_live_definition(current->arg1) && strcmp(current->op, "return") != 0) { // change it only if this is the most recent definition
             printf("Replacing %s with %s\n", current->arg1, lookup_live_definition(current->arg1));
             current->arg1 = lookup_live_definition(current->arg1);
         }
@@ -121,6 +121,7 @@ void constant_folding(TAC** head) {
     TAC* current = *head;
     while (current != NULL) {
         if (strcmp(current->op, "+") == 0 && is_constant(current->arg1) && is_constant(current->arg2)) {
+            printf("Folding %s + %s\n", current->arg1, current->arg2);
             int arg1 = atoi(current->arg1);
             int arg2 = atoi(current->arg2);
             int result = arg1 + arg2;

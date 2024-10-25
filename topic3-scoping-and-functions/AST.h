@@ -89,6 +89,7 @@ typedef struct ASTNode {
         struct {
             char* funcName;
             char* funcType;
+            symbol_table* scope;
         } funcSignature;
 
         struct {

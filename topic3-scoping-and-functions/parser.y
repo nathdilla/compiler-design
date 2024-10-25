@@ -146,7 +146,8 @@ FuncDecl
 	  	:    	FuncSignature 
 				{
 					printf("PARSER: Entering function scope\n");
-					symbol_table* local_table = create_symbol_table(TABLE_SIZE, "local"); 
+					symbol_table* local_table = create_symbol_table(TABLE_SIZE, $1->funcSignature.funcName); 
+					$1->funcSignature.scope = local_table;
 					local_table->parent = current_scope;
 					previous_scope = current_scope;
 					current_scope = local_table; 

@@ -488,9 +488,9 @@ static const yytype_int8 yyrhs[] =
 static const yytype_uint16 yyrline[] =
 {
        0,    76,    76,    84,    94,    95,   106,   125,   126,   137,
-     147,   146,   172,   173,   179,   189,   201,   202,   209,   219,
-     225,   237,   240,   236,   258,   266,   267,   276,   290,   296,
-     306,   314,   320,   328,   337,   344,   351,   358
+     147,   146,   173,   174,   180,   190,   202,   203,   210,   220,
+     226,   238,   241,   237,   259,   267,   268,   277,   291,   297,
+     307,   315,   321,   329,   338,   345,   352,   359
 };
 #endif
 
@@ -1524,7 +1524,8 @@ yyreduce:
 #line 147 "parser.y"
     {
 					printf("PARSER: Entering function scope\n");
-					symbol_table* local_table = create_symbol_table(TABLE_SIZE, "local"); 
+					symbol_table* local_table = create_symbol_table(TABLE_SIZE, (yyvsp[(1) - (1)].ast)->funcSignature.funcName); 
+					(yyvsp[(1) - (1)].ast)->funcSignature.scope = local_table;
 					local_table->parent = current_scope;
 					previous_scope = current_scope;
 					current_scope = local_table; 
@@ -1532,7 +1533,7 @@ yyreduce:
     break;
 
   case 11:
-#line 155 "parser.y"
+#line 156 "parser.y"
     { 
 					// Scopes will be made compile-time. runtime scopes will be dealt with in the future.
 					printf("PARSER: Recognized function declaration\n");
@@ -1550,12 +1551,12 @@ yyreduce:
     break;
 
   case 12:
-#line 172 "parser.y"
+#line 173 "parser.y"
     {/*empty, i.e. it is possible not to have any parameters*/;}
     break;
 
   case 13:
-#line 173 "parser.y"
+#line 174 "parser.y"
     { printf("PARSER: Recognized single parameter\n");
 								(yyval.ast) = malloc(sizeof(ASTNode));
 								(yyval.ast)->type = NodeType_ParamList;
@@ -1565,7 +1566,7 @@ yyreduce:
     break;
 
   case 14:
-#line 179 "parser.y"
+#line 180 "parser.y"
     { 
 									printf("PARSER: Recognized parameter list with comma\n");
 									(yyval.ast) = malloc(sizeof(ASTNode));
@@ -1576,7 +1577,7 @@ yyreduce:
     break;
 
   case 15:
-#line 189 "parser.y"
+#line 190 "parser.y"
     {
 									printf("PARSER: Recognized parameter: %s\n", (yyvsp[(2) - (2)].string));
 									(yyval.ast) = malloc(sizeof(ASTNode));
@@ -1590,12 +1591,12 @@ yyreduce:
     break;
 
   case 16:
-#line 201 "parser.y"
+#line 202 "parser.y"
     {/*empty, i.e. it is possible not to have any input parameters*/;}
     break;
 
   case 17:
-#line 202 "parser.y"
+#line 203 "parser.y"
     { 
 								printf("PARSER: Recognized single input parameter\n");
 								(yyval.ast) = malloc(sizeof(ASTNode));
@@ -1606,7 +1607,7 @@ yyreduce:
     break;
 
   case 18:
-#line 209 "parser.y"
+#line 210 "parser.y"
     { 
 											printf("PARSER: Recognized input parameter list with comma\n");
 											(yyval.ast) = malloc(sizeof(ASTNode));
@@ -1617,7 +1618,7 @@ yyreduce:
     break;
 
   case 19:
-#line 219 "parser.y"
+#line 220 "parser.y"
     {
 							printf("PARSER: Recognized input parameter ID: %s\n", (yyvsp[(1) - (1)].string));
 							(yyval.ast) = malloc(sizeof(ASTNode));
@@ -1627,7 +1628,7 @@ yyreduce:
     break;
 
   case 20:
-#line 225 "parser.y"
+#line 226 "parser.y"
     {
 							printf("PARSER: Recognized input parameter number: %d\n", (yyvsp[(1) - (1)].number));
 							(yyval.ast) = malloc(sizeof(ASTNode));
@@ -1639,21 +1640,21 @@ yyreduce:
     break;
 
   case 21:
-#line 237 "parser.y"
+#line 238 "parser.y"
     { 
 				
 			;}
     break;
 
   case 22:
-#line 240 "parser.y"
+#line 241 "parser.y"
     {
 				
 			;}
     break;
 
   case 23:
-#line 244 "parser.y"
+#line 245 "parser.y"
     { 
 				printf("PARSER: Recognized block\n"); 
 				(yyval.ast) = malloc(sizeof(ASTNode));
@@ -1667,7 +1668,7 @@ yyreduce:
     break;
 
   case 24:
-#line 258 "parser.y"
+#line 259 "parser.y"
     { 
 										printf("PARSER: Recognized return statement\n");
 										(yyval.ast) = malloc(sizeof(ASTNode));
@@ -1677,12 +1678,12 @@ yyreduce:
     break;
 
   case 25:
-#line 266 "parser.y"
+#line 267 "parser.y"
     {/*empty, i.e. it is possible not to have any statement*/;}
     break;
 
   case 26:
-#line 267 "parser.y"
+#line 268 "parser.y"
     { printf("PARSER: Recognized statement list\n");
 							(yyval.ast) = malloc(sizeof(ASTNode));
 							(yyval.ast)->type = NodeType_StmtList;
@@ -1692,7 +1693,7 @@ yyreduce:
     break;
 
   case 27:
-#line 276 "parser.y"
+#line 277 "parser.y"
     {
 									printf("Parsed Assignment Statement: %s = ...\n", (yyvsp[(1) - (4)].string));
 									(yyval.ast) = malloc(sizeof(ASTNode));
@@ -1710,7 +1711,7 @@ yyreduce:
     break;
 
   case 28:
-#line 290 "parser.y"
+#line 291 "parser.y"
     {
 									printf("Parsed Write Statement: %s\n", (yyvsp[(2) - (3)].string));
 									(yyval.ast) = malloc(sizeof(ASTNode));
@@ -1720,7 +1721,7 @@ yyreduce:
     break;
 
   case 29:
-#line 296 "parser.y"
+#line 297 "parser.y"
     {
 									printf("Parsed Function Call: %s()\n", (yyvsp[(1) - (5)].string));
 									(yyval.ast) = malloc(sizeof(ASTNode));
@@ -1731,7 +1732,7 @@ yyreduce:
     break;
 
   case 30:
-#line 306 "parser.y"
+#line 307 "parser.y"
     { 
 						printf("PARSER: Recognized binary operation\n");
 						(yyval.ast) = malloc(sizeof(ASTNode));
@@ -1743,7 +1744,7 @@ yyreduce:
     break;
 
   case 31:
-#line 314 "parser.y"
+#line 315 "parser.y"
     { 
 						printf("ASSIGNMENT statement \n"); 
 						(yyval.ast) = malloc(sizeof(ASTNode));
@@ -1753,7 +1754,7 @@ yyreduce:
     break;
 
   case 32:
-#line 320 "parser.y"
+#line 321 "parser.y"
     { 
 						printf("PARSER: Recognized number\n");
 						(yyval.ast) = malloc(sizeof(ASTNode));
@@ -1765,7 +1766,7 @@ yyreduce:
     break;
 
   case 33:
-#line 328 "parser.y"
+#line 329 "parser.y"
     {
 						printf("PARSER: Recognized function call\n");
 						(yyval.ast) = malloc(sizeof(ASTNode));
@@ -1776,7 +1777,7 @@ yyreduce:
     break;
 
   case 34:
-#line 337 "parser.y"
+#line 338 "parser.y"
     {
 			printf("PARSER: Recognized binary operation (addition)\n");	
 			(yyval.ast) = malloc(sizeof(ASTNode));
@@ -1786,7 +1787,7 @@ yyreduce:
     break;
 
   case 35:
-#line 344 "parser.y"
+#line 345 "parser.y"
     {
 				printf("PARSER: Recognized binary operation (subtraction)\n");
 				(yyval.ast) = malloc(sizeof(ASTNode));
@@ -1796,7 +1797,7 @@ yyreduce:
     break;
 
   case 36:
-#line 351 "parser.y"
+#line 352 "parser.y"
     {
 				printf("PARSER: Recognized binary operation (multiplication)\n");
 				(yyval.ast) = malloc(sizeof(ASTNode));
@@ -1806,7 +1807,7 @@ yyreduce:
     break;
 
   case 37:
-#line 358 "parser.y"
+#line 359 "parser.y"
     {
 				printf("PARSER: Recognized binary operation (division)\n");
 				(yyval.ast) = malloc(sizeof(ASTNode));
@@ -1819,7 +1820,7 @@ yyreduce:
 
 
 /* Line 1267 of yacc.c.  */
-#line 1823 "parser.tab.c"
+#line 1824 "parser.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2033,7 +2034,7 @@ yyreturn:
 }
 
 
-#line 375 "parser.y"
+#line 376 "parser.y"
 
 
 int main() {

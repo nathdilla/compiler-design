@@ -1,15 +1,57 @@
 // codeGenerator.c
 
 #include "code_generator.h"
+#include "symbol_table.h"
 #include <stdio.h>
 #include <stdlib.h>
 
 static FILE* output_file;
 
+symbol_table* current_scope_code_gen = NULL;
+
 typedef struct {
     char* name; // Name of the register, e.g., "$t0"
     bool inUse; // Whether the register is currently in use
 } MIPSRegister;
+
+// typedef struct {
+//     char* instruction;
+//     MIPSinstruction* next;
+// } MIPSinstruction;
+
+// MIPSinstruction* global_head = NULL;
+// MIPSinstruction* local_head = NULL;
+bool in_function = false;
+
+// void add_MIPS_instruction(MIPSinstruction** head, char* instruction) {
+//     MIPSinstruction* new_instruction = (MIPSinstruction*)malloc(sizeof(MIPSinstruction));
+//     if (!new_instruction) {
+//         perror("Failed to allocate memory for MIPS instruction");
+//         exit(EXIT_FAILURE);
+//     }
+//     new_instruction->instruction = instruction;
+//     new_instruction->next = NULL;
+
+//     if (!*head) {
+//         *head = new_instruction;
+//     } else {
+//         MIPSinstruction* current = *head;
+//         while (current->next) {
+//             current = current->next;
+//         }
+//         current->next = new_instruction;
+//     }
+// }
+
+// void print_MIPS_to_file(FILE* file, MIPSinstruction* head) {
+//     MIPSinstruction* current = head;
+//     while (current != NULL) {
+//         fprintf(file, "%s", current->instruction);
+//         current = current->next;
+//     }
+// }
+
+
 
 // Array of temporary registers, used for register allocation
 // and tracking which registers are currently in use
@@ -28,6 +70,144 @@ void init_code_generator(const char* output_filename) {
     }
     // Write the data section header
     fprintf(output_file, ".data\n");
+}
+
+// Function to handle storing the value
+void store_value(FILE* output_file, const char* register_name, const char* result, symbol* sym) {
+    if (sym != NULL && sym->is_local) {
+        printf("stack offset: %d\n", sym->stack_offset);
+        fprintf(output_file, "\tsw %s, %d($fp)\n", register_name, sym->stack_offset);
+    } else {
+        fprintf(output_file, "\tsw %s, var_%s\n", register_name, result);
+    }
+}
+
+void evaluate_operations(TAC* current, int stack_offset) {
+// if (strcmp(current->op, "const") == 0) {
+    //     fprintf(output_file, "\tli $%s, %s\n", current->result, current->arg1);
+    // }
+    if (strcmp(current->op, "assign") == 0) {
+        int tempRegIndex = allocate_register();
+        if (tempRegIndex == -1) {
+        // Handle register allocation failure
+        return;
+        }
+        // Lookup the symbol for the current result in the current scope
+        // printf("%s",current->op);
+        symbol* sym = lookup(current_scope_code_gen, current->result);
+
+        if (current->arg1[0] == 't') {
+            // If arg1 is already a temp register, directly store it into the variable
+            char tempRegName[10];
+            snprintf(tempRegName, sizeof(tempRegName), "$%s", current->arg1);
+            store_value(output_file, tempRegName, current->result, sym);
+        } else {
+            // Load the immediate value into a temp register
+            const char* tempRegName = temp_registers[tempRegIndex].name;
+            fprintf(output_file, "\tli %s, %s\n", tempRegName, current->arg1);
+            
+            // Store the temp register value
+            store_value(output_file, tempRegName, current->result, sym);
+        }
+        deallocate_register(tempRegIndex);
+    } else if (strcmp(current->op, "li") == 0) {
+        fprintf(output_file, "\tli $%s, %s\n", current->result, current->arg1);
+    }
+    else if (strcmp(current->op, "write") == 0) {
+        fprintf(output_file, "\tlw $t9, var_%s\n", current->result);
+        fprintf(output_file, "\tmove $a0, $t9\n");
+        fprintf(output_file, "\tli $v0, 1\n\tsyscall\n");
+    }
+    else if (strcmp(current->op, "+") == 0) {
+        // Modify the command below, to properly allocate registers for the operands
+        char arg1_reg[10];
+        char arg2_reg[10];
+
+        // Use t9 and t8 for temporary operations
+        char* temp_reg1 = "$t9"; // Designated temp register for arg1 if not a temp
+        char* temp_reg2 = "$t8"; // Designated temp register for arg2 if not a temp
+
+        if (current->arg1[0] == 't') {
+        // arg1 is a temporary, so add $ in front
+        snprintf(arg1_reg, sizeof(arg1_reg), "$%s", current->arg1);
+        } else {
+        // arg1 is not a temporary, so load it into the designated temp register (t9)
+        fprintf(output_file, "\tlw %s, %s\n", temp_reg1, current->arg1);
+        strcpy(arg1_reg, temp_reg1);
+        }
+
+        if (current->arg2[0] == 't') {
+        // arg2 is a temporary, so add $ in front
+        snprintf(arg2_reg, sizeof(arg2_reg), "$%s", current->arg2);
+        } else {
+        // arg2 is not a temporary, so load it into the designated temp register (t8)
+        fprintf(output_file, "\tlw %s, %s\n", temp_reg2, current->arg2);
+        strcpy(arg2_reg, temp_reg2);
+        }
+
+        // Perform the addition with the appropriate registers
+        fprintf(output_file, "\tadd $%s, %s, %s\n", current->result, arg1_reg, arg2_reg);
+    } else if (strcmp(current->op, "func") == 0) {
+        in_function = true;
+        current_scope_code_gen = current->scope;
+        printf("scope variables:");
+        print_table(current_scope_code_gen);
+        fprintf(output_file, "\n%s:\n", current->result);
+        // Function prologue
+        fprintf(output_file, "\taddi $sp, $sp, -12\n");
+        fprintf(output_file, "\tsw $ra, 8($sp)\n"); // save return address
+        fprintf(output_file, "\tsw $fp, 4($sp)\n"); // save frame pointer
+        fprintf(output_file, "\tmove $fp, $sp\n"); // set up new frame pointer
+        fprintf(output_file, "\n"); // save argument
+        // allocate memory for variables in current symbol table
+        stack_offset = -12;
+        for (int i = 0; i < current_scope_code_gen->size; i++) {
+            symbol* sym = current_scope_code_gen->table[i];
+            while (sym != 0) {
+                fprintf(output_file, "\taddi $sp, $sp, -4\n"); // Allocate space on stack
+                fprintf(output_file, "\tsw $zero, 0($sp)\n"); // Initialize allocated space to 0
+                sym->stack_offset = stack_offset; // Keep track of stack position
+                stack_offset -= 4; // Update stack offset for next variable
+                fprintf(output_file, "\n");
+                printf("stack offset: %d of variable %s\n", sym->stack_offset, sym->name);
+                // Print other fields of Symbol
+                sym = sym->next;
+            }
+        }
+
+    } else if (strcmp(current->op, "param") == 0) {
+        // int tempRegIndex = allocate_register();
+        fprintf(output_file, "\tmove $%s, $%s\n", current->arg2, current->result);
+    } else if (strcmp(current->op, "return") == 0) {
+        // look up the symbol for the return value in the current scope
+        printf("processing return\n");
+        fprintf(output_file, "\n");   
+        symbol* sym = lookup(current_scope_code_gen, current->arg1);
+        if (sym && sym->is_param) {
+            fprintf(output_file, "\tmove $v0, $%s\n", sym->temp_var);
+        } else if (sym && sym->is_local) {
+            fprintf(output_file, "\tlw $v0, %d($fp)\n", sym->stack_offset);
+        } else if (current->arg1[0] == 't') {
+            fprintf(output_file, "\tmove $v0, $%s\n", current->arg1);
+        } else {
+            fprintf(output_file, "\tlw $v0, var_%s\n", current->arg1);
+        }
+        
+        fprintf(output_file, "\n");
+        fprintf(output_file, "\tlw $ra, 8($fp)\n"); // restore return address
+        fprintf(output_file, "\tlw $fp, 4($fp)\n"); // restore frame pointer
+        fprintf(output_file, "\taddi $sp, $sp, %d\n", stack_offset * -1); // deallocate stack space
+        fprintf(output_file, "\tjr $ra\n"); // return
+        current_scope_code_gen = current_scope_code_gen->parent;
+        in_function = false;
+    } else if (strcmp(current->op, "param_in") == 0) {
+        fprintf(output_file, "\tli $%s, %s\n", current->result, current->arg1);
+    } else if (strcmp(current->op, "call") == 0) {
+        fprintf(output_file, "\tjal %s\n", current->arg1);
+        
+        fprintf(output_file, "\n");
+        fprintf(output_file, "\tmove $%s, $v0\n", current->result);
+    }
 }
 
 void generate_MIPS(TAC* tac_instructions) {
@@ -49,12 +229,12 @@ void generate_MIPS(TAC* tac_instructions) {
     TAC* current = tac_instructions;
     // allocate memory for variables
     while (current != NULL) {
-        if (strcmp(current->op, "declare") == 0) {
+        if (strcmp(current->op, "declare") == 0 && current->scope->parent == NULL) {
             fprintf(output_file, "var_%s: .word %s\n", current->result, "0");
         }
         current = current->next;
     }
-    fprintf(output_file, ".text\n.globl main\nmain:\n");
+    fprintf(output_file, ".text\n.globl main\n");
 
     int regIndex = allocate_register(); // Allocate a register, e.g., $t0
     if (regIndex == -1) {
@@ -62,75 +242,9 @@ void generate_MIPS(TAC* tac_instructions) {
         return;
     }
     current = tac_instructions;
-    while (current != NULL) {
-        // if (strcmp(current->op, "const") == 0) {
-        //     fprintf(output_file, "\tli $%s, %s\n", current->result, current->arg1);
-        // }
-        if (strcmp(current->op, "assign") == 0) {
-            int tempRegIndex = allocate_register();
-            if (tempRegIndex == -1) {
-            // Handle register allocation failure
-            return;
-            }
-            if (current->arg1[0] == 't') {
-                // If arg1 is already a temp register, directly store it into the variable
-                fprintf(output_file, "\tsw $%s, var_%s\n", current->arg1, current->result);
-            } else {
-                // Otherwise, load the immediate value into a temp register and store it
-                fprintf(output_file, "\tli %s, %s\n", temp_registers[tempRegIndex].name, current->arg1);
-                fprintf(output_file, "\tsw %s, var_%s\n", temp_registers[tempRegIndex].name, current->result);
-            }
-            deallocate_register(tempRegIndex);
-        } else if (strcmp(current->op, "li") == 0) {
-            fprintf(output_file, "\tli $%s, %s\n", current->result, current->arg1);
-        }
-        else if (strcmp(current->op, "write") == 0) {
-            fprintf(output_file, "\tlw $t9, var_%s\n", current->result);
-            fprintf(output_file, "\tmove $a0, $t9\n");
-            fprintf(output_file, "\tli $v0, 1\n\tsyscall\n");
-        }
-        else if (strcmp(current->op, "+") == 0) {
-            // Modify the command below, to properly allocate registers for the operands
-            char arg1_reg[10];
-            char arg2_reg[10];
-
-            // Use t9 and t8 for temporary operations
-            char* temp_reg1 = "$t9"; // Designated temp register for arg1 if not a temp
-            char* temp_reg2 = "$t8"; // Designated temp register for arg2 if not a temp
-
-            if (current->arg1[0] == 't' || current->arg1[0] == 'a') {
-            // arg1 is a temporary, so add $ in front
-            snprintf(arg1_reg, sizeof(arg1_reg), "$%s", current->arg1);
-            } else {
-            // arg1 is not a temporary, so load it into the designated temp register (t9)
-            fprintf(output_file, "\tli %s, %s\n", temp_reg1, current->arg1);
-            strcpy(arg1_reg, temp_reg1);
-            }
-
-            if (current->arg2[0] == 't' || current->arg2[0] == 'a') {
-            // arg2 is a temporary, so add $ in front
-            snprintf(arg2_reg, sizeof(arg2_reg), "$%s", current->arg2);
-            } else {
-            // arg2 is not a temporary, so load it into the designated temp register (t8)
-            fprintf(output_file, "\tli %s, %s\n", temp_reg2, current->arg2);
-            strcpy(arg2_reg, temp_reg2);
-            }
-
-            // Perform the addition with the appropriate registers
-            fprintf(output_file, "\tadd %s, %s, %s\n", temp_registers[regIndex].name, arg1_reg, arg2_reg);
-        } else if (strcmp(current->op, "func") == 0) {
-            fprintf(output_file, "\n%s:\n", current->result);
-            // Function prologue
-            fprintf(output_file, "\taddi $sp, $sp, -12\n");
-            fprintf(output_file, "\tsw $ra, 8($sp)\n"); // save return address
-            fprintf(output_file, "\tsw $fp, 4($sp)\n"); // save frame pointer
-            fprintf(output_file, "\tmove $fp, $sp\n"); // set up new frame pointer
-        } else if (strcmp(current->op, "param") == 0) {
-            // int tempRegIndex = allocate_register();
-            fprintf(output_file, "\tmove $%s, $%s\n", current->arg2, current->result);
-        }
-        // Add more operations here (subtraction, multiplication, etc.)
-
+    int stack_offset = -12;
+    while (current != NULL) { // local instructions
+        evaluate_operations(current, stack_offset);
         current = current->next;
     }
 

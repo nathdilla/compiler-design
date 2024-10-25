@@ -265,6 +265,7 @@ TAC* tac_expr(ASTNode* expr, symbol_table* sym_table) {
             printf("Generating TAC for function declaration\n");
             instruction->op = strdup("func");
             instruction->result = strdup(expr->funcDecl.funcName);
+            instruction->scope = expr->funcSignature.scope;
             buffering_tac = false;
             allocated_arg_regs = -1;
             break;
@@ -285,10 +286,9 @@ TAC* tac_expr(ASTNode* expr, symbol_table* sym_table) {
             instruction->arg1 = strdup(expr->param.varName);
             instruction->arg2 = create_temp_var();
             symbol* sym = lookup(scope, instruction->arg1);
-            if (sym->temp_var != NULL && is_temp_var(instruction->arg1)) {
-                printf("Setting temp var %s to %s\n", sym->temp_var, instruction->arg2);
-                sym->temp_var = instruction->arg2;
-            }
+            sym->temp_var = instruction->arg2;
+            sym->is_param = true;
+            printf("Setting param %s to %s\n", instruction->arg1, instruction->arg2);
             break;
         }
 
@@ -475,11 +475,13 @@ void print_TAC(TAC* tac) {
             printf("return %s\n", tac->arg1);
             printf("\n");
         } else if (strcmp(tac->op, "param") == 0) {
-            printf("%s param %s\n", tac->result, tac->arg1);
+            printf("%s param %s\n", tac->result, tac->arg2);
         } else if (strcmp(tac->op, "param_in") == 0) {
             printf("%s param_in %s\n", tac->result, tac->arg1);
         } else if (strcmp(tac->op, "call") == 0) {
             printf("%s = call %s\n", tac->result, tac->arg1);
+        } else if (strcmp(tac->op, "li") == 0) {
+            printf("%s li %s\n", tac->result, tac->arg1);
         }
 }
 

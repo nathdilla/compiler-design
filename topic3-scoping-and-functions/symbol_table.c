@@ -54,6 +54,13 @@ void add_symbol(symbol_table* table, char* name, char* type) {
     unsigned int hashval = hash(table, name);
     new_symbol->next = table->table[hashval];  
     table->table[hashval] = new_symbol;
+
+    // Set is_local to true if the table is not global
+    if (strcmp(table->scope_name, "global") != 0) {
+        new_symbol->is_local = true;
+    } else {
+        new_symbol->is_local = false;
+    }
 }
 
 /*

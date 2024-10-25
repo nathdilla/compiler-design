@@ -1,5 +1,12 @@
 x declare
+result declare
+t2 = t0 + t1
+result = t2
+arg declare
+arg = 0
 x = 2
-t0 = 2 + 3
-x = t0
+t3 li 4
+x = t3
+x = t4
 write x
+x = 1

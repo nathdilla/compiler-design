@@ -1,5 +1,25 @@
 x declare
+
+func addTwoNumbers
+a0 param a
+a1 param b
+result declare
+t2 = t0 + t1
+result = t2
+return result
+
+
+func main
+arg declare
+arg = 0
 x = 2
-t0 = x + 3
-x = t0
+t3 = x + 2
+x = t3
+a0 param_in 1
+a1 param_in 2
+t4 call addTwoNumbers
+x = t4
 write x
+return arg
+
+x = 1
