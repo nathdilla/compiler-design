@@ -70,6 +70,9 @@ symbol_table* current_scope = NULL;
 %type <ast> Program VarDecl VarDeclList FuncDecl FuncDeclList ParamList Param Block Stmt StmtList Expr BinOp WriteStmt ReturnStmt FuncSignature InputParamList InputParam
 %start Program
 
+%left PLUS MINUS
+%left STAR BSLASH
+
 %%
 
 Program
@@ -288,11 +291,8 @@ Stmt
 										print_table(current_scope);
 									}
  								}
-   	| 	WRITE ID SEMICOLON 		{
-									printf("Parsed Write Statement: %s\n", $2);
-									$$ = malloc(sizeof(ASTNode));
-									$$->type = NodeType_WriteStmt;
-									$$->writeStmt.varName = strdup($2);
+   	| 	WriteStmt 				{
+									$$ = $1;
 								}
 	|   ID LPAREN InputParamList RPAREN SEMICOLON {
 									printf("Parsed Function Call: %s()\n", $1);

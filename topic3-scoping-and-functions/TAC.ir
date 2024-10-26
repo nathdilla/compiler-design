@@ -1,6 +1,6 @@
-x declare
+arg declare
 
-func addTwoNumbers
+func addSomeNums
 a0 param a
 a1 param b
 result declare
@@ -10,16 +10,31 @@ return result
 
 
 func main
-arg declare
-arg = 0
+x declare
+y declare
+z declare
 x = 2
-t3 = x + 2
-x = t3
-a0 param_in 1
-a1 param_in 2
-t4 call addTwoNumbers
-x = t4
-write x
-return arg
+y = 3
+t3 = x + y
+z = t3
+write z
+x = 4
+y = 8
+t4 = x * y
+z = t4
+write z
+x = 20
+y = 10
+t5 = x / y
+z = t5
+write z
+x = 5
+y = 10
+a0 param_in 5
+a1 param_in 10
+t6 call addSomeNums
+z = t6
+write z
+return 0
 
-x = 1
+arg = 1

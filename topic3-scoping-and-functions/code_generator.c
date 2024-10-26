@@ -4,6 +4,7 @@
 #include "symbol_table.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
 
 static FILE* output_file;
 
@@ -114,8 +115,18 @@ void evaluate_operations(TAC* current, int stack_offset) {
         fprintf(output_file, "\tli $%s, %s\n", current->result, current->arg1);
     }
     else if (strcmp(current->op, "write") == 0) {
-        fprintf(output_file, "\tlw $t9, var_%s\n", current->result);
-        fprintf(output_file, "\tmove $a0, $t9\n");
+        symbol* sym = lookup(current_scope_code_gen, current->result);
+        printf("writing %s\n", current->result);
+        if (sym && sym->is_param) {
+            fprintf(output_file, "\tmove $a0, $%s\n", sym->temp_var);
+        } else if (sym && sym->is_local) {
+            fprintf(output_file, "\tlw $a0, %d($fp)\n", sym->stack_offset);
+        } else if (current->result[0] == 't') {
+            fprintf(output_file, "\tmove $a0, $%s\n", current->result);
+        } else {
+            fprintf(output_file, "\tlw $t9, var_%s\n", current->result);
+            fprintf(output_file, "\tmove $a0, $t9\n");
+        }
         fprintf(output_file, "\tli $v0, 1\n\tsyscall\n");
     }
     else if (strcmp(current->op, "+") == 0) {
@@ -189,6 +200,8 @@ void evaluate_operations(TAC* current, int stack_offset) {
             fprintf(output_file, "\tlw $v0, %d($fp)\n", sym->stack_offset);
         } else if (current->arg1[0] == 't') {
             fprintf(output_file, "\tmove $v0, $%s\n", current->arg1);
+        } else if (isdigit(current->arg1[0]) || (current->arg1[0] == '-' && isdigit(current->arg1[1]))) {
+            fprintf(output_file, "\tli $v0, %s\n", current->arg1); // Load constant directly
         } else {
             fprintf(output_file, "\tlw $v0, var_%s\n", current->arg1);
         }
