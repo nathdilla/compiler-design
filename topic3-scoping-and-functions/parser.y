@@ -62,6 +62,7 @@ symbol_table* current_scope = NULL;
 %token <operator> STAR 
 %token <operator> BSLASH
 %token <number> NUMBER
+%token <number> BOOL_LITERAL
 %token <string> WRITE
 %token <string> RETURN
 %token <string> FUNC
@@ -384,7 +385,14 @@ Expr
 						snprintf(buffer, sizeof(buffer), "%d", $3);
 						$$->arrayAccess.index = strdup(buffer);
 						}
-;
+   | BOOL_LITERAL    { 
+                      printf("PARSER: Recognized boolean literal\n");
+                      $$ = malloc(sizeof(ASTNode));
+                      $$->type = NodeType_SimpleExpr;
+                      char buffer[20];
+                      snprintf(buffer, sizeof(buffer), "%d", $1);
+                      $$->simpleExpr.number = strdup(buffer);
+                    }
 
 BinOp: PLUS {
 			printf("PARSER: Recognized binary operation (addition)\n");	
