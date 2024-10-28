@@ -1,40 +1,17 @@
 arg declare
 
-func addSomeNums
-a0 param a
-a1 param b
-result declare
-t2 = t0 + t1
-result = t2
-return result
-
-
 func main
 x declare
-y declare
-z declare
-x = 2
-y = 3
-t3 = x + y
-z = t3
-write z
-x = 4
-y = 8
-t4 = x * y
-z = t4
-write z
-x = 20
-y = 10
-t5 = x / y
-z = t5
-write z
-x = 5
-y = 10
-a0 param_in 5
-a1 param_in 10
-t6 call addSomeNums
-z = t6
-write z
+arr array, size 5
+x = 1
+arr[0] = 4
+arr[1] = 4
+arr[2] = 7
+arr[3] = 4
+arr[4] = 1
+t0 = arr[2]
+x = t0
+write x
 return 0
 
 arg = 1

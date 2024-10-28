@@ -112,6 +112,7 @@ void semantic_analysis(ASTNode* node, symbol_table* sym_table) {
         case NodeType_Block:
             printf("Performing semantic analysis on block\n");
             semantic_analysis(node->block.varDeclList, sym_table);
+            semantic_analysis(node->block.arrayDeclList, sym_table);
             semantic_analysis(node->block.stmtList, sym_table);
             semantic_analysis(node->block.returnStmt, sym_table);
             break;
@@ -146,6 +147,23 @@ void semantic_analysis(ASTNode* node, symbol_table* sym_table) {
             break;
         case NodeType_InputParam:
             printf("Performing semantic analysis on input parameter\n");
+            // no checks necessary... for now
+            break;
+        case NodeType_ArrayDeclList:
+            printf("Performing semantic analysis on array declaration list\n");
+            semantic_analysis(node->arrayDeclList.arrayDecl, sym_table);
+            semantic_analysis(node->arrayDeclList.arrayDeclList, sym_table);
+            break;
+        case NodeType_ArrayDecl:
+            printf("Performing semantic analysis on array declaration\n");
+            // no checks necessary... for now
+            break;
+        case NodeType_ArrayAssignStmt:
+            printf("Performing semantic analysis on array assignment statement\n");
+            semantic_analysis(node->arrayAssignStmt.expr, sym_table);
+            break;
+        case NodeType_ArrayAccess:
+            printf("Performing semantic analysis on array access\n");
             // no checks necessary... for now
             break;
         // ... handle other node types ...
@@ -345,6 +363,36 @@ TAC *tac_expr(ASTNode *expr, symbol_table *sym_table)
             break;
         }
 
+        case NodeType_ArrayDecl: {
+            printf("Generating TAC for array declaration\n");
+            instruction->op = strdup("array");
+            instruction->result = strdup(expr->arrayDecl.varName);
+            instruction->arg1 = strdup(expr->arrayDecl.size);
+            break;
+        }
+
+        case NodeType_ArrayAssignStmt: {
+            printf("Generating TAC for array assignment\n");
+            instruction->arg1 = create_operand(expr->arrayAssignStmt.expr);
+            instruction->arg2 = expr->arrayAssignStmt.index;
+            instruction->op = strdup("assign_array");
+            instruction->result = expr->arrayAssignStmt.varName;
+            break;
+        }
+
+        case NodeType_ArrayAccess: {
+            printf("Generating TAC for array access\n");
+            instruction->arg1 = strdup(expr->arrayAccess.varName);
+            instruction->arg2 = strdup(expr->arrayAccess.index);
+            instruction->op = strdup("array_access");
+            instruction->result = create_temp_var();
+            expr->arrayAccess.temp = instruction->result;
+            symbol* sym = lookup(scope, instruction->arg1);
+            sym->temp_var = instruction->result;
+            // printf("Setting param %s to %s\n", instruction->arg1, instruction->arg2);
+            break;
+        }
+
         default:
             free(instruction);
             return NULL;
@@ -389,6 +437,13 @@ char* create_operand(ASTNode* node) {
                 return sym->temp_var;
             }
             return node->simpleID.name;
+        }
+        case NodeType_ArrayAccess: {
+            symbol* sym = lookup(scope, node->arrayAccess.varName);
+            if (sym != NULL && sym->temp_var != NULL) {
+                return sym->temp_var;
+            }
+            return node->arrayAccess.varName;
         }
         case NodeType_SimpleExpr:
             // return  node->simpleExpr.number in string format
@@ -456,6 +511,12 @@ void print_TAC_to_file(const char *filename, TAC *tac)
             fprintf(file, "%s param_in %s\n", current->result, current->arg1);
         } else if (strcmp(current->op, "call") == 0) {
             fprintf(file, "%s call %s\n", current->result, current->arg1);
+        } else if (strcmp(current->op, "array") == 0) {
+            fprintf(file, "%s array, size %s\n", current->result, current->arg1);
+        } else if (strcmp(current->op, "assign_array") == 0) {
+            fprintf(file, "%s[%s] = %s\n", current->result, current->arg2, current->arg1);
+        } else if (strcmp(current->op, "array_access") == 0) {
+            fprintf(file, "%s = %s[%s]\n", current->result, current->arg1, current->arg2);
         }
         current = current->next;
     }
@@ -545,6 +606,12 @@ void print_TAC(TAC* tac) {
             printf("%s = call %s\n", tac->result, tac->arg1);
         } else if (strcmp(tac->op, "li") == 0) {
             printf("%s li %s\n", tac->result, tac->arg1);
+        } else if (strcmp(tac->op, "array") == 0) {
+            printf("%s array, size %s\n", tac->result, tac->arg1);
+        } else if (strcmp(tac->op, "assign_array") == 0) {
+            printf("%s[%s] = %s\n", tac->result, tac->arg2, tac->arg1);
+        } else if (strcmp(tac->op, "array_access") == 0) {
+            printf("%s = %s[%s]\n", tac->result, tac->arg1, tac->arg2);
         }
 }
 

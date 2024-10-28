@@ -44,18 +44,21 @@
      SEMICOLON = 260,
      LBRACK = 261,
      RBRACK = 262,
-     LPAREN = 263,
-     RPAREN = 264,
-     COMMA = 265,
-     EQ = 266,
-     PLUS = 267,
-     MINUS = 268,
-     STAR = 269,
-     BSLASH = 270,
-     NUMBER = 271,
-     WRITE = 272,
-     RETURN = 273,
-     FUNC = 274
+     LCURBRACK = 263,
+     RCURBRACK = 264,
+     LPAREN = 265,
+     RPAREN = 266,
+     COMMA = 267,
+     EQ = 268,
+     PLUS = 269,
+     MINUS = 270,
+     STAR = 271,
+     BSLASH = 272,
+     NUMBER = 273,
+     WRITE = 274,
+     RETURN = 275,
+     FUNC = 276,
+     ARRAY = 277
    };
 #endif
 /* Tokens.  */
@@ -64,18 +67,21 @@
 #define SEMICOLON 260
 #define LBRACK 261
 #define RBRACK 262
-#define LPAREN 263
-#define RPAREN 264
-#define COMMA 265
-#define EQ 266
-#define PLUS 267
-#define MINUS 268
-#define STAR 269
-#define BSLASH 270
-#define NUMBER 271
-#define WRITE 272
-#define RETURN 273
-#define FUNC 274
+#define LCURBRACK 263
+#define RCURBRACK 264
+#define LPAREN 265
+#define RPAREN 266
+#define COMMA 267
+#define EQ 268
+#define PLUS 269
+#define MINUS 270
+#define STAR 271
+#define BSLASH 272
+#define NUMBER 273
+#define WRITE 274
+#define RETURN 275
+#define FUNC 276
+#define ARRAY 277
 
 
 
@@ -91,7 +97,7 @@ typedef union YYSTYPE
 	struct ASTNode* ast;
 }
 /* Line 1529 of yacc.c.  */
-#line 95 "parser.tab.h"
+#line 101 "parser.tab.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

@@ -51,6 +51,8 @@ symbol_table* current_scope = NULL;
 %token <char> SEMICOLON
 %token <char> LBRACK
 %token <char> RBRACK
+%token <char> LCURBRACK
+%token <char> RCURBRACK
 %token <char> LPAREN
 %token <char> RPAREN
 %token <char> COMMA
@@ -63,11 +65,12 @@ symbol_table* current_scope = NULL;
 %token <string> WRITE
 %token <string> RETURN
 %token <string> FUNC
+%token <string> ARRAY
 
 
 %printer { fprintf(yyoutput, "%s", $$); } ID;
 
-%type <ast> Program VarDecl VarDeclList FuncDecl FuncDeclList ParamList Param Block Stmt StmtList Expr BinOp WriteStmt ReturnStmt FuncSignature InputParamList InputParam
+%type <ast> Program VarDecl VarDeclList FuncDecl FuncDeclList ParamList Param Block Stmt StmtList Expr BinOp WriteStmt ReturnStmt FuncSignature InputParamList InputParam ArrayDecl ArrayDeclList
 %start Program
 
 %left PLUS MINUS
@@ -91,6 +94,34 @@ Program
 									root->program.varDeclList = $1;
 									root->program.stmtList = $2;
 									}
+;
+
+ArrayDeclList
+		  	: 						{/*empty, i.e. it is possible not to declare an array*/}
+		  	| 	ArrayDecl ArrayDeclList {  
+									printf("PARSER: Recognized array declaration list\n"); 
+									$$ = malloc(sizeof(ASTNode));
+									$$->type = NodeType_ArrayDeclList;
+									$$->arrayDeclList.arrayDecl = $1;
+									$$->arrayDeclList.arrayDeclList = $2;
+									printASTNode($$);
+									}
+								
+ArrayDecl
+		:    ARRAY TYPE ID LBRACK NUMBER RBRACK SEMICOLON { 
+									printf("PARSER: Recognized array declaration: %s\n", $3);
+									$$ = malloc(sizeof(ASTNode));
+									$$->type = NodeType_ArrayDecl;
+									$$->arrayDecl.varType = strdup($2);
+									$$->arrayDecl.varName = strdup($3);
+									char buffer[20];
+									snprintf(buffer, sizeof(buffer), "%d", $5);
+									$$->arrayDecl.size = strdup(buffer);
+
+									printf("\nAdding array symbol: {%s} to table {%s}\n", $3, current_scope->scope_name);
+									add_symbol(current_scope, $3, $2);
+									print_table(current_scope);
+								}
 ;
 
 VarDeclList
@@ -237,21 +268,22 @@ InputParam
 ;
 
 Block
-	  	:    	LBRACK 
+	  	:    	LCURBRACK 
 			{ 
 				
-			} 	VarDeclList StmtList ReturnStmt
+			} 	VarDeclList ArrayDeclList StmtList ReturnStmt
 			{
 				
 			}
-				RBRACK 	
+				RCURBRACK 	
 			{ 
 				printf("PARSER: Recognized block\n"); 
 				$$ = malloc(sizeof(ASTNode));
 				$$->type = NodeType_Block;
 				$$->block.varDeclList = $3;
-				$$->block.stmtList = $4;
-				$$->block.returnStmt = $5;
+				$$->block.arrayDeclList = $4;
+				$$->block.stmtList = $5;
+				$$->block.returnStmt = $6;
 				// $$->block.scope = current_scope;
 				// printf("setting block scope to %s\n", current_scope->scope_name);
 			}
@@ -301,6 +333,16 @@ Stmt
 									$$->funcCall.funcName = strdup($1);
 									// $$->funcCall.paramList = NULL;
 								}
+	|   ID LBRACK NUMBER RBRACK EQ Expr SEMICOLON {
+									printf("Parsed Array Assignment: %s[%d] = ...\n", $1, $3);
+									$$ = malloc(sizeof(ASTNode));
+									$$->type = NodeType_ArrayAssignStmt;
+									$$->arrayAssignStmt.varName = strdup($1);
+									char buffer[20];
+									snprintf(buffer, sizeof(buffer), "%d", $3);
+									$$->arrayAssignStmt.index = strdup(buffer);
+									$$->arrayAssignStmt.expr = $6;
+								}
 ;
 
 Expr
@@ -332,6 +374,15 @@ Expr
 						$$->type = NodeType_FuncCall;
 						$$->funcCall.funcName = strdup($1);
 						$$->funcCall.inputParamList = $3;
+						}
+	|   ID LBRACK NUMBER RBRACK 	{
+						printf("PARSER: Recognized array access\n");
+						$$ = malloc(sizeof(ASTNode));
+						$$->type = NodeType_ArrayAccess;
+						$$->arrayAccess.varName = strdup($1);
+						char buffer[20];
+						snprintf(buffer, sizeof(buffer), "%d", $3);
+						$$->arrayAccess.index = strdup(buffer);
 						}
 ;
 

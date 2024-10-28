@@ -31,7 +31,11 @@ typedef enum {
     NodeType_ReturnStmt,
     NodeType_FuncCall,
     NodeType_InputParam,
-    NodeType_InputParamList
+    NodeType_InputParamList,
+    NodeType_ArrayDeclList,
+    NodeType_ArrayDecl,
+    NodeType_ArrayAssignStmt,
+    NodeType_ArrayAccess
 } NodeType;
 
 // Structure for AST nodes
@@ -106,6 +110,7 @@ typedef struct ASTNode {
             struct ASTNode* varDeclList;
             struct ASTNode* stmtList;
             struct ASTNode* returnStmt;
+            struct ASTNode* arrayDeclList;
             symbol_table* scope;
         } block;
 
@@ -155,6 +160,29 @@ typedef struct ASTNode {
             struct ASTNode* inputParam;
             struct ASTNode* inputParamList;
         } inputParamList;
+
+        struct ArrayDeclList {
+            struct ASTNode* arrayDecl;
+            struct ASTNode* arrayDeclList;
+        } arrayDeclList;
+        
+        struct ArrayDecl {
+            char* varType;
+            char* varName;
+            char* size;
+        } arrayDecl;
+        
+        struct ArrayAssignStmt {
+            char* varName;
+            char* index;
+            struct ASTNode* expr;
+        } arrayAssignStmt;
+
+        struct ArrayAccess {
+            char* varName;
+            char* index;
+            char* temp;
+        } arrayAccess;
     };
 } ASTNode;
 

@@ -76,6 +76,12 @@ ws          {delim}+
 		 yylval.string = strdup(yytext); 
 		 return FUNC;
 		}
+
+"table" {words++; chars += strlen(yytext);
+		 printf("%s : ARRAY\n", yytext);
+		 yylval.string = strdup(yytext); 
+		 return ARRAY;
+		}
 			
 "="		{chars++;
 		 printf("%s : EQ\n", yytext);
@@ -126,15 +132,27 @@ ws          {delim}+
 		}
 
 "{"		{chars++;
-		  printf("%s : LBRACK\n", yytext);
+		  printf("%s : LCURBRACK\n", yytext);
 		  yylval.string = strdup(yytext); 
-		  return LBRACK;
+		  return LCURBRACK;
 		}
 
 "}"		{chars++;
-		  printf("%s : RBRACK\n", yytext);
+		  printf("%s : RCURBRACK\n", yytext);
 		  yylval.string = strdup(yytext); 
-		  return RBRACK;
+		  return RCURBRACK;
+		}
+
+"["		{chars++;
+			printf("%s : LBRACK\n", yytext);
+			yylval.string = strdup(yytext); 
+			return LBRACK;
+		}
+
+"]"		{chars++;
+			printf("%s : RBRACK\n", yytext);
+			yylval.string = strdup(yytext); 
+			return RBRACK;
 		}
 
 "("		{chars++;

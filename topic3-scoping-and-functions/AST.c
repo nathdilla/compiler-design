@@ -95,6 +95,7 @@ void traverseAST(ASTNode* node, int level) {
             printIndent(level);
             printf("Block\n");
             traverseAST(node->block.varDeclList, level + indentValue);
+            traverseAST(node->block.arrayDeclList, level + indentValue);
             traverseAST(node->block.stmtList, level + indentValue);
             traverseAST(node->block.returnStmt, level + indentValue);
             break;
@@ -127,6 +128,24 @@ void traverseAST(ASTNode* node, int level) {
             printf("Input Parameter List\n");
             traverseAST(node->inputParamList.inputParam, level + indentValue);
             traverseAST(node->inputParamList.inputParamList, level + indentValue);
+            break;
+        case NodeType_ArrayDeclList:
+            printIndent(level);
+            printf("Array Declaration List\n");
+            traverseAST(node->arrayDeclList.arrayDecl, level + indentValue);
+            traverseAST(node->arrayDeclList.arrayDeclList, level + indentValue);
+            break;
+        case NodeType_ArrayDecl:
+            printIndent(level);
+            printf("Array Declaration\n");
+            break;
+        case NodeType_ArrayAssignStmt:
+            printIndent(level);
+            printf("Array Assignment: %s[%s] = %s\n", node->arrayAssignStmt.varName, node->arrayAssignStmt.index, "node->arrayAssignStmt.expr");
+            break;
+        case NodeType_ArrayAccess:
+            printIndent(level);
+            printf("Array Access\n");
             break;
     }
 }
@@ -201,6 +220,18 @@ void printASTNode(ASTNode* node) {
         case NodeType_InputParamList:  
             printf("Input Parameter List\n");
             break;
+        case NodeType_ArrayDeclList:
+            printf("Array Declaration List\n");
+            break;
+        case NodeType_ArrayDecl:
+            printf("Array Declaration\n");
+            break;
+        case NodeType_ArrayAssignStmt:
+            printf("Array Assignment: %s[%s] = %s\n", node->arrayAssignStmt.varName, node->arrayAssignStmt.index, "node->arrayAssignStmt.expr");
+            break;
+        case NodeType_ArrayAccess:
+            printf("Array Access\n");
+            break;
     }
 } 
 
@@ -268,6 +299,7 @@ void freeAST(ASTNode* node) {
             break;
         case NodeType_Block:
             free(node->block.varDeclList);
+            free(node->block.arrayDeclList);
             free(node->block.stmtList);
             free(node->block.returnStmt);
             break;
@@ -287,6 +319,19 @@ void freeAST(ASTNode* node) {
         case NodeType_InputParam:
             break;
         case NodeType_InputParamList:  
+            break;
+        case NodeType_ArrayDeclList:
+            free(node->arrayDeclList.arrayDecl);
+            free(node->arrayDeclList.arrayDeclList);
+            break;
+        case NodeType_ArrayDecl:    
+            break;
+        case NodeType_ArrayAssignStmt:
+            free(node->arrayAssignStmt.varName);
+            free(node->arrayAssignStmt.index);
+            free(node->arrayAssignStmt.expr);
+            break;
+        case NodeType_ArrayAccess:
             break;
     }
 
@@ -365,6 +410,7 @@ ASTNode* createNode(NodeType type) {
             break;
         case NodeType_Block:
             newNode->block.varDeclList = NULL;
+            newNode->block.arrayDeclList = NULL;
             newNode->block.stmtList = NULL;
             newNode->block.returnStmt = NULL;
             break;
@@ -385,9 +431,24 @@ ASTNode* createNode(NodeType type) {
         case NodeType_InputParam:
             newNode->inputParam.value = NULL;
             break;
-        case NodeType_InputParamList:  
+        case NodeType_InputParamList:
             newNode->inputParamList.inputParam = NULL;  
             newNode->inputParamList.inputParamList = NULL;
+            break;
+        case NodeType_ArrayDeclList:
+            newNode->arrayDeclList.arrayDecl = NULL;
+            newNode->arrayDeclList.arrayDeclList = NULL;
+            break;
+        case NodeType_ArrayDecl:
+            break;
+        case NodeType_ArrayAssignStmt:
+            newNode->arrayAssignStmt.varName = NULL;
+            newNode->arrayAssignStmt.index = NULL;
+            newNode->arrayAssignStmt.expr = NULL;
+            break;
+        case NodeType_ArrayAccess:
+            newNode->arrayAccess.varName = NULL;
+            newNode->arrayAccess.index = NULL;
             break;
     }
 

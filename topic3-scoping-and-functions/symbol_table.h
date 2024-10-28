@@ -15,6 +15,7 @@ typedef struct symbol {
     char* temp_var; // Temporary variable for code generation
     char* value; // Constant value for constant folding
     int stack_offset; // Stack offset for local variables
+    int arr_offset; // Array offset for array elements
     bool is_local;
     bool is_param;
     // Add other fields of Symbol

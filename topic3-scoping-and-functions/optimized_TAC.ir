@@ -1,27 +1,6 @@
 arg declare
-result declare
-t2 = t0 + t1
-result = t2
 x declare
-y declare
-z declare
-x = 2
-y = 3
-t3 li 5
-z = t3
-write z
-x = 4
-y = 8
-t4 li 32
-z = t4
-write z
-x = 20
-y = 10
-t5 li 2
-z = t5
-write z
-x = 5
-y = 10
-z = t6
-write z
+x = 1
+x = t0
+write x
 arg = 1

@@ -75,6 +75,7 @@ void init_code_generator(const char* output_filename) {
 
 // Function to handle storing the value
 void store_value(FILE* output_file, const char* register_name, const char* result, symbol* sym) {
+    fprintf(output_file, "\t# store value of %s\n", result);
     if (sym != NULL && sym->is_local) {
         printf("stack offset: %d\n", sym->stack_offset);
         fprintf(output_file, "\tsw %s, %d($fp)\n", register_name, sym->stack_offset);
@@ -88,6 +89,7 @@ void evaluate_operations(TAC* current, int stack_offset) {
     //     fprintf(output_file, "\tli $%s, %s\n", current->result, current->arg1);
     // }
     if (strcmp(current->op, "assign") == 0) {
+        fprintf(output_file, "\t# assignment of %s\n", current->result);
         int tempRegIndex = allocate_register();
         if (tempRegIndex == -1) {
         // Handle register allocation failure
@@ -117,6 +119,7 @@ void evaluate_operations(TAC* current, int stack_offset) {
     else if (strcmp(current->op, "write") == 0) {
         symbol* sym = lookup(current_scope_code_gen, current->result);
         printf("writing %s\n", current->result);
+        fprintf(output_file, "\t# write %s\n", current->result);
         if (sym && sym->is_param) {
             fprintf(output_file, "\tmove $a0, $%s\n", sym->temp_var);
         } else if (sym && sym->is_local) {
@@ -175,6 +178,7 @@ void evaluate_operations(TAC* current, int stack_offset) {
         for (int i = 0; i < current_scope_code_gen->size; i++) {
             symbol* sym = current_scope_code_gen->table[i];
             while (sym != 0) {
+                fprintf(output_file, "\t# allocate memory for %s\n", sym->name);
                 fprintf(output_file, "\taddi $sp, $sp, -4\n"); // Allocate space on stack
                 fprintf(output_file, "\tsw $zero, 0($sp)\n"); // Initialize allocated space to 0
                 sym->stack_offset = stack_offset; // Keep track of stack position
@@ -220,6 +224,54 @@ void evaluate_operations(TAC* current, int stack_offset) {
         
         fprintf(output_file, "\n");
         fprintf(output_file, "\tmove $%s, $v0\n", current->result);
+    } else if (strcmp(current->op, "array") == 0) {
+        // allocate memory for array on stack according to size
+        fprintf(output_file, "\t# allocate memory for array %s\n", current->result);
+        symbol* sym = lookup(current_scope_code_gen, current->result);
+        int array_offset = 4 * atoi(current->arg1);
+        sym->stack_offset = array_offset;
+        stack_offset -= array_offset;
+        fprintf(output_file, "\taddi $sp, $sp, -%d\n", array_offset);
+        fprintf(output_file, "\n");
+    } else if (strcmp(current->op, "assign_array") == 0) {
+        int tempRegIndex = allocate_register();
+        if (tempRegIndex == -1) {
+        // Handle register allocation failure
+        return;
+        }
+        // Lookup the symbol for the current result in the current scope
+        // printf("%s",current->op);
+        symbol* sym = lookup(current_scope_code_gen, current->result);
+
+        if (current->arg1[0] == 't') {
+            // If arg1 is already a temp register, directly store it into the variable
+            char tempRegName[10];
+            snprintf(tempRegName, sizeof(tempRegName), "$%s", current->arg1);
+            // store value in array
+            fprintf(output_file, "\t# store value in array %s\n", current->result);
+            int offset = 4 * atoi(current->arg2) + sym->stack_offset;
+            char offset_str[10];
+            snprintf(offset_str, sizeof(offset_str), "%d", offset);
+            fprintf(output_file, "\tsw %s, -%s($sp)\n", tempRegName, offset_str);
+        } else {
+            // Load the immediate value into a temp register
+            const char* tempRegName = temp_registers[tempRegIndex].name;
+            fprintf(output_file, "\tli %s, %s\n", tempRegName, current->arg1);
+            // store value in array
+            fprintf(output_file, "\t# store value in array %s\n", current->result);
+            int offset = 4 * atoi(current->arg2) + sym->stack_offset;
+            char offset_str[10];
+            snprintf(offset_str, sizeof(offset_str), "%d", offset);
+            fprintf(output_file, "\tsw %s, -%s($sp)\n", tempRegName, offset_str);
+        }
+        deallocate_register(tempRegIndex);        
+    } else if (strcmp(current->op, "array_access") == 0) {
+        fprintf(output_file, "\t# array access of %s\n", current->arg1);
+        symbol* sym = lookup(current_scope_code_gen, current->arg1);
+        int offset = 4 * atoi(current->arg2) + sym->stack_offset;
+        char offset_str[10];
+        snprintf(offset_str, sizeof(offset_str), "%d", offset);
+        fprintf(output_file, "\tlw $%s, -%s($sp)\n", current->result, offset_str);
     }
 }
 
