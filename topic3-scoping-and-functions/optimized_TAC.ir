@@ -1,6 +1,0 @@
-arg declare
-x declare
-x = 1
-x = t0
-write x
-arg = 1
