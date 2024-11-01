@@ -1,6 +1,8 @@
 arg declare
+result declare
+t2 = t0 + t1
+result = t2
 x declare
-x = 1
-x = t0
+x = t3
 write x
 arg = 1

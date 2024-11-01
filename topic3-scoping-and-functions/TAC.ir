@@ -1,16 +1,20 @@
 arg declare
 
+func addTwoNums
+a0 param a
+a1 param b
+result declare
+t2 = t0 + t1
+result = t2
+return result
+
+
 func main
 x declare
 arr array, size 5
-x = 1
-arr[0] = 4
-arr[1] = 4
-arr[2] = 7
-arr[3] = 4
-arr[4] = 1
-t0 = arr[2]
-x = t0
+arr[3] = 2
+t3 = arr[3]
+x = t3
 write x
 return 0
 

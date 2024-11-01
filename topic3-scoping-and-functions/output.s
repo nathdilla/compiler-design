@@ -3,6 +3,38 @@ var_arg: .word 0
 .text
 .globl main
 
+addTwoNums:
+	addi $sp, $sp, -12
+	sw $ra, 8($sp)
+	sw $fp, 4($sp)
+	move $fp, $sp
+
+	# allocate memory for result
+	addi $sp, $sp, -4
+	sw $zero, 0($sp)
+
+	# allocate memory for a
+	addi $sp, $sp, -4
+	sw $zero, 0($sp)
+
+	# allocate memory for b
+	addi $sp, $sp, -4
+	sw $zero, 0($sp)
+
+	move $t0, $a0
+	move $t1, $a1
+	add $t2, $t0, $t1
+	# assignment of result
+	# store value of result
+	sw $t2, -12($fp)
+
+	lw $v0, -12($fp)
+
+	lw $ra, 8($fp)
+	lw $fp, 4($fp)
+	addi $sp, $sp, 12
+	jr $ra
+
 main:
 	addi $sp, $sp, -12
 	sw $ra, 8($sp)
@@ -20,30 +52,14 @@ main:
 	# allocate memory for array arr
 	addi $sp, $sp, -20
 
-	# assignment of x
-	li $t1, 1
-	# store value of x
-	sw $t1, -12($fp)
-	li $t1, 4
-	# store value in array arr
-	sw $t1, -20($sp)
-	li $t1, 4
-	# store value in array arr
-	sw $t1, -24($sp)
-	li $t1, 7
-	# store value in array arr
-	sw $t1, -28($sp)
-	li $t1, 4
+	li $t1, 2
 	# store value in array arr
 	sw $t1, -32($sp)
-	li $t1, 1
-	# store value in array arr
-	sw $t1, -36($sp)
 	# array access of arr
-	lw $t0, -28($sp)
+	lw $t3, -32($sp)
 	# assignment of x
 	# store value of x
-	sw $t0, -12($fp)
+	sw $t3, -12($fp)
 	# write x
 	lw $a0, -12($fp)
 	li $v0, 1
