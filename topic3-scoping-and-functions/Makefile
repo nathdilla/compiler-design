@@ -11,5 +11,5 @@ parser: lex.yy.c parser.tab.c parser.tab.h AST.c symbol_table.c semantic.c optim
 	./parser testProg.cmm
 
 clean:
-	rm -f parser parser.tab.c lex.yy.c parser.tab.h parser.output lex.yy.o parser.tab.o AST.o symbol_table.o semantic.o code_generator.o optimizer.o TAC.ir TACOptimized.ir output.s
+	rm -f parser parser.tab.c lex.yy.c parser.tab.h parser.output lex.yy.o parser.tab.o AST.o symbol_table.o semantic.o code_generator.o optimizer.o TAC.ir optimized_TAC.ir output.s
 	ls -l

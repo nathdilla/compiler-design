@@ -18,6 +18,7 @@ digit       [0-9]
 ID          {letter}({letter}|{digit})*
 delim       [ \t\n]
 NUMBER         {digit}+(\.{digit}+)?(E[+\-]?(digit)+)?
+BOOL_LITERAL (true|false)
 ws          {delim}+
 
 %%
@@ -112,6 +113,20 @@ ws          {delim}+
 		 yylval.operator = strdup(yytext);
 		 return BSLASH;
 		}
+
+"true"  {
+    words++; chars += strlen(yytext);
+    printf("%s : BOOL_LITERAL\n", yytext);
+    yylval.number = 1;
+    return BOOL_LITERAL;
+}
+
+"false" {
+    words++; chars += strlen(yytext);
+    printf("%s : BOOL_LITERAL\n", yytext);
+    yylval.number = 0;
+    return BOOL_LITERAL;
+}
 
 {ID}	{words++; chars += strlen(yytext);
 			  printf("%s : IDENTIFIER\n",yytext);
