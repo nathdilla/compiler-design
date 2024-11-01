@@ -70,11 +70,12 @@ extern int yydebug;
     STAR = 271,                    /* STAR  */
     BSLASH = 272,                  /* BSLASH  */
     NUMBER = 273,                  /* NUMBER  */
-    BOOL_LITERAL = 274,            /* BOOL_LITERAL  */
-    WRITE = 275,                   /* WRITE  */
-    RETURN = 276,                  /* RETURN  */
-    FUNC = 277,                    /* FUNC  */
-    ARRAY = 278                    /* ARRAY  */
+    FLOAT = 274,                   /* FLOAT  */
+    BOOL_LITERAL = 275,            /* BOOL_LITERAL  */
+    WRITE = 276,                   /* WRITE  */
+    RETURN = 277,                  /* RETURN  */
+    FUNC = 278,                    /* FUNC  */
+    ARRAY = 279                    /* ARRAY  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -86,12 +87,13 @@ union YYSTYPE
 #line 41 "parser.y"
 
 	int number;
+	double floatVal;
 	char character;
 	char* string;
 	char* operator;
 	struct ASTNode* ast;
 
-#line 95 "parser.tab.h"
+#line 97 "parser.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

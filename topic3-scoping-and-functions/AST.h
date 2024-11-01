@@ -13,6 +13,13 @@
 // kinds of AST nodes
 typedef enum
 {
+    VAL_INT,
+    VAL_FLOAT,
+    VAL_BOOL
+} ValueType;
+
+typedef enum
+{
     NodeType_Program,
     NodeType_VarDeclList,
     NodeType_VarDecl,
@@ -72,6 +79,7 @@ typedef struct ASTNode
             bool boolValue;
             char *number;
             char *temp;
+            ValueType type; // Add enum to track if it's INT, FLOAT, or BOOL
         } simpleExpr;
 
         struct

@@ -40,6 +40,7 @@ symbol_table* current_scope = NULL;
 
 %union {
 	int number;
+	double floatVal;
 	char character;
 	char* string;
 	char* operator;
@@ -62,6 +63,7 @@ symbol_table* current_scope = NULL;
 %token <operator> STAR 
 %token <operator> BSLASH
 %token <number> NUMBER
+%token <floatVal> FLOAT
 %token <number> BOOL_LITERAL
 %token <string> WRITE
 %token <string> RETURN
@@ -361,14 +363,22 @@ Expr
 						$$->type = NodeType_SimpleID;
 						$$->simpleID.name = $1;
 						}
-	| 	NUMBER 			{ 
-						printf("PARSER: Recognized number\n");
-						$$ = malloc(sizeof(ASTNode));
-						$$->type = NodeType_SimpleExpr;
-						char buffer[20];
-						snprintf(buffer, sizeof(buffer), "%d", $1);
-						$$->simpleExpr.number = strdup(buffer);
-						}
+	| NUMBER          	{ 
+							printf("PARSER: Recognized integer\n");
+							$$ = malloc(sizeof(ASTNode));
+							$$->type = NodeType_SimpleExpr;
+							char buffer[20];
+							snprintf(buffer, sizeof(buffer), "%d", $1);
+							$$->simpleExpr.number = strdup(buffer);
+							}
+	| FLOAT          	{
+							printf("PARSER: Recognized float\n");
+							$$ = malloc(sizeof(ASTNode));
+							$$->type = NodeType_SimpleExpr;
+							char buffer[20];
+							snprintf(buffer, sizeof(buffer), "%f", $1);
+							$$->simpleExpr.number = strdup(buffer);
+							}
 	|   ID LPAREN InputParamList RPAREN 	{
 						printf("PARSER: Recognized function call\n");
 						$$ = malloc(sizeof(ASTNode));

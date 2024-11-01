@@ -17,7 +17,8 @@ letter      [a-zA-Z]
 digit       [0-9]
 ID          {letter}({letter}|{digit})*
 delim       [ \t\n]
-NUMBER         {digit}+(\.{digit}+)?(E[+\-]?(digit)+)?
+NUMBER     {digit}+
+FLOAT       {digit}+\.{digit}+
 BOOL_LITERAL (true|false)
 ws          {delim}+
 
@@ -134,11 +135,17 @@ ws          {delim}+
 			  return ID;
 		}
 			
-{NUMBER}	{words++; chars += strlen(yytext);
-			  printf("%s : NUMBER\n",yytext);
-			  yylval.number = atoi(yytext);
-			  return NUMBER;
-			}
+{NUMBER}   {words++; chars += strlen(yytext);
+             printf("%s : NUMBER\n",yytext);
+             yylval.number = atoi(yytext);
+             return NUMBER;
+            }
+
+{FLOAT}     {words++; chars += strlen(yytext);
+             printf("%s : FLOAT\n",yytext);
+             yylval.floatVal = atof(yytext);
+             return FLOAT;
+            }
 
 ";"		{chars++;
 		  printf("%s : SEMICOLON\n", yytext);

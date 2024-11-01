@@ -46,9 +46,13 @@ void traverseAST(ASTNode *node, int level)
             printf("Simple Expression (Bool): %s\n",
                    strcmp(node->simpleExpr.number, "1") == 0 ? "true" : "false");
         }
+        else if (strchr(node->simpleExpr.number, '.'))
+        {
+            printf("Simple Expression (Float): %s\n", node->simpleExpr.number);
+        }
         else
         {
-            printf("Simple Expression: %s\n", node->simpleExpr.number);
+            printf("Simple Expression (Int): %s\n", node->simpleExpr.number);
         }
         break;
     case NodeType_SimpleID:

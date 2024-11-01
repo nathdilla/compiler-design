@@ -58,6 +58,7 @@ void deallocate_temp_var(int tempVars[], int index);
 void append_TAC(TAC **head, TAC *newInstruction);
 void print_TAC_to_file(const char *filename, TAC *tac);
 void print_all_TAC(TAC *tac);
+bool is_float_value(const char *value);
 bool is_bool_value(const char *value);
 
 #endif // SEMANTIC_H
