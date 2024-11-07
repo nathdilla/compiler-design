@@ -1,15 +1,5 @@
-int arg;
-function int addTwoNums(int a, int b) {
-    int result;
-    result = a + b;
-    return result;
-}
 function int main() {
-    int x;
-    table int arr[5];
-    arr[3] = 2;
-    x = arr[3];
-    write x;
+    float y;
+    y = 4.23;
     return 0;
 }
-arg = 1;

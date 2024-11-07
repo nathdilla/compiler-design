@@ -17,8 +17,9 @@ letter      [a-zA-Z]
 digit       [0-9]
 ID          {letter}({letter}|{digit})*
 delim       [ \t\n]
-NUMBER         {digit}+(\.{digit}+)?(E[+\-]?(digit)+)?
-ws          {delim}+
+NUMBER         [+-]?{digit}+
+FLOAT          [+-]?{digit}+"."{digit}+(E[+\-]?{digit}+)?
+ws             {delim}+
 
 %%
 "/*"    				{
@@ -82,6 +83,12 @@ ws          {delim}+
 		 yylval.string = strdup(yytext); 
 		 return ARRAY;
 		}
+
+"if"	{words++; chars += strlen(yytext);
+		 printf("%s : IF\n", yytext);
+		 yylval.string = strdup(yytext); 
+		 return IF;
+		}
 			
 "="		{chars++;
 		 printf("%s : EQ\n", yytext);
@@ -125,7 +132,13 @@ ws          {delim}+
 			  return NUMBER;
 			}
 
-";"		{chars++;
+{FLOAT}	{words++; chars += strlen(yytext);
+			  printf("%s : FLOAT\n",yytext);
+			  yylval.fval = atof(yytext);
+			  return FLOAT;
+			}
+
+";"		{chars++;	
 		  printf("%s : SEMICOLON\n", yytext);
 		  yylval.string = strdup(yytext); 
 		  return SEMICOLON;
@@ -171,6 +184,12 @@ ws          {delim}+
 		  printf("%s : COMMA\n", yytext);
 		  yylval.string = strdup(yytext); 
 		  return COMMA;
+		}
+
+"."		{chars++;
+		  printf("%s : DOT\n", yytext);
+		  yylval.string = strdup(yytext); 
+		  return DOT;
 		}
 
 		

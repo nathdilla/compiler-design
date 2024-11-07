@@ -49,16 +49,19 @@
      LPAREN = 265,
      RPAREN = 266,
      COMMA = 267,
-     EQ = 268,
-     PLUS = 269,
-     MINUS = 270,
-     STAR = 271,
-     BSLASH = 272,
-     NUMBER = 273,
-     WRITE = 274,
-     RETURN = 275,
-     FUNC = 276,
-     ARRAY = 277
+     DOT = 268,
+     EQ = 269,
+     PLUS = 270,
+     MINUS = 271,
+     STAR = 272,
+     BSLASH = 273,
+     NUMBER = 274,
+     FLOAT = 275,
+     WRITE = 276,
+     RETURN = 277,
+     FUNC = 278,
+     ARRAY = 279,
+     IF = 280
    };
 #endif
 /* Tokens.  */
@@ -72,16 +75,19 @@
 #define LPAREN 265
 #define RPAREN 266
 #define COMMA 267
-#define EQ 268
-#define PLUS 269
-#define MINUS 270
-#define STAR 271
-#define BSLASH 272
-#define NUMBER 273
-#define WRITE 274
-#define RETURN 275
-#define FUNC 276
-#define ARRAY 277
+#define DOT 268
+#define EQ 269
+#define PLUS 270
+#define MINUS 271
+#define STAR 272
+#define BSLASH 273
+#define NUMBER 274
+#define FLOAT 275
+#define WRITE 276
+#define RETURN 277
+#define FUNC 278
+#define ARRAY 279
+#define IF 280
 
 
 
@@ -91,13 +97,14 @@ typedef union YYSTYPE
 #line 41 "parser.y"
 {
 	int number;
+	float fval;
 	char character;
 	char* string;
 	char* operator;
 	struct ASTNode* ast;
 }
 /* Line 1529 of yacc.c.  */
-#line 101 "parser.tab.h"
+#line 108 "parser.tab.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

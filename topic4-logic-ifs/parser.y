@@ -40,6 +40,7 @@ symbol_table* current_scope = NULL;
 
 %union {
 	int number;
+	float fval;
 	char character;
 	char* string;
 	char* operator;
@@ -56,16 +57,19 @@ symbol_table* current_scope = NULL;
 %token <char> LPAREN
 %token <char> RPAREN
 %token <char> COMMA
+%token <char> DOT
 %token <operator> EQ
 %token <operator> PLUS
 %token <operator> MINUS
 %token <operator> STAR 
 %token <operator> BSLASH
 %token <number> NUMBER
+%token <fval> FLOAT
 %token <string> WRITE
 %token <string> RETURN
 %token <string> FUNC
 %token <string> ARRAY
+%token <string> IF
 
 
 %printer { fprintf(yyoutput, "%s", $$); } ID;
@@ -360,6 +364,16 @@ Expr
 						$$->type = NodeType_SimpleID;
 						$$->simpleID.name = $1;
 						}
+	| 	FLOAT {
+						printf("PARSER: Recognized float\n");
+						printf("FLOAT: %f\n", $1);
+						$$ = malloc(sizeof(ASTNode));
+						$$->type = NodeType_SimpleExpr;
+						char buffer[20];
+						snprintf(buffer, sizeof(buffer), "%f", $1);
+						$$->simpleExpr.number = strdup(buffer);
+						printf("FLOAT: %s\n", $$->simpleExpr.number);
+					}
 	| 	NUMBER 			{ 
 						printf("PARSER: Recognized number\n");
 						$$ = malloc(sizeof(ASTNode));
