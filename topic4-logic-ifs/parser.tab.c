@@ -510,8 +510,8 @@ static const yytype_uint16 yyrline[] =
        0,    87,    87,    95,   105,   106,   116,   133,   134,   145,
      164,   165,   176,   186,   185,   212,   213,   219,   229,   241,
      242,   249,   259,   265,   276,   290,   298,   299,   308,   322,
-     325,   332,   345,   353,   359,   369,   375,   383,   390,   401,
-     408,   415,   422,   431
+     325,   332,   345,   353,   359,   368,   375,   384,   391,   402,
+     409,   416,   423,   432
 };
 #endif
 
@@ -1828,23 +1828,23 @@ yyreduce:
 #line 359 "parser.y"
     {
 						printf("PARSER: Recognized float\n");
-						printf("FLOAT: %f\n", (yyvsp[(1) - (1)].fval));
 						(yyval.ast) = malloc(sizeof(ASTNode));
 						(yyval.ast)->type = NodeType_SimpleExpr;
 						char buffer[20];
 						snprintf(buffer, sizeof(buffer), "%f", (yyvsp[(1) - (1)].fval));
 						(yyval.ast)->simpleExpr.number = strdup(buffer);
-						printf("FLOAT: %s\n", (yyval.ast)->simpleExpr.number);
+						(yyval.ast)->simpleExpr.type = "float";
 					;}
     break;
 
   case 35:
-#line 369 "parser.y"
+#line 368 "parser.y"
     {
 						printf("PARSER: Recognized boolean\n");
 						(yyval.ast) = malloc(sizeof(ASTNode));
 						(yyval.ast)->type = NodeType_SimpleExpr;
 						(yyval.ast)->simpleExpr.number = strdup((yyvsp[(1) - (1)].string));
+						(yyval.ast)->simpleExpr.type = "bool";
 						;}
     break;
 
@@ -1857,11 +1857,12 @@ yyreduce:
 						char buffer[20];
 						snprintf(buffer, sizeof(buffer), "%d", (yyvsp[(1) - (1)].number));
 						(yyval.ast)->simpleExpr.number = strdup(buffer);
+						(yyval.ast)->simpleExpr.type = "int";
 						;}
     break;
 
   case 37:
-#line 383 "parser.y"
+#line 384 "parser.y"
     {
 						printf("PARSER: Recognized function call\n");
 						(yyval.ast) = malloc(sizeof(ASTNode));
@@ -1872,7 +1873,7 @@ yyreduce:
     break;
 
   case 38:
-#line 390 "parser.y"
+#line 391 "parser.y"
     {
 						printf("PARSER: Recognized array access\n");
 						(yyval.ast) = malloc(sizeof(ASTNode));
@@ -1885,7 +1886,7 @@ yyreduce:
     break;
 
   case 39:
-#line 401 "parser.y"
+#line 402 "parser.y"
     {
 			printf("PARSER: Recognized binary operation (addition)\n");	
 			(yyval.ast) = malloc(sizeof(ASTNode));
@@ -1895,7 +1896,7 @@ yyreduce:
     break;
 
   case 40:
-#line 408 "parser.y"
+#line 409 "parser.y"
     {
 				printf("PARSER: Recognized binary operation (subtraction)\n");
 				(yyval.ast) = malloc(sizeof(ASTNode));
@@ -1905,7 +1906,7 @@ yyreduce:
     break;
 
   case 41:
-#line 415 "parser.y"
+#line 416 "parser.y"
     {
 				printf("PARSER: Recognized binary operation (multiplication)\n");
 				(yyval.ast) = malloc(sizeof(ASTNode));
@@ -1915,7 +1916,7 @@ yyreduce:
     break;
 
   case 42:
-#line 422 "parser.y"
+#line 423 "parser.y"
     {
 				printf("PARSER: Recognized binary operation (division)\n");
 				(yyval.ast) = malloc(sizeof(ASTNode));
@@ -1927,7 +1928,7 @@ yyreduce:
     break;
 
   case 43:
-#line 431 "parser.y"
+#line 432 "parser.y"
     {
 									printf("PARSER: Recognized write statement\n");
 									(yyval.ast) = malloc(sizeof(ASTNode));
@@ -1938,7 +1939,7 @@ yyreduce:
 
 
 /* Line 1267 of yacc.c.  */
-#line 1942 "parser.tab.c"
+#line 1943 "parser.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2152,7 +2153,7 @@ yyreturn:
 }
 
 
-#line 439 "parser.y"
+#line 440 "parser.y"
 
 
 int main() {

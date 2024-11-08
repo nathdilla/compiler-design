@@ -363,6 +363,9 @@ ASTNode* createNode(NodeType type) {
             newNode->varDecl.varName = NULL;
             break;
         case NodeType_SimpleExpr:
+            newNode->simpleExpr.number = NULL;
+            newNode->simpleExpr.temp = NULL;
+            newNode->simpleExpr.type = NULL;
             // newNode->simpleExpr.number = NULL;
             break;
         case NodeType_SimpleID:
@@ -372,6 +375,7 @@ ASTNode* createNode(NodeType type) {
             newNode->expr.operator = '\0';  // Placeholder value
             newNode->expr.left = NULL;
             newNode->expr.right = NULL;
+            newNode->expr.expr_type = NULL;
             break;
         case NodeType_StmtList:
             newNode->stmtList.stmt = NULL;  // Example initialization

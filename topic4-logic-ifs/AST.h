@@ -61,6 +61,7 @@ typedef struct ASTNode {
         struct {
             char* number;
             char* temp;
+            char* type;
         } simpleExpr;
 
         struct {
@@ -73,6 +74,7 @@ typedef struct ASTNode {
             char operator;  // Example for an operator field
             struct ASTNode* left;  // Left operand
             struct ASTNode* right; // Right operand
+            char* expr_type; // Type of the expression
             char* temp; // Temporary variable for TAC
         } expr;
 

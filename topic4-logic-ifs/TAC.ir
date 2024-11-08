@@ -1,11 +1,7 @@
 
 func main
 x declare
-y declare
-z declare
-hello array, size 5
-x = 4
-y = TRUE
-z = 2.000000
+t0 = 4.600000 + 3.200000
+x = t0
 return 0
 

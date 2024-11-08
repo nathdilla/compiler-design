@@ -56,11 +56,52 @@ void semantic_analysis(ASTNode* node, symbol_table* sym_table) {
         case NodeType_AssignStmt:
             printf("Performing semantic analysis on assignment statement\n");
             semantic_analysis(node->assignStmt.expr, sym_table);
+            symbol* sym = lookup(sym_table, node->assignStmt.varName);
+            // check if symbol type matches expression type
+            char* expr_type = "none";
+            if (node->assignStmt.expr->type == NodeType_SimpleExpr) {
+                expr_type = node->assignStmt.expr->simpleExpr.type;
+                printf("simple type found: %s\n", expr_type);
+            } else if (node->assignStmt.expr->type == NodeType_Expr) {
+                expr_type = node->assignStmt.expr->expr.expr_type;
+                printf("expr type found: %s\n", expr_type);
+            } else {
+                printf("type not found\n");
+            }
+            if (sym != NULL) {
+                if (strcmp(expr_type, sym->type) != 0) {
+                    fprintf(stderr, "Semantic error: Type mismatch in assignment to variable '%s'. Expected: %s, Found: %s\n", node->assignStmt.varName, sym->type, expr_type);
+                } else {
+                    printf("Type match: %s\n", expr_type);
+                }
+            }
             break;
         case NodeType_Expr:
             printf("Performing semantic analysis on expression\n");
+            // Check if types match
             semantic_analysis(node->expr.left, sym_table);
             semantic_analysis(node->expr.right, sym_table);
+            
+            char* left_type = "none";
+            char* right_type = "none";
+
+            if (node->expr.left->type == NodeType_SimpleExpr) {
+                left_type = node->expr.left->simpleExpr.type;
+            } else if (node->expr.left->type == NodeType_Expr) {
+                left_type = node->expr.left->expr.expr_type;
+            }
+
+            if (node->expr.right->type == NodeType_SimpleExpr) {
+                right_type = node->expr.right->simpleExpr.type;
+            } else if (node->expr.right->type == NodeType_Expr) {
+                right_type = node->expr.right->expr.expr_type;
+            }
+
+            if (strcmp(left_type, right_type) != 0) {
+                fprintf(stderr, "Semantic error: Type mismatch in expression. Left: %s, Right: %s\n", left_type, right_type);
+            }
+
+            node->expr.expr_type = left_type;
             break;
         // default:
         //     fprintf(stderr, "Unknown Node Type\n");
@@ -129,11 +170,6 @@ void semantic_analysis(ASTNode* node, symbol_table* sym_table) {
             break;
         case NodeType_Param:
             printf("Performing semantic analysis on parameter\n");
-            // if (lookup(sym_table, node->param.varName) != NULL) {
-            //     fprintf(stderr, "Error: Variable '%s' redeclared.\n", node->param.varName);
-            // } else {
-            //     add_symbol(sym_table, node->param.varName, node->param.varType); // Assuming 0 as initial value
-            // }
             break;
         case NodeType_FuncCall:
             printf("Performing semantic analysis on function call\n");
@@ -221,10 +257,6 @@ TAC *tac_expr(ASTNode *expr, symbol_table *sym_table)
     TAC *instruction = (TAC *)malloc(sizeof(TAC));
     if (!instruction)
         return NULL;
-
-    // if (buffering_tac) {
-    //     push_TAC(&tac_buffer_head, instruction);
-    // }
 
     instruction->scope = sym_table;
     printf("Generating TAC in the scope %s\n", sym_table->scope_name);

@@ -358,19 +358,19 @@ Expr
 						}
 	| 	FLOAT {
 						printf("PARSER: Recognized float\n");
-						printf("FLOAT: %f\n", $1);
 						$$ = malloc(sizeof(ASTNode));
 						$$->type = NodeType_SimpleExpr;
 						char buffer[20];
 						snprintf(buffer, sizeof(buffer), "%f", $1);
 						$$->simpleExpr.number = strdup(buffer);
-						printf("FLOAT: %s\n", $$->simpleExpr.number);
+						$$->simpleExpr.type = "float";
 					}
 	| 	BOOL {
 						printf("PARSER: Recognized boolean\n");
 						$$ = malloc(sizeof(ASTNode));
 						$$->type = NodeType_SimpleExpr;
 						$$->simpleExpr.number = strdup($1);
+						$$->simpleExpr.type = "bool";
 						}
 	| 	NUMBER 			{ 
 						printf("PARSER: Recognized number\n");
@@ -379,6 +379,7 @@ Expr
 						char buffer[20];
 						snprintf(buffer, sizeof(buffer), "%d", $1);
 						$$->simpleExpr.number = strdup(buffer);
+						$$->simpleExpr.type = "int";
 						}
 	|   ID LPAREN InputParamList RPAREN 	{
 						printf("PARSER: Recognized function call\n");
