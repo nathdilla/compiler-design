@@ -1,6 +1,11 @@
 
 func main
+x declare
 y declare
-y = 4.230000
+z declare
+hello array, size 5
+x = 4
+y = TRUE
+z = 2.000000
 return 0
 

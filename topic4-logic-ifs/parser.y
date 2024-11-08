@@ -63,6 +63,7 @@ symbol_table* current_scope = NULL;
 %token <operator> MINUS
 %token <operator> STAR 
 %token <operator> BSLASH
+%token <string> BOOL
 %token <number> NUMBER
 %token <fval> FLOAT
 %token <string> WRITE
@@ -272,24 +273,15 @@ InputParam
 ;
 
 Block
-	  	:    	LCURBRACK 
-			{ 
-				
-			} 	VarDeclList ArrayDeclList StmtList ReturnStmt
-			{
-				
-			}
-				RCURBRACK 	
+	  	:    	LCURBRACK VarDeclList ArrayDeclList StmtList ReturnStmt RCURBRACK 					
 			{ 
 				printf("PARSER: Recognized block\n"); 
 				$$ = malloc(sizeof(ASTNode));
 				$$->type = NodeType_Block;
-				$$->block.varDeclList = $3;
-				$$->block.arrayDeclList = $4;
-				$$->block.stmtList = $5;
-				$$->block.returnStmt = $6;
-				// $$->block.scope = current_scope;
-				// printf("setting block scope to %s\n", current_scope->scope_name);
+				$$->block.varDeclList = $2;
+				$$->block.arrayDeclList = $3;
+				$$->block.stmtList = $4;
+				$$->block.returnStmt = $5;
 			}
 
 ;
@@ -374,6 +366,12 @@ Expr
 						$$->simpleExpr.number = strdup(buffer);
 						printf("FLOAT: %s\n", $$->simpleExpr.number);
 					}
+	| 	BOOL {
+						printf("PARSER: Recognized boolean\n");
+						$$ = malloc(sizeof(ASTNode));
+						$$->type = NodeType_SimpleExpr;
+						$$->simpleExpr.number = strdup($1);
+						}
 	| 	NUMBER 			{ 
 						printf("PARSER: Recognized number\n");
 						$$ = malloc(sizeof(ASTNode));

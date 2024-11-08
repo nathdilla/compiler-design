@@ -242,46 +242,6 @@ TAC *tac_expr(ASTNode *expr, symbol_table *sym_table)
             break;
         }
 
-            // case NodeType_SimpleID: {
-            //     symbol* sym = lookup(scope, expr->simpleID.name);
-            //     if (sym != NULL && sym->temp_var == NULL) {
-            //         printf("Generating TAC for simple ID\n");
-            //         instruction->arg1 = create_operand(expr);
-            //         instruction->op = strdup("load");
-            //         instruction->result = create_temp_var();
-            //         expr->simpleID.temp = instruction->result;
-                    
-            //         sym->temp_var = instruction->result;
-            //     } else {
-            //         instruction->arg1 = sym->name;
-            //         instruction->op = strdup("load");
-            //         instruction->result = sym->temp_var;
-            //     }
-            //     break;
-            // }
-            
-        // case NodeType_SimpleID:
-        // {
-        //     symbol *sym = lookup(scope, expr->simpleID.name);
-        //     if (sym != NULL && sym->temp_var == NULL)
-        //     {
-        //         printf("Generating TAC for simple ID\n");
-        //         instruction->arg1 = create_operand(expr);
-        //         instruction->op = strdup("load");
-        //         instruction->result = create_temp_var();
-        //         expr->simpleID.temp = instruction->result;
-
-        //         sym->temp_var = instruction->result;
-        //     }
-        //     else
-        //     {
-        //         instruction->arg1 = sym->name;
-        //         instruction->op = strdup("load");
-        //         instruction->result = sym->temp_var;
-        //     }
-        //     break;
-        // }
-
         case NodeType_VarDecl:
         {
             printf("Generating TAC for variable declaration\n");
@@ -313,7 +273,6 @@ TAC *tac_expr(ASTNode *expr, symbol_table *sym_table)
             instruction->result = strdup(expr->writeStmt.varName);
             break;
         }
-            // Add cases for other expression types...
 
         case NodeType_FuncSignature: {
             printf("Generating TAC for function declaration\n");

@@ -57,6 +57,18 @@ ws             {delim}+
 		 yylval.string = strdup(yytext); 
 		 return TYPE;
 		}
+
+"TRUE"	{words++; chars += strlen(yytext);
+		 printf("%s : BOOL\n", yytext);
+		 yylval.string = strdup(yytext); 
+		 return BOOL;
+		}
+
+"FALSE"	{words++; chars += strlen(yytext);
+		 printf("%s : BOOL\n", yytext);
+		 yylval.string = strdup(yytext); 
+		 return BOOL;
+		}
 		
 "write"	{words++; 
 		 chars += strlen(yytext);

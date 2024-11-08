@@ -1,5 +1,10 @@
 function int main() {
-    float y;
-    y = 4.23;
+    int x;
+    bool y;
+    float z;
+    table int hello[5];
+    x = 4;
+    y = TRUE;
+    z = 2.0;
     return 0;
 }
