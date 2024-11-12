@@ -147,6 +147,11 @@ void traverseAST(ASTNode* node, int level) {
             printIndent(level);
             printf("Array Access\n");
             break;
+        case NodeType_TypeCast:
+            printIndent(level);
+            printf("Type Cast\n");
+            traverseAST(node->typeCast.expr, level + indentValue);
+            break;
     }
 }
 
@@ -231,6 +236,9 @@ void printASTNode(ASTNode* node) {
             break;
         case NodeType_ArrayAccess:
             printf("Array Access\n");
+            break;
+        case NodeType_TypeCast:
+            printf("Type Cast\n");
             break;
     }
 } 
@@ -332,6 +340,9 @@ void freeAST(ASTNode* node) {
             free(node->arrayAssignStmt.expr);
             break;
         case NodeType_ArrayAccess:
+            break;
+        case NodeType_TypeCast:
+            free(node->typeCast.expr);
             break;
     }
 
@@ -453,6 +464,11 @@ ASTNode* createNode(NodeType type) {
         case NodeType_ArrayAccess:
             newNode->arrayAccess.varName = NULL;
             newNode->arrayAccess.index = NULL;
+            break;
+        case NodeType_TypeCast:
+            newNode->typeCast.name = NULL;
+            newNode->typeCast.type = NULL;
+            newNode->typeCast.expr = NULL;
             break;
     }
 

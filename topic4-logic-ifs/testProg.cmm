@@ -1,5 +1,13 @@
+int one;
+int two;
+int three;
+
 function int main() {
-    float x;
-    x = 4.6 + 3.2;
+    int a;
+    float b;
+    bool c;
+    a = 1;
+    b = 2.3;
+    c = TRUE;
     return 0;
 }

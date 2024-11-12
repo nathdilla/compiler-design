@@ -1,3 +1,9 @@
-x declare
-t0 li 7
-x = t0
+one declare
+two declare
+three declare
+a declare
+b declare
+c declare
+a = 1
+b = 2.300000
+c = TRUE

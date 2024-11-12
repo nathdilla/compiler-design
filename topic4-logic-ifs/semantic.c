@@ -202,6 +202,10 @@ void semantic_analysis(ASTNode* node, symbol_table* sym_table) {
             printf("Performing semantic analysis on array access\n");
             // no checks necessary... for now
             break;
+        case NodeType_TypeCast:
+            printf("Performing semantic analysis on type cast\n");
+            // no checks necessary... for now
+            break;
         // ... handle other node types ...
         default:
             fprintf(stderr, "Unknown Node Type\n");

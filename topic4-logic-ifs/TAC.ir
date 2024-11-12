@@ -1,7 +1,13 @@
+one declare
+two declare
+three declare
 
 func main
-x declare
-t0 = 4.600000 + 3.200000
-x = t0
+a declare
+b declare
+c declare
+a = 1
+b = 2.300000
+c = TRUE
 return 0
 

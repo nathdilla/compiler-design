@@ -131,7 +131,7 @@ ArrayDecl
 
 VarDeclList
 		  	: 						{/*empty, i.e. it is possible not to declare a variable*/}
-		  	| 	VarDecl VarDeclList {  
+		  	| 	VarDeclList VarDecl {  
 									printf("PARSER: Recognized variable declaration list\n"); 
 									$$ = malloc(sizeof(ASTNode));
 									$$->type = NodeType_VarDeclList;
@@ -273,13 +273,13 @@ InputParam
 ;
 
 Block
-	  	:    	LCURBRACK VarDeclList ArrayDeclList StmtList ReturnStmt RCURBRACK 					
+	  	:    	LCURBRACK ArrayDeclList VarDeclList StmtList ReturnStmt RCURBRACK 					
 			{ 
 				printf("PARSER: Recognized block\n"); 
 				$$ = malloc(sizeof(ASTNode));
 				$$->type = NodeType_Block;
-				$$->block.varDeclList = $2;
-				$$->block.arrayDeclList = $3;
+				$$->block.varDeclList = $3;
+				$$->block.arrayDeclList = $2;
 				$$->block.stmtList = $4;
 				$$->block.returnStmt = $5;
 			}
@@ -355,6 +355,13 @@ Expr
 						$$ = malloc(sizeof(ASTNode));
 						$$->type = NodeType_SimpleID;
 						$$->simpleID.name = $1;
+						}
+	| 	LPAREN TYPE RPAREN Expr 	{ 
+						printf("PARSER: Recognized type cast\n");
+						$$ = malloc(sizeof(ASTNode));
+						$$->type = NodeType_TypeCast;
+						$$->typeCast.type = strdup($2);
+						$$->typeCast.expr = $4;
 						}
 	| 	FLOAT {
 						printf("PARSER: Recognized float\n");

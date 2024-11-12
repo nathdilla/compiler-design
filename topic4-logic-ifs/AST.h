@@ -35,7 +35,8 @@ typedef enum {
     NodeType_ArrayDeclList,
     NodeType_ArrayDecl,
     NodeType_ArrayAssignStmt,
-    NodeType_ArrayAccess
+    NodeType_ArrayAccess,
+    NodeType_TypeCast,
 } NodeType;
 
 // Structure for AST nodes
@@ -185,6 +186,12 @@ typedef struct ASTNode {
             char* index;
             char* temp;
         } arrayAccess;
+
+        struct TypeCast {
+            char* name;
+            char* type;
+            struct ASTNode* expr;
+        } typeCast;
     };
 } ASTNode;
 

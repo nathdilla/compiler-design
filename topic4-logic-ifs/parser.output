@@ -4,8 +4,9 @@ Terminals which are not used
    IF
 
 
-State 3 conflicts: 2 shift/reduce, 1 reduce/reduce
-State 59 conflicts: 4 shift/reduce
+State 2 conflicts: 2 shift/reduce, 1 reduce/reduce
+State 61 conflicts: 4 shift/reduce
+State 68 conflicts: 4 shift/reduce
 
 
 Grammar
@@ -21,7 +22,7 @@ Grammar
     5 ArrayDecl: ARRAY TYPE ID LBRACK NUMBER RBRACK SEMICOLON
 
     6 VarDeclList: /* empty */
-    7            | VarDecl VarDeclList
+    7            | VarDeclList VarDecl
 
     8 VarDecl: TYPE ID SEMICOLON
 
@@ -47,7 +48,7 @@ Grammar
    21 InputParam: ID
    22           | NUMBER
 
-   23 Block: LCURBRACK VarDeclList ArrayDeclList StmtList ReturnStmt RCURBRACK
+   23 Block: LCURBRACK ArrayDeclList VarDeclList StmtList ReturnStmt RCURBRACK
 
    24 ReturnStmt: RETURN Expr SEMICOLON
 
@@ -61,44 +62,45 @@ Grammar
 
    31 Expr: Expr BinOp Expr
    32     | ID
-   33     | FLOAT
-   34     | BOOL
-   35     | NUMBER
-   36     | ID LPAREN InputParamList RPAREN
-   37     | ID LBRACK NUMBER RBRACK
+   33     | LPAREN TYPE RPAREN Expr
+   34     | FLOAT
+   35     | BOOL
+   36     | NUMBER
+   37     | ID LPAREN InputParamList RPAREN
+   38     | ID LBRACK NUMBER RBRACK
 
-   38 BinOp: PLUS
-   39      | MINUS
-   40      | STAR
-   41      | BSLASH
+   39 BinOp: PLUS
+   40      | MINUS
+   41      | STAR
+   42      | BSLASH
 
-   42 WriteStmt: WRITE ID SEMICOLON
+   43 WriteStmt: WRITE ID SEMICOLON
 
 
 Terminals, with rules where they appear
 
 $end (0) 0
 error (256)
-TYPE (258) 5 8 11 17
-ID (259) 5 8 11 17 21 27 29 30 32 36 37 42
-SEMICOLON (260) 5 8 24 27 29 30 42
-LBRACK (261) 5 30 37
-RBRACK (262) 5 30 37
+TYPE (258) 5 8 11 17 33
+ID (259) 5 8 11 17 21 27 29 30 32 37 38 43
+SEMICOLON (260) 5 8 24 27 29 30 43
+LBRACK (261) 5 30 38
+RBRACK (262) 5 30 38
 LCURBRACK (263) 23
 RCURBRACK (264) 23
-LPAREN (265) 13 29 36
-RPAREN (266) 13 29 36
+LPAREN (265) 13 29 33 37
+RPAREN (266) 13 29 33 37
 COMMA (267) 16 20
 DOT (268)
 EQ (269) 27 30
-PLUS (270) 38
-MINUS (271) 39
-STAR (272) 40
-BSLASH (273) 41
-BOOL (274) 34
-NUMBER (275) 5 22 30 35 37
-FLOAT (276) 33
-WRITE (277) 42
+PLUS (270) 39
+MINUS (271) 40
+STAR (272) 41
+BSLASH (273) 42
+BOOL (274) 35
+NUMBER (275) 5 22 30 36 38
+FLOAT (276) 34
+WRITE (277) 43
 RETURN (278) 24
 FUNC (279) 11
 ARRAY (280) 5
@@ -132,7 +134,7 @@ ParamList (37)
 Param (38)
     on left: 17, on right: 15 16
 InputParamList (39)
-    on left: 18 19 20, on right: 20 29 36
+    on left: 18 19 20, on right: 20 29 37
 InputParam (40)
     on left: 21 22, on right: 19 20
 Block (41)
@@ -144,48 +146,40 @@ StmtList (43)
 Stmt (44)
     on left: 27 28 29 30, on right: 26
 Expr (45)
-    on left: 31 32 33 34 35 36 37, on right: 24 27 30 31
+    on left: 31 32 33 34 35 36 37 38, on right: 24 27 30 31 33
 BinOp (46)
-    on left: 38 39 40 41, on right: 31
+    on left: 39 40 41 42, on right: 31
 WriteStmt (47)
-    on left: 42, on right: 28
+    on left: 43, on right: 28
 
 
 state 0
 
     0 $accept: . Program $end
 
-    TYPE  shift, and go to state 1
-
     $default  reduce using rule 6 (VarDeclList)
 
-    Program      go to state 2
-    VarDeclList  go to state 3
-    VarDecl      go to state 4
+    Program      go to state 1
+    VarDeclList  go to state 2
 
 
 state 1
 
-    8 VarDecl: TYPE . ID SEMICOLON
+    0 $accept: Program . $end
 
-    ID  shift, and go to state 5
+    $end  shift, and go to state 3
 
 
 state 2
 
-    0 $accept: Program . $end
-
-    $end  shift, and go to state 6
-
-
-state 3
-
     1 Program: VarDeclList . FuncDeclList StmtList
     2        | VarDeclList . StmtList
+    7 VarDeclList: VarDeclList . VarDecl
 
-    ID     shift, and go to state 7
-    WRITE  shift, and go to state 8
-    FUNC   shift, and go to state 9
+    TYPE   shift, and go to state 4
+    ID     shift, and go to state 5
+    WRITE  shift, and go to state 6
+    FUNC   shift, and go to state 7
 
     $end      reduce using rule 9 (FuncDeclList)
     $end      [reduce using rule 25 (StmtList)]
@@ -193,168 +187,158 @@ state 3
     WRITE     [reduce using rule 9 (FuncDeclList)]
     $default  reduce using rule 9 (FuncDeclList)
 
-    FuncDeclList   go to state 10
-    FuncSignature  go to state 11
-    FuncDecl       go to state 12
-    StmtList       go to state 13
-    Stmt           go to state 14
-    WriteStmt      go to state 15
+    VarDecl        go to state 8
+    FuncDeclList   go to state 9
+    FuncSignature  go to state 10
+    FuncDecl       go to state 11
+    StmtList       go to state 12
+    Stmt           go to state 13
+    WriteStmt      go to state 14
 
 
-state 4
-
-    7 VarDeclList: VarDecl . VarDeclList
-
-    TYPE  shift, and go to state 1
-
-    $default  reduce using rule 6 (VarDeclList)
-
-    VarDeclList  go to state 16
-    VarDecl      go to state 4
-
-
-state 5
-
-    8 VarDecl: TYPE ID . SEMICOLON
-
-    SEMICOLON  shift, and go to state 17
-
-
-state 6
+state 3
 
     0 $accept: Program $end .
 
     $default  accept
 
 
-state 7
+state 4
+
+    8 VarDecl: TYPE . ID SEMICOLON
+
+    ID  shift, and go to state 15
+
+
+state 5
 
    27 Stmt: ID . EQ Expr SEMICOLON
    29     | ID . LPAREN InputParamList RPAREN SEMICOLON
    30     | ID . LBRACK NUMBER RBRACK EQ Expr SEMICOLON
 
-    LBRACK  shift, and go to state 18
-    LPAREN  shift, and go to state 19
-    EQ      shift, and go to state 20
+    LBRACK  shift, and go to state 16
+    LPAREN  shift, and go to state 17
+    EQ      shift, and go to state 18
+
+
+state 6
+
+   43 WriteStmt: WRITE . ID SEMICOLON
+
+    ID  shift, and go to state 19
+
+
+state 7
+
+   11 FuncSignature: FUNC . TYPE ID
+
+    TYPE  shift, and go to state 20
 
 
 state 8
 
-   42 WriteStmt: WRITE . ID SEMICOLON
+    7 VarDeclList: VarDeclList VarDecl .
 
-    ID  shift, and go to state 21
+    $default  reduce using rule 7 (VarDeclList)
 
 
 state 9
 
-   11 FuncSignature: FUNC . TYPE ID
-
-    TYPE  shift, and go to state 22
-
-
-state 10
-
     1 Program: VarDeclList FuncDeclList . StmtList
 
-    ID     shift, and go to state 7
-    WRITE  shift, and go to state 8
+    ID     shift, and go to state 5
+    WRITE  shift, and go to state 6
 
     $default  reduce using rule 25 (StmtList)
 
-    StmtList   go to state 23
-    Stmt       go to state 14
-    WriteStmt  go to state 15
+    StmtList   go to state 21
+    Stmt       go to state 13
+    WriteStmt  go to state 14
 
 
-state 11
+state 10
 
    13 FuncDecl: FuncSignature . @1 LPAREN ParamList RPAREN Block
 
     $default  reduce using rule 12 (@1)
 
-    @1  go to state 24
+    @1  go to state 22
 
 
-state 12
+state 11
 
    10 FuncDeclList: FuncDecl . FuncDeclList
 
-    FUNC  shift, and go to state 9
+    FUNC  shift, and go to state 7
 
     $default  reduce using rule 9 (FuncDeclList)
 
-    FuncDeclList   go to state 25
-    FuncSignature  go to state 11
-    FuncDecl       go to state 12
+    FuncDeclList   go to state 23
+    FuncSignature  go to state 10
+    FuncDecl       go to state 11
 
 
-state 13
+state 12
 
     2 Program: VarDeclList StmtList .
 
     $default  reduce using rule 2 (Program)
 
 
-state 14
+state 13
 
    26 StmtList: Stmt . StmtList
 
-    ID     shift, and go to state 7
-    WRITE  shift, and go to state 8
+    ID     shift, and go to state 5
+    WRITE  shift, and go to state 6
 
     $default  reduce using rule 25 (StmtList)
 
-    StmtList   go to state 26
-    Stmt       go to state 14
-    WriteStmt  go to state 15
+    StmtList   go to state 24
+    Stmt       go to state 13
+    WriteStmt  go to state 14
 
 
-state 15
+state 14
 
    28 Stmt: WriteStmt .
 
     $default  reduce using rule 28 (Stmt)
 
 
+state 15
+
+    8 VarDecl: TYPE ID . SEMICOLON
+
+    SEMICOLON  shift, and go to state 25
+
+
 state 16
 
-    7 VarDeclList: VarDecl VarDeclList .
+   30 Stmt: ID LBRACK . NUMBER RBRACK EQ Expr SEMICOLON
 
-    $default  reduce using rule 7 (VarDeclList)
+    NUMBER  shift, and go to state 26
 
 
 state 17
 
-    8 VarDecl: TYPE ID SEMICOLON .
+   29 Stmt: ID LPAREN . InputParamList RPAREN SEMICOLON
 
-    $default  reduce using rule 8 (VarDecl)
+    ID      shift, and go to state 27
+    NUMBER  shift, and go to state 28
+
+    $default  reduce using rule 18 (InputParamList)
+
+    InputParamList  go to state 29
+    InputParam      go to state 30
 
 
 state 18
 
-   30 Stmt: ID LBRACK . NUMBER RBRACK EQ Expr SEMICOLON
-
-    NUMBER  shift, and go to state 27
-
-
-state 19
-
-   29 Stmt: ID LPAREN . InputParamList RPAREN SEMICOLON
-
-    ID      shift, and go to state 28
-    NUMBER  shift, and go to state 29
-
-    $default  reduce using rule 18 (InputParamList)
-
-    InputParamList  go to state 30
-    InputParam      go to state 31
-
-
-state 20
-
    27 Stmt: ID EQ . Expr SEMICOLON
 
-    ID      shift, and go to state 32
+    ID      shift, and go to state 31
+    LPAREN  shift, and go to state 32
     BOOL    shift, and go to state 33
     NUMBER  shift, and go to state 34
     FLOAT   shift, and go to state 35
@@ -362,77 +346,84 @@ state 20
     Expr  go to state 36
 
 
-state 21
+state 19
 
-   42 WriteStmt: WRITE ID . SEMICOLON
+   43 WriteStmt: WRITE ID . SEMICOLON
 
     SEMICOLON  shift, and go to state 37
 
 
-state 22
+state 20
 
    11 FuncSignature: FUNC TYPE . ID
 
     ID  shift, and go to state 38
 
 
-state 23
+state 21
 
     1 Program: VarDeclList FuncDeclList StmtList .
 
     $default  reduce using rule 1 (Program)
 
 
-state 24
+state 22
 
    13 FuncDecl: FuncSignature @1 . LPAREN ParamList RPAREN Block
 
     LPAREN  shift, and go to state 39
 
 
-state 25
+state 23
 
    10 FuncDeclList: FuncDecl FuncDeclList .
 
     $default  reduce using rule 10 (FuncDeclList)
 
 
-state 26
+state 24
 
    26 StmtList: Stmt StmtList .
 
     $default  reduce using rule 26 (StmtList)
 
 
-state 27
+state 25
+
+    8 VarDecl: TYPE ID SEMICOLON .
+
+    $default  reduce using rule 8 (VarDecl)
+
+
+state 26
 
    30 Stmt: ID LBRACK NUMBER . RBRACK EQ Expr SEMICOLON
 
     RBRACK  shift, and go to state 40
 
 
-state 28
+state 27
 
    21 InputParam: ID .
 
     $default  reduce using rule 21 (InputParam)
 
 
-state 29
+state 28
 
    22 InputParam: NUMBER .
 
     $default  reduce using rule 22 (InputParam)
 
 
-state 30
+state 29
 
    29 Stmt: ID LPAREN InputParamList . RPAREN SEMICOLON
 
     RPAREN  shift, and go to state 41
 
 
-state 31
+state 30
 
    19 InputParamList: InputParam .
    20               | InputParam . COMMA InputParamList
@@ -442,11 +433,11 @@ state 31
     $default  reduce using rule 19 (InputParamList)
 
 
-state 32
+state 31
 
    32 Expr: ID .
-   36     | ID . LPAREN InputParamList RPAREN
-   37     | ID . LBRACK NUMBER RBRACK
+   37     | ID . LPAREN InputParamList RPAREN
+   38     | ID . LBRACK NUMBER RBRACK
 
     LBRACK  shift, and go to state 43
     LPAREN  shift, and go to state 44
@@ -454,25 +445,32 @@ state 32
     $default  reduce using rule 32 (Expr)
 
 
+state 32
+
+   33 Expr: LPAREN . TYPE RPAREN Expr
+
+    TYPE  shift, and go to state 45
+
+
 state 33
 
-   34 Expr: BOOL .
-
-    $default  reduce using rule 34 (Expr)
-
-
-state 34
-
-   35 Expr: NUMBER .
+   35 Expr: BOOL .
 
     $default  reduce using rule 35 (Expr)
 
 
+state 34
+
+   36 Expr: NUMBER .
+
+    $default  reduce using rule 36 (Expr)
+
+
 state 35
 
-   33 Expr: FLOAT .
+   34 Expr: FLOAT .
 
-    $default  reduce using rule 33 (Expr)
+    $default  reduce using rule 34 (Expr)
 
 
 state 36
@@ -480,20 +478,20 @@ state 36
    27 Stmt: ID EQ Expr . SEMICOLON
    31 Expr: Expr . BinOp Expr
 
-    SEMICOLON  shift, and go to state 45
-    PLUS       shift, and go to state 46
-    MINUS      shift, and go to state 47
-    STAR       shift, and go to state 48
-    BSLASH     shift, and go to state 49
+    SEMICOLON  shift, and go to state 46
+    PLUS       shift, and go to state 47
+    MINUS      shift, and go to state 48
+    STAR       shift, and go to state 49
+    BSLASH     shift, and go to state 50
 
-    BinOp  go to state 50
+    BinOp  go to state 51
 
 
 state 37
 
-   42 WriteStmt: WRITE ID SEMICOLON .
+   43 WriteStmt: WRITE ID SEMICOLON .
 
-    $default  reduce using rule 42 (WriteStmt)
+    $default  reduce using rule 43 (WriteStmt)
 
 
 state 38
@@ -507,181 +505,203 @@ state 39
 
    13 FuncDecl: FuncSignature @1 LPAREN . ParamList RPAREN Block
 
-    TYPE  shift, and go to state 51
+    TYPE  shift, and go to state 52
 
     $default  reduce using rule 14 (ParamList)
 
-    ParamList  go to state 52
-    Param      go to state 53
+    ParamList  go to state 53
+    Param      go to state 54
 
 
 state 40
 
    30 Stmt: ID LBRACK NUMBER RBRACK . EQ Expr SEMICOLON
 
-    EQ  shift, and go to state 54
+    EQ  shift, and go to state 55
 
 
 state 41
 
    29 Stmt: ID LPAREN InputParamList RPAREN . SEMICOLON
 
-    SEMICOLON  shift, and go to state 55
+    SEMICOLON  shift, and go to state 56
 
 
 state 42
 
    20 InputParamList: InputParam COMMA . InputParamList
 
-    ID      shift, and go to state 28
-    NUMBER  shift, and go to state 29
+    ID      shift, and go to state 27
+    NUMBER  shift, and go to state 28
 
     $default  reduce using rule 18 (InputParamList)
 
-    InputParamList  go to state 56
-    InputParam      go to state 31
+    InputParamList  go to state 57
+    InputParam      go to state 30
 
 
 state 43
 
-   37 Expr: ID LBRACK . NUMBER RBRACK
+   38 Expr: ID LBRACK . NUMBER RBRACK
 
-    NUMBER  shift, and go to state 57
+    NUMBER  shift, and go to state 58
 
 
 state 44
 
-   36 Expr: ID LPAREN . InputParamList RPAREN
+   37 Expr: ID LPAREN . InputParamList RPAREN
 
-    ID      shift, and go to state 28
-    NUMBER  shift, and go to state 29
+    ID      shift, and go to state 27
+    NUMBER  shift, and go to state 28
 
     $default  reduce using rule 18 (InputParamList)
 
-    InputParamList  go to state 58
-    InputParam      go to state 31
+    InputParamList  go to state 59
+    InputParam      go to state 30
 
 
 state 45
+
+   33 Expr: LPAREN TYPE . RPAREN Expr
+
+    RPAREN  shift, and go to state 60
+
+
+state 46
 
    27 Stmt: ID EQ Expr SEMICOLON .
 
     $default  reduce using rule 27 (Stmt)
 
 
-state 46
-
-   38 BinOp: PLUS .
-
-    $default  reduce using rule 38 (BinOp)
-
-
 state 47
 
-   39 BinOp: MINUS .
+   39 BinOp: PLUS .
 
     $default  reduce using rule 39 (BinOp)
 
 
 state 48
 
-   40 BinOp: STAR .
+   40 BinOp: MINUS .
 
     $default  reduce using rule 40 (BinOp)
 
 
 state 49
 
-   41 BinOp: BSLASH .
+   41 BinOp: STAR .
 
     $default  reduce using rule 41 (BinOp)
 
 
 state 50
 
-   31 Expr: Expr BinOp . Expr
+   42 BinOp: BSLASH .
 
-    ID      shift, and go to state 32
-    BOOL    shift, and go to state 33
-    NUMBER  shift, and go to state 34
-    FLOAT   shift, and go to state 35
-
-    Expr  go to state 59
+    $default  reduce using rule 42 (BinOp)
 
 
 state 51
 
-   17 Param: TYPE . ID
+   31 Expr: Expr BinOp . Expr
 
-    ID  shift, and go to state 60
-
-
-state 52
-
-   13 FuncDecl: FuncSignature @1 LPAREN ParamList . RPAREN Block
-
-    RPAREN  shift, and go to state 61
-
-
-state 53
-
-   15 ParamList: Param .
-   16          | Param . COMMA ParamList
-
-    COMMA  shift, and go to state 62
-
-    $default  reduce using rule 15 (ParamList)
-
-
-state 54
-
-   30 Stmt: ID LBRACK NUMBER RBRACK EQ . Expr SEMICOLON
-
-    ID      shift, and go to state 32
+    ID      shift, and go to state 31
+    LPAREN  shift, and go to state 32
     BOOL    shift, and go to state 33
     NUMBER  shift, and go to state 34
     FLOAT   shift, and go to state 35
 
-    Expr  go to state 63
+    Expr  go to state 61
+
+
+state 52
+
+   17 Param: TYPE . ID
+
+    ID  shift, and go to state 62
+
+
+state 53
+
+   13 FuncDecl: FuncSignature @1 LPAREN ParamList . RPAREN Block
+
+    RPAREN  shift, and go to state 63
+
+
+state 54
+
+   15 ParamList: Param .
+   16          | Param . COMMA ParamList
+
+    COMMA  shift, and go to state 64
+
+    $default  reduce using rule 15 (ParamList)
 
 
 state 55
+
+   30 Stmt: ID LBRACK NUMBER RBRACK EQ . Expr SEMICOLON
+
+    ID      shift, and go to state 31
+    LPAREN  shift, and go to state 32
+    BOOL    shift, and go to state 33
+    NUMBER  shift, and go to state 34
+    FLOAT   shift, and go to state 35
+
+    Expr  go to state 65
+
+
+state 56
 
    29 Stmt: ID LPAREN InputParamList RPAREN SEMICOLON .
 
     $default  reduce using rule 29 (Stmt)
 
 
-state 56
+state 57
 
    20 InputParamList: InputParam COMMA InputParamList .
 
     $default  reduce using rule 20 (InputParamList)
 
 
-state 57
-
-   37 Expr: ID LBRACK NUMBER . RBRACK
-
-    RBRACK  shift, and go to state 64
-
-
 state 58
 
-   36 Expr: ID LPAREN InputParamList . RPAREN
+   38 Expr: ID LBRACK NUMBER . RBRACK
 
-    RPAREN  shift, and go to state 65
+    RBRACK  shift, and go to state 66
 
 
 state 59
 
+   37 Expr: ID LPAREN InputParamList . RPAREN
+
+    RPAREN  shift, and go to state 67
+
+
+state 60
+
+   33 Expr: LPAREN TYPE RPAREN . Expr
+
+    ID      shift, and go to state 31
+    LPAREN  shift, and go to state 32
+    BOOL    shift, and go to state 33
+    NUMBER  shift, and go to state 34
+    FLOAT   shift, and go to state 35
+
+    Expr  go to state 68
+
+
+state 61
+
    31 Expr: Expr . BinOp Expr
    31     | Expr BinOp Expr .
 
-    PLUS    shift, and go to state 46
-    MINUS   shift, and go to state 47
-    STAR    shift, and go to state 48
-    BSLASH  shift, and go to state 49
+    PLUS    shift, and go to state 47
+    MINUS   shift, and go to state 48
+    STAR    shift, and go to state 49
+    BSLASH  shift, and go to state 50
 
     PLUS      [reduce using rule 31 (Expr)]
     MINUS     [reduce using rule 31 (Expr)]
@@ -689,242 +709,262 @@ state 59
     BSLASH    [reduce using rule 31 (Expr)]
     $default  reduce using rule 31 (Expr)
 
-    BinOp  go to state 50
+    BinOp  go to state 51
 
 
-state 60
+state 62
 
    17 Param: TYPE ID .
 
     $default  reduce using rule 17 (Param)
 
 
-state 61
+state 63
 
    13 FuncDecl: FuncSignature @1 LPAREN ParamList RPAREN . Block
 
-    LCURBRACK  shift, and go to state 66
+    LCURBRACK  shift, and go to state 69
 
-    Block  go to state 67
-
-
-state 62
-
-   16 ParamList: Param COMMA . ParamList
-
-    TYPE  shift, and go to state 51
-
-    $default  reduce using rule 14 (ParamList)
-
-    ParamList  go to state 68
-    Param      go to state 53
-
-
-state 63
-
-   30 Stmt: ID LBRACK NUMBER RBRACK EQ Expr . SEMICOLON
-   31 Expr: Expr . BinOp Expr
-
-    SEMICOLON  shift, and go to state 69
-    PLUS       shift, and go to state 46
-    MINUS      shift, and go to state 47
-    STAR       shift, and go to state 48
-    BSLASH     shift, and go to state 49
-
-    BinOp  go to state 50
+    Block  go to state 70
 
 
 state 64
 
-   37 Expr: ID LBRACK NUMBER RBRACK .
+   16 ParamList: Param COMMA . ParamList
 
-    $default  reduce using rule 37 (Expr)
+    TYPE  shift, and go to state 52
+
+    $default  reduce using rule 14 (ParamList)
+
+    ParamList  go to state 71
+    Param      go to state 54
 
 
 state 65
 
-   36 Expr: ID LPAREN InputParamList RPAREN .
+   30 Stmt: ID LBRACK NUMBER RBRACK EQ Expr . SEMICOLON
+   31 Expr: Expr . BinOp Expr
 
-    $default  reduce using rule 36 (Expr)
+    SEMICOLON  shift, and go to state 72
+    PLUS       shift, and go to state 47
+    MINUS      shift, and go to state 48
+    STAR       shift, and go to state 49
+    BSLASH     shift, and go to state 50
+
+    BinOp  go to state 51
 
 
 state 66
 
-   23 Block: LCURBRACK . VarDeclList ArrayDeclList StmtList ReturnStmt RCURBRACK
+   38 Expr: ID LBRACK NUMBER RBRACK .
 
-    TYPE  shift, and go to state 1
-
-    $default  reduce using rule 6 (VarDeclList)
-
-    VarDeclList  go to state 70
-    VarDecl      go to state 4
+    $default  reduce using rule 38 (Expr)
 
 
 state 67
+
+   37 Expr: ID LPAREN InputParamList RPAREN .
+
+    $default  reduce using rule 37 (Expr)
+
+
+state 68
+
+   31 Expr: Expr . BinOp Expr
+   33     | LPAREN TYPE RPAREN Expr .
+
+    PLUS    shift, and go to state 47
+    MINUS   shift, and go to state 48
+    STAR    shift, and go to state 49
+    BSLASH  shift, and go to state 50
+
+    PLUS      [reduce using rule 33 (Expr)]
+    MINUS     [reduce using rule 33 (Expr)]
+    STAR      [reduce using rule 33 (Expr)]
+    BSLASH    [reduce using rule 33 (Expr)]
+    $default  reduce using rule 33 (Expr)
+
+    BinOp  go to state 51
+
+
+state 69
+
+   23 Block: LCURBRACK . ArrayDeclList VarDeclList StmtList ReturnStmt RCURBRACK
+
+    ARRAY  shift, and go to state 73
+
+    $default  reduce using rule 3 (ArrayDeclList)
+
+    ArrayDeclList  go to state 74
+    ArrayDecl      go to state 75
+
+
+state 70
 
    13 FuncDecl: FuncSignature @1 LPAREN ParamList RPAREN Block .
 
     $default  reduce using rule 13 (FuncDecl)
 
 
-state 68
+state 71
 
    16 ParamList: Param COMMA ParamList .
 
     $default  reduce using rule 16 (ParamList)
 
 
-state 69
+state 72
 
    30 Stmt: ID LBRACK NUMBER RBRACK EQ Expr SEMICOLON .
 
     $default  reduce using rule 30 (Stmt)
 
 
-state 70
-
-   23 Block: LCURBRACK VarDeclList . ArrayDeclList StmtList ReturnStmt RCURBRACK
-
-    ARRAY  shift, and go to state 71
-
-    $default  reduce using rule 3 (ArrayDeclList)
-
-    ArrayDeclList  go to state 72
-    ArrayDecl      go to state 73
-
-
-state 71
+state 73
 
     5 ArrayDecl: ARRAY . TYPE ID LBRACK NUMBER RBRACK SEMICOLON
 
-    TYPE  shift, and go to state 74
-
-
-state 72
-
-   23 Block: LCURBRACK VarDeclList ArrayDeclList . StmtList ReturnStmt RCURBRACK
-
-    ID     shift, and go to state 7
-    WRITE  shift, and go to state 8
-
-    $default  reduce using rule 25 (StmtList)
-
-    StmtList   go to state 75
-    Stmt       go to state 14
-    WriteStmt  go to state 15
-
-
-state 73
-
-    4 ArrayDeclList: ArrayDecl . ArrayDeclList
-
-    ARRAY  shift, and go to state 71
-
-    $default  reduce using rule 3 (ArrayDeclList)
-
-    ArrayDeclList  go to state 76
-    ArrayDecl      go to state 73
+    TYPE  shift, and go to state 76
 
 
 state 74
 
-    5 ArrayDecl: ARRAY TYPE . ID LBRACK NUMBER RBRACK SEMICOLON
+   23 Block: LCURBRACK ArrayDeclList . VarDeclList StmtList ReturnStmt RCURBRACK
 
-    ID  shift, and go to state 77
+    $default  reduce using rule 6 (VarDeclList)
+
+    VarDeclList  go to state 77
 
 
 state 75
 
-   23 Block: LCURBRACK VarDeclList ArrayDeclList StmtList . ReturnStmt RCURBRACK
+    4 ArrayDeclList: ArrayDecl . ArrayDeclList
 
-    RETURN  shift, and go to state 78
+    ARRAY  shift, and go to state 73
 
-    ReturnStmt  go to state 79
+    $default  reduce using rule 3 (ArrayDeclList)
+
+    ArrayDeclList  go to state 78
+    ArrayDecl      go to state 75
 
 
 state 76
+
+    5 ArrayDecl: ARRAY TYPE . ID LBRACK NUMBER RBRACK SEMICOLON
+
+    ID  shift, and go to state 79
+
+
+state 77
+
+    7 VarDeclList: VarDeclList . VarDecl
+   23 Block: LCURBRACK ArrayDeclList VarDeclList . StmtList ReturnStmt RCURBRACK
+
+    TYPE   shift, and go to state 4
+    ID     shift, and go to state 5
+    WRITE  shift, and go to state 6
+
+    $default  reduce using rule 25 (StmtList)
+
+    VarDecl    go to state 8
+    StmtList   go to state 80
+    Stmt       go to state 13
+    WriteStmt  go to state 14
+
+
+state 78
 
     4 ArrayDeclList: ArrayDecl ArrayDeclList .
 
     $default  reduce using rule 4 (ArrayDeclList)
 
 
-state 77
+state 79
 
     5 ArrayDecl: ARRAY TYPE ID . LBRACK NUMBER RBRACK SEMICOLON
 
-    LBRACK  shift, and go to state 80
-
-
-state 78
-
-   24 ReturnStmt: RETURN . Expr SEMICOLON
-
-    ID      shift, and go to state 32
-    BOOL    shift, and go to state 33
-    NUMBER  shift, and go to state 34
-    FLOAT   shift, and go to state 35
-
-    Expr  go to state 81
-
-
-state 79
-
-   23 Block: LCURBRACK VarDeclList ArrayDeclList StmtList ReturnStmt . RCURBRACK
-
-    RCURBRACK  shift, and go to state 82
+    LBRACK  shift, and go to state 81
 
 
 state 80
 
-    5 ArrayDecl: ARRAY TYPE ID LBRACK . NUMBER RBRACK SEMICOLON
+   23 Block: LCURBRACK ArrayDeclList VarDeclList StmtList . ReturnStmt RCURBRACK
 
-    NUMBER  shift, and go to state 83
+    RETURN  shift, and go to state 82
+
+    ReturnStmt  go to state 83
 
 
 state 81
 
-   24 ReturnStmt: RETURN Expr . SEMICOLON
-   31 Expr: Expr . BinOp Expr
+    5 ArrayDecl: ARRAY TYPE ID LBRACK . NUMBER RBRACK SEMICOLON
 
-    SEMICOLON  shift, and go to state 84
-    PLUS       shift, and go to state 46
-    MINUS      shift, and go to state 47
-    STAR       shift, and go to state 48
-    BSLASH     shift, and go to state 49
-
-    BinOp  go to state 50
+    NUMBER  shift, and go to state 84
 
 
 state 82
 
-   23 Block: LCURBRACK VarDeclList ArrayDeclList StmtList ReturnStmt RCURBRACK .
+   24 ReturnStmt: RETURN . Expr SEMICOLON
 
-    $default  reduce using rule 23 (Block)
+    ID      shift, and go to state 31
+    LPAREN  shift, and go to state 32
+    BOOL    shift, and go to state 33
+    NUMBER  shift, and go to state 34
+    FLOAT   shift, and go to state 35
+
+    Expr  go to state 85
 
 
 state 83
 
-    5 ArrayDecl: ARRAY TYPE ID LBRACK NUMBER . RBRACK SEMICOLON
+   23 Block: LCURBRACK ArrayDeclList VarDeclList StmtList ReturnStmt . RCURBRACK
 
-    RBRACK  shift, and go to state 85
+    RCURBRACK  shift, and go to state 86
 
 
 state 84
+
+    5 ArrayDecl: ARRAY TYPE ID LBRACK NUMBER . RBRACK SEMICOLON
+
+    RBRACK  shift, and go to state 87
+
+
+state 85
+
+   24 ReturnStmt: RETURN Expr . SEMICOLON
+   31 Expr: Expr . BinOp Expr
+
+    SEMICOLON  shift, and go to state 88
+    PLUS       shift, and go to state 47
+    MINUS      shift, and go to state 48
+    STAR       shift, and go to state 49
+    BSLASH     shift, and go to state 50
+
+    BinOp  go to state 51
+
+
+state 86
+
+   23 Block: LCURBRACK ArrayDeclList VarDeclList StmtList ReturnStmt RCURBRACK .
+
+    $default  reduce using rule 23 (Block)
+
+
+state 87
+
+    5 ArrayDecl: ARRAY TYPE ID LBRACK NUMBER RBRACK . SEMICOLON
+
+    SEMICOLON  shift, and go to state 89
+
+
+state 88
 
    24 ReturnStmt: RETURN Expr SEMICOLON .
 
     $default  reduce using rule 24 (ReturnStmt)
 
 
-state 85
-
-    5 ArrayDecl: ARRAY TYPE ID LBRACK NUMBER RBRACK . SEMICOLON
-
-    SEMICOLON  shift, and go to state 86
-
-
-state 86
+state 89
 
     5 ArrayDecl: ARRAY TYPE ID LBRACK NUMBER RBRACK SEMICOLON .
 
