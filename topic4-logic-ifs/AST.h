@@ -35,7 +35,8 @@ typedef enum {
     NodeType_ArrayDeclList,
     NodeType_ArrayDecl,
     NodeType_ArrayAssignStmt,
-    NodeType_ArrayAccess
+    NodeType_ArrayAccess,
+    NodeType_TypeCast,
 } NodeType;
 
 // Structure for AST nodes
@@ -61,6 +62,7 @@ typedef struct ASTNode {
         struct {
             char* number;
             char* temp;
+            char* type;
         } simpleExpr;
 
         struct {
@@ -69,10 +71,11 @@ typedef struct ASTNode {
         } simpleID;
 
         struct {
-            // Expression-specific fields
+            // Expression-speci fic fields
             char operator;  // Example for an operator field
             struct ASTNode* left;  // Left operand
             struct ASTNode* right; // Right operand
+            char* expr_type; // Type of the expression
             char* temp; // Temporary variable for TAC
         } expr;
 
@@ -183,6 +186,12 @@ typedef struct ASTNode {
             char* index;
             char* temp;
         } arrayAccess;
+
+        struct TypeCast {
+            char* name;
+            char* type;
+            struct ASTNode* expr;
+        } typeCast;
     };
 } ASTNode;
 

@@ -18,6 +18,7 @@ typedef struct TAC {
     char* arg1; // Argument 1
     char* arg2; // Argument 2
     char* result; // Result
+    char* type;
     struct TAC* next; // Next instruction
     symbol_table* scope; // Scope of the instruction
     bool dead; // Add this field
@@ -34,6 +35,7 @@ TAC* pop_TAC(TACStack** stack);
 bool is_TAC_stack_empty(TACStack* stack);
 
 extern int temp_vars[10]; // Declaration only
+extern int float_temp_vars[30]; // Declaration only
 extern TAC* tac_head; // Global head of the TAC instructions list
 
 // Function to allocate argument registers for parameters
@@ -44,11 +46,13 @@ void deallocate_arg_register(int arg_regs[], int index);
 char* get_arg_register(int index);
 bool is_arg_register(const char* str);
 int allocate_temp_var(int temp_vars[]);
+int allocate_float_temp_var(int float_temp_vars[]);
 char* create_arg_register();
 bool is_temp_var(const char* str);
 void semantic_analysis(ASTNode* node, symbol_table* symTab);
 TAC* tac_expr(ASTNode* expr, symbol_table* sym_table); //returns the TAC for the expression to print on console
 char* create_temp_var();
+char* create_float_temp_var();
 char* create_operand(ASTNode* node);
 void print_TAC(TAC* tac);
 void initialize_temp_vars();

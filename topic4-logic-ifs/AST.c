@@ -147,6 +147,11 @@ void traverseAST(ASTNode* node, int level) {
             printIndent(level);
             printf("Array Access\n");
             break;
+        case NodeType_TypeCast:
+            printIndent(level);
+            printf("Type Cast\n");
+            traverseAST(node->typeCast.expr, level + indentValue);
+            break;
     }
 }
 
@@ -231,6 +236,9 @@ void printASTNode(ASTNode* node) {
             break;
         case NodeType_ArrayAccess:
             printf("Array Access\n");
+            break;
+        case NodeType_TypeCast:
+            printf("Type Cast\n");
             break;
     }
 } 
@@ -333,6 +341,9 @@ void freeAST(ASTNode* node) {
             break;
         case NodeType_ArrayAccess:
             break;
+        case NodeType_TypeCast:
+            free(node->typeCast.expr);
+            break;
     }
 
     free(node);
@@ -363,6 +374,9 @@ ASTNode* createNode(NodeType type) {
             newNode->varDecl.varName = NULL;
             break;
         case NodeType_SimpleExpr:
+            newNode->simpleExpr.number = NULL;
+            newNode->simpleExpr.temp = NULL;
+            newNode->simpleExpr.type = NULL;
             // newNode->simpleExpr.number = NULL;
             break;
         case NodeType_SimpleID:
@@ -372,6 +386,7 @@ ASTNode* createNode(NodeType type) {
             newNode->expr.operator = '\0';  // Placeholder value
             newNode->expr.left = NULL;
             newNode->expr.right = NULL;
+            newNode->expr.expr_type = NULL;
             break;
         case NodeType_StmtList:
             newNode->stmtList.stmt = NULL;  // Example initialization
@@ -449,6 +464,11 @@ ASTNode* createNode(NodeType type) {
         case NodeType_ArrayAccess:
             newNode->arrayAccess.varName = NULL;
             newNode->arrayAccess.index = NULL;
+            break;
+        case NodeType_TypeCast:
+            newNode->typeCast.name = NULL;
+            newNode->typeCast.type = NULL;
+            newNode->typeCast.expr = NULL;
             break;
     }
 

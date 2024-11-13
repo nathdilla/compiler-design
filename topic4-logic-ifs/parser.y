@@ -40,6 +40,7 @@ symbol_table* current_scope = NULL;
 
 %union {
 	int number;
+	float fval;
 	char character;
 	char* string;
 	char* operator;
@@ -56,16 +57,20 @@ symbol_table* current_scope = NULL;
 %token <char> LPAREN
 %token <char> RPAREN
 %token <char> COMMA
+%token <char> DOT
 %token <operator> EQ
 %token <operator> PLUS
 %token <operator> MINUS
 %token <operator> STAR 
 %token <operator> BSLASH
+%token <string> BOOL
 %token <number> NUMBER
+%token <fval> FLOAT
 %token <string> WRITE
 %token <string> RETURN
 %token <string> FUNC
 %token <string> ARRAY
+%token <string> IF
 
 
 %printer { fprintf(yyoutput, "%s", $$); } ID;
@@ -126,7 +131,7 @@ ArrayDecl
 
 VarDeclList
 		  	: 						{/*empty, i.e. it is possible not to declare a variable*/}
-		  	| 	VarDecl VarDeclList {  
+		  	| 	VarDeclList VarDecl {  
 									printf("PARSER: Recognized variable declaration list\n"); 
 									$$ = malloc(sizeof(ASTNode));
 									$$->type = NodeType_VarDeclList;
@@ -268,24 +273,15 @@ InputParam
 ;
 
 Block
-	  	:    	LCURBRACK 
-			{ 
-				
-			} 	VarDeclList ArrayDeclList StmtList ReturnStmt
-			{
-				
-			}
-				RCURBRACK 	
+	  	:    	LCURBRACK ArrayDeclList VarDeclList StmtList ReturnStmt RCURBRACK 					
 			{ 
 				printf("PARSER: Recognized block\n"); 
 				$$ = malloc(sizeof(ASTNode));
 				$$->type = NodeType_Block;
 				$$->block.varDeclList = $3;
-				$$->block.arrayDeclList = $4;
-				$$->block.stmtList = $5;
-				$$->block.returnStmt = $6;
-				// $$->block.scope = current_scope;
-				// printf("setting block scope to %s\n", current_scope->scope_name);
+				$$->block.arrayDeclList = $2;
+				$$->block.stmtList = $4;
+				$$->block.returnStmt = $5;
 			}
 
 ;
@@ -360,6 +356,29 @@ Expr
 						$$->type = NodeType_SimpleID;
 						$$->simpleID.name = $1;
 						}
+	| 	LPAREN TYPE RPAREN Expr 	{ 
+						printf("PARSER: Recognized type cast\n");
+						$$ = malloc(sizeof(ASTNode));
+						$$->type = NodeType_TypeCast;
+						$$->typeCast.type = strdup($2);
+						$$->typeCast.expr = $4;
+						}
+	| 	FLOAT {
+						printf("PARSER: Recognized float\n");
+						$$ = malloc(sizeof(ASTNode));
+						$$->type = NodeType_SimpleExpr;
+						char buffer[20];
+						snprintf(buffer, sizeof(buffer), "%f", $1);
+						$$->simpleExpr.number = strdup(buffer);
+						$$->simpleExpr.type = "float";
+					}
+	| 	BOOL {
+						printf("PARSER: Recognized boolean\n");
+						$$ = malloc(sizeof(ASTNode));
+						$$->type = NodeType_SimpleExpr;
+						$$->simpleExpr.number = strdup($1);
+						$$->simpleExpr.type = "bool";
+						}
 	| 	NUMBER 			{ 
 						printf("PARSER: Recognized number\n");
 						$$ = malloc(sizeof(ASTNode));
@@ -367,6 +386,7 @@ Expr
 						char buffer[20];
 						snprintf(buffer, sizeof(buffer), "%d", $1);
 						$$->simpleExpr.number = strdup(buffer);
+						$$->simpleExpr.type = "int";
 						}
 	|   ID LPAREN InputParamList RPAREN 	{
 						printf("PARSER: Recognized function call\n");

@@ -1,21 +1,11 @@
-arg declare
-
-func addTwoNums
-a0 param a
-a1 param b
-result declare
-t2 = t0 + t1
-result = t2
-return result
-
 
 func main
-x declare
-arr array, size 5
-arr[3] = 2
-t3 = arr[3]
-x = t3
-write x
+a declare
+b declare
+t0 = 1 + 2
+a = t0
+f1 = 1.600000 + 1.000000
+b = f1
+write b
 return 0
 
-arg = 1

@@ -7,6 +7,7 @@ TAC* tac_head = NULL;
 TACStack* tac_buffer_head = NULL;
 
 int temp_vars[10] = {0}; // Definition and initialization
+int float_temp_vars[30] = {0}; // Definition and initialization
 int arg_regs[10] = {0}; // Definition and initialization
 int arg_reg_index = 0;
 int allocated_arg_regs = -1;
@@ -56,11 +57,59 @@ void semantic_analysis(ASTNode* node, symbol_table* sym_table) {
         case NodeType_AssignStmt:
             printf("Performing semantic analysis on assignment statement\n");
             semantic_analysis(node->assignStmt.expr, sym_table);
+            symbol* sym = lookup(sym_table, node->assignStmt.varName);
+            // check if symbol type matches expression type
+            char* expr_type = "none";
+            if (node->assignStmt.expr->type == NodeType_SimpleExpr) {
+                expr_type = node->assignStmt.expr->simpleExpr.type;
+                printf("simple type found: %s\n", expr_type);
+            } else if (node->assignStmt.expr->type == NodeType_Expr) {
+                expr_type = node->assignStmt.expr->expr.expr_type;
+                printf("expr type found: %s\n", expr_type);
+            } else if (node->assignStmt.expr->type == NodeType_TypeCast) {
+                expr_type = node->assignStmt.expr->typeCast.type;
+                printf("type cast type found: %s\n", expr_type);
+            } else {
+                printf("type not found\n");
+            }
+            if (sym != NULL) {
+                if (strcmp(expr_type, sym->type) != 0) {
+                    fprintf(stderr, "Semantic error: Type mismatch in assignment to variable '%s'. Expected: %s, Found: %s\n", node->assignStmt.varName, sym->type, expr_type);
+                } else {
+                    printf("Type match: %s\n", expr_type);
+                }
+            }
             break;
         case NodeType_Expr:
             printf("Performing semantic analysis on expression\n");
+            // Check if types match
             semantic_analysis(node->expr.left, sym_table);
             semantic_analysis(node->expr.right, sym_table);
+            
+            char* left_type = "none";
+            char* right_type = "none";
+
+            if (node->expr.left->type == NodeType_SimpleExpr) {
+                left_type = node->expr.left->simpleExpr.type;
+            } else if (node->expr.left->type == NodeType_Expr) {
+                left_type = node->expr.left->expr.expr_type;
+            } else if (node->expr.left->type == NodeType_TypeCast) {
+                left_type = node->expr.left->typeCast.type;
+            }
+
+            if (node->expr.right->type == NodeType_SimpleExpr) {
+                right_type = node->expr.right->simpleExpr.type;
+            } else if (node->expr.right->type == NodeType_Expr) {
+                right_type = node->expr.right->expr.expr_type;
+            } else if (node->expr.right->type == NodeType_TypeCast) {
+                right_type = node->expr.right->typeCast.type;
+            }
+
+            if (strcmp(left_type, right_type) != 0) {
+                fprintf(stderr, "Semantic error: Type mismatch in expression. Left: %s, Right: %s\n", left_type, right_type);
+            }
+
+            node->expr.expr_type = left_type;
             break;
         // default:
         //     fprintf(stderr, "Unknown Node Type\n");
@@ -129,11 +178,6 @@ void semantic_analysis(ASTNode* node, symbol_table* sym_table) {
             break;
         case NodeType_Param:
             printf("Performing semantic analysis on parameter\n");
-            // if (lookup(sym_table, node->param.varName) != NULL) {
-            //     fprintf(stderr, "Error: Variable '%s' redeclared.\n", node->param.varName);
-            // } else {
-            //     add_symbol(sym_table, node->param.varName, node->param.varType); // Assuming 0 as initial value
-            // }
             break;
         case NodeType_FuncCall:
             printf("Performing semantic analysis on function call\n");
@@ -164,6 +208,37 @@ void semantic_analysis(ASTNode* node, symbol_table* sym_table) {
             break;
         case NodeType_ArrayAccess:
             printf("Performing semantic analysis on array access\n");
+            // no checks necessary... for now
+            break;
+        case NodeType_TypeCast:
+            printf("Performing semantic analysis on type cast\n");
+            char* target_type = node->typeCast.type;
+            char* curr_type = "none";
+            if (node->typeCast.expr->type == NodeType_SimpleExpr) {
+                printf("Type casting to SimpleExpr\n");
+                curr_type = node->typeCast.expr->simpleExpr.type;
+                if (strcmp(curr_type, "float") == 0 && strcmp(target_type, "int") == 0) {
+                    printf("Type casting float to int\n");
+                    node->typeCast.expr->simpleExpr.type = "int";
+                    char* number = node->typeCast.expr->simpleExpr.number;
+                    int int_number = (int) atof(number);
+                    char buffer[20];
+                    snprintf(buffer, sizeof(buffer), "%d", int_number);
+                    node->typeCast.expr->simpleExpr.number = strdup(buffer);
+                    printf("Type casted number to %s: %s\n", node->typeCast.expr->simpleExpr.type, node->typeCast.expr->simpleExpr.number);
+                }
+                else if (strcmp(curr_type, "int") == 0 && strcmp(target_type, "float") == 0) {
+                    printf("Type casting int to float\n");
+                    node->typeCast.expr->simpleExpr.type = "float";
+                    char* number = node->typeCast.expr->simpleExpr.number;
+                    float float_number = (float) atoi(number);
+                    char buffer[20];
+                    snprintf(buffer, sizeof(buffer), "%f", float_number);
+                    node->typeCast.expr->simpleExpr.number = strdup(buffer);
+                    printf("Type casted number to %s: %s\n", node->typeCast.expr->simpleExpr.type, node->typeCast.expr->simpleExpr.number);
+                }
+            }
+            semantic_analysis(node->typeCast.expr, sym_table);
             // no checks necessary... for now
             break;
         // ... handle other node types ...
@@ -222,10 +297,6 @@ TAC *tac_expr(ASTNode *expr, symbol_table *sym_table)
     if (!instruction)
         return NULL;
 
-    // if (buffering_tac) {
-    //     push_TAC(&tac_buffer_head, instruction);
-    // }
-
     instruction->scope = sym_table;
     printf("Generating TAC in the scope %s\n", sym_table->scope_name);
     switch (expr->type)
@@ -237,50 +308,16 @@ TAC *tac_expr(ASTNode *expr, symbol_table *sym_table)
             instruction->arg2 = create_operand(expr->expr.right);
             char op_str[2] = {expr->expr.operator, '\0' };
             instruction->op = strdup(op_str);
-            instruction->result = create_temp_var();
+            if (strcmp(expr->expr.expr_type, "int") == 0) {
+                instruction->result = create_temp_var();
+                instruction->type = "int";
+            } else if (strcmp(expr->expr.expr_type, "float") == 0) {
+                instruction->result = create_float_temp_var();
+                instruction->type = "float";
+            }
             expr->expr.temp = instruction->result;
             break;
         }
-
-            // case NodeType_SimpleID: {
-            //     symbol* sym = lookup(scope, expr->simpleID.name);
-            //     if (sym != NULL && sym->temp_var == NULL) {
-            //         printf("Generating TAC for simple ID\n");
-            //         instruction->arg1 = create_operand(expr);
-            //         instruction->op = strdup("load");
-            //         instruction->result = create_temp_var();
-            //         expr->simpleID.temp = instruction->result;
-                    
-            //         sym->temp_var = instruction->result;
-            //     } else {
-            //         instruction->arg1 = sym->name;
-            //         instruction->op = strdup("load");
-            //         instruction->result = sym->temp_var;
-            //     }
-            //     break;
-            // }
-            
-        // case NodeType_SimpleID:
-        // {
-        //     symbol *sym = lookup(scope, expr->simpleID.name);
-        //     if (sym != NULL && sym->temp_var == NULL)
-        //     {
-        //         printf("Generating TAC for simple ID\n");
-        //         instruction->arg1 = create_operand(expr);
-        //         instruction->op = strdup("load");
-        //         instruction->result = create_temp_var();
-        //         expr->simpleID.temp = instruction->result;
-
-        //         sym->temp_var = instruction->result;
-        //     }
-        //     else
-        //     {
-        //         instruction->arg1 = sym->name;
-        //         instruction->op = strdup("load");
-        //         instruction->result = sym->temp_var;
-        //     }
-        //     break;
-        // }
 
         case NodeType_VarDecl:
         {
@@ -313,7 +350,6 @@ TAC *tac_expr(ASTNode *expr, symbol_table *sym_table)
             instruction->result = strdup(expr->writeStmt.varName);
             break;
         }
-            // Add cases for other expression types...
 
         case NodeType_FuncSignature: {
             printf("Generating TAC for function declaration\n");
@@ -421,6 +457,17 @@ char *create_temp_var()
     return tempVar;
 }
 
+char *create_float_temp_var()
+{
+    static int count = 0;
+    char *tempVar = malloc(10); // Enough space for "f" + number
+    if (!tempVar)
+        return NULL;
+    count = allocate_float_temp_var(temp_vars);
+    sprintf(tempVar, "f%d", count++);
+    return tempVar;
+}
+
 char* create_operand(ASTNode* node) {
     char buffer[20]; // Declare buffer here
     switch (node->type) {   
@@ -444,6 +491,9 @@ char* create_operand(ASTNode* node) {
                 return sym->temp_var;
             }
             return node->arrayAccess.varName;
+        }
+        case NodeType_TypeCast: {
+            return node->typeCast.expr->simpleExpr.number;
         }
         case NodeType_SimpleExpr:
             // return  node->simpleExpr.number in string format
@@ -560,6 +610,22 @@ void deallocate_temp_var(int temp_vars[], int index)
     if (index >= 0 && index < 20)
     {
         temp_vars[index] = 0;
+    }
+}
+
+int allocate_float_temp_var(int float_temp_vars[]) {
+    for (int i = 0; i < 30; i++) {
+        if (float_temp_vars[i] == 0) {
+            float_temp_vars[i] = 1;
+            return i;
+        }
+    }
+    return -1;
+}
+
+void deallocate_float_temp_var(int index) {
+    if (index >= 0 && index < 30) {
+        float_temp_vars[index] = 0;
     }
 }
 
