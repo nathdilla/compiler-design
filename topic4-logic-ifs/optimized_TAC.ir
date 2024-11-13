@@ -1,9 +1,7 @@
-one declare
-two declare
-three declare
 a declare
 b declare
-c declare
-a = 1
-b = 2.300000
-c = TRUE
+t0 li 3
+a = t0
+f1 li 2.600000
+b = f1
+write b

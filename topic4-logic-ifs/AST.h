@@ -71,7 +71,7 @@ typedef struct ASTNode {
         } simpleID;
 
         struct {
-            // Expression-specific fields
+            // Expression-speci fic fields
             char operator;  // Example for an operator field
             struct ASTNode* left;  // Left operand
             struct ASTNode* right; // Right operand

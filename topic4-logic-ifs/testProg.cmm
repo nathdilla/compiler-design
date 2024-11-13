@@ -1,13 +1,8 @@
-int one;
-int two;
-int three;
-
 function int main() {
     int a;
     float b;
-    bool c;
-    a = 1;
-    b = 2.3;
-    c = TRUE;
+    a = 1 + (int)2.3;
+    b = 1.6 + (float)1;
+    write b;
     return 0;
 }

@@ -167,28 +167,52 @@ void constant_folding(TAC **head)
     {
         if (is_constant(current->arg1) && is_constant(current->arg2))
         {
-            int arg1 = atoi(current->arg1);
-            int arg2 = atoi(current->arg2);
-            int result;
-            if (strcmp(current->op, "+") == 0)
-                result = arg1 + arg2;
-            else if (strcmp(current->op, "-") == 0)
-                result = arg1 - arg2;
-            else if (strcmp(current->op, "*") == 0)
-                result = arg1 * arg2;
-            else if (strcmp(current->op, "/") == 0 && arg2 != 0)
-                result = arg1 / arg2;
-            else
-            {
-                current = current->next;
-                continue;
-            }
             char *result_str = (char *)malloc(20);
-            sprintf(result_str, "%d", result);
+            if (strcmp(current->type, "int") == 0) {
+                printf("int\n");
+                int result;
+                int arg1 = atoi(current->arg1);
+                int arg2 = atoi(current->arg2);
+                if (strcmp(current->op, "+") == 0)
+                    result = arg1 + arg2;
+                else if (strcmp(current->op, "-") == 0)
+                    result = arg1 - arg2;
+                else if (strcmp(current->op, "*") == 0)
+                    result = arg1 * arg2;
+                else if (strcmp(current->op, "/") == 0 && arg2 != 0)
+                    result = arg1 / arg2;
+                else
+                {
+                    current = current->next;
+                    continue;
+                }
+                sprintf(result_str, "%d", result);
+                printf("Folded constant operation: %s = %d\n", current->result, result);
+            } else if (strcmp(current->type, "float") == 0) {
+                printf("float\n");
+                float result;
+                float arg1 = atof(current->arg1);
+                float arg2 = atof(current->arg2);
+                if (strcmp(current->op, "+") == 0)
+                    result = arg1 + arg2;
+                else if (strcmp(current->op, "-") == 0)
+                    result = arg1 - arg2;
+                else if (strcmp(current->op, "*") == 0)
+                    result = arg1 * arg2;
+                else if (strcmp(current->op, "/") == 0 && arg2 != 0)
+                    result = arg1 / arg2;
+                else
+                {
+                    current = current->next;
+                    continue;
+                }
+                sprintf(result_str, "%f", result);
+                printf("Folded constant operation: %s = %f\n", current->result, result);
+            }
+            
             current->op = "li";
             current->arg1 = result_str;
             current->arg2 = NULL;
-            printf("Folded constant operation: %s = %d\n", current->result, result);
         }
         current = current->next;
     }

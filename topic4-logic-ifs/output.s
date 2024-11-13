@@ -1,7 +1,4 @@
 .data
-var_one: .word 0
-var_two: .word 0
-var_three: .word 0
 .text
 .globl main
 
@@ -19,22 +16,19 @@ main:
 	addi $sp, $sp, -4
 	sw $zero, 0($sp)
 
-	# allocate memory for c
-	addi $sp, $sp, -4
-	sw $zero, 0($sp)
-
+	li $t0, 3
 	# assignment of a
-	li $t1, 1
 	# store value of a
-	sw $t1, -12($fp)
+	sw $t0, -12($fp)
+	li $t9, 0x40266666
+	mtc1 $t9, $f1
 	# assignment of b
-	li $t1, 2.300000
 	# store value of b
-	sw $t1, -16($fp)
-	# assignment of c
-	li $t1, TRUE
-	# store value of c
-	sw $t1, -20($fp)
+	s.s $f1, -16($fp)
+	# write b
+	l.s $f12, -16($fp)
+	li $v0, 2
+	syscall
 
 	li $v0, 0
 

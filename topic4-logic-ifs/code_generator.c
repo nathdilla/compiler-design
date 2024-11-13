@@ -63,6 +63,24 @@ MIPSRegister temp_registers[NUM_TEMP_REGISTERS] = {
     {"$t8", false}, {"$t9", false},
 };
 
+// Array of register names
+const char* register_names[40] = {
+    "t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7", "t8", "t9",
+    "f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9",
+    "f10", "f11", "f12", "f13", "f14", "f15", "f16", "f17", "f18", "f19",
+    "f20", "f21", "f22", "f23", "f24", "f25", "f26", "f27", "f28", "f29",
+};
+
+// function to check if input is a register_name
+bool is_register_name(const char* str) {
+    for (int i = 0; i < 40; i++) {
+        if (strcmp(str, register_names[i]) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void init_code_generator(const char* output_filename) {
     output_file = fopen(output_filename, "w");
     if (output_file == NULL) {
@@ -78,7 +96,11 @@ void store_value(FILE* output_file, const char* register_name, const char* resul
     fprintf(output_file, "\t# store value of %s\n", result);
     if (sym != NULL && sym->is_local) {
         printf("stack offset: %d\n", sym->stack_offset);
-        fprintf(output_file, "\tsw %s, %d($fp)\n", register_name, sym->stack_offset);
+        if (register_name[1] == 'f' && is_register_name(register_name+1)) {
+            fprintf(output_file, "\ts.s %s, %d($fp)\n", register_name, sym->stack_offset);
+        } else if (register_name[1] == 't' && is_register_name(register_name+1)) {
+            fprintf(output_file, "\tsw %s, %d($fp)\n", register_name, sym->stack_offset);
+        }
     } else {
         fprintf(output_file, "\tsw %s, var_%s\n", register_name, result);
     }
@@ -99,7 +121,7 @@ void evaluate_operations(TAC* current, int stack_offset) {
         // printf("%s",current->op);
         symbol* sym = lookup(current_scope_code_gen, current->result);
 
-        if (current->arg1[0] == 't') {
+        if (is_register_name(current->arg1)) {
             // If arg1 is already a temp register, directly store it into the variable
             char tempRegName[10];
             snprintf(tempRegName, sizeof(tempRegName), "$%s", current->arg1);
@@ -114,7 +136,16 @@ void evaluate_operations(TAC* current, int stack_offset) {
         }
         deallocate_register(tempRegIndex);
     } else if (strcmp(current->op, "li") == 0) {
-        fprintf(output_file, "\tli $%s, %s\n", current->result, current->arg1);
+        if (strcmp(current->type, "int") == 0) {
+            fprintf(output_file, "\tli $%s, %s\n", current->result, current->arg1);
+        } else if (strcmp(current->type, "float") == 0) {
+            // Convert the float value to its hexadecimal bit representation
+            float float_val = atof(current->arg1);
+            unsigned int hex_val;
+            memcpy(&hex_val, &float_val, sizeof(float_val));
+            fprintf(output_file, "\tli %s, 0x%08X\n", "$t9", hex_val);
+            fprintf(output_file, "\tmtc1 $t9, $%s\n", current->result);
+        }
     }
     else if (strcmp(current->op, "write") == 0) {
         symbol* sym = lookup(current_scope_code_gen, current->result);
@@ -122,15 +153,23 @@ void evaluate_operations(TAC* current, int stack_offset) {
         fprintf(output_file, "\t# write %s\n", current->result);
         if (sym && sym->is_param) {
             fprintf(output_file, "\tmove $a0, $%s\n", sym->temp_var);
+            fprintf(output_file, "\tli $v0, 1\n\tsyscall\n");
         } else if (sym && sym->is_local) {
-            fprintf(output_file, "\tlw $a0, %d($fp)\n", sym->stack_offset);
+            if (strcmp(sym->type, "int") == 0) {
+                fprintf(output_file, "\tlw $a0, %d($fp)\n", sym->stack_offset);
+                fprintf(output_file, "\tli $v0, 1\n\tsyscall\n");
+            } else if (strcmp(sym->type, "float") == 0) {
+                fprintf(output_file, "\tl.s $f12, %d($fp)\n", sym->stack_offset);
+                fprintf(output_file, "\tli $v0, 2\n\tsyscall\n");
+            }
         } else if (current->result[0] == 't') {
             fprintf(output_file, "\tmove $a0, $%s\n", current->result);
+            fprintf(output_file, "\tli $v0, 1\n\tsyscall\n");
         } else {
             fprintf(output_file, "\tlw $t9, var_%s\n", current->result);
             fprintf(output_file, "\tmove $a0, $t9\n");
+            fprintf(output_file, "\tli $v0, 1\n\tsyscall\n");
         }
-        fprintf(output_file, "\tli $v0, 1\n\tsyscall\n");
     }
     else if (strcmp(current->op, "+") == 0) {
         // Modify the command below, to properly allocate registers for the operands
@@ -141,7 +180,7 @@ void evaluate_operations(TAC* current, int stack_offset) {
         char* temp_reg1 = "$t9"; // Designated temp register for arg1 if not a temp
         char* temp_reg2 = "$t8"; // Designated temp register for arg2 if not a temp
 
-        if (current->arg1[0] == 't') {
+        if (is_register_name(current->arg1)) {
         // arg1 is a temporary, so add $ in front
         snprintf(arg1_reg, sizeof(arg1_reg), "$%s", current->arg1);
         } else {
@@ -150,7 +189,7 @@ void evaluate_operations(TAC* current, int stack_offset) {
         strcpy(arg1_reg, temp_reg1);
         }
 
-        if (current->arg2[0] == 't') {
+        if (is_register_name(current->arg2)) {
         // arg2 is a temporary, so add $ in front
         snprintf(arg2_reg, sizeof(arg2_reg), "$%s", current->arg2);
         } else {
@@ -202,7 +241,7 @@ void evaluate_operations(TAC* current, int stack_offset) {
             fprintf(output_file, "\tmove $v0, $%s\n", sym->temp_var);
         } else if (sym && sym->is_local) {
             fprintf(output_file, "\tlw $v0, %d($fp)\n", sym->stack_offset);
-        } else if (current->arg1[0] == 't') {
+        } else if (is_register_name(current->arg1)) {
             fprintf(output_file, "\tmove $v0, $%s\n", current->arg1);
         } else if (isdigit(current->arg1[0]) || (current->arg1[0] == '-' && isdigit(current->arg1[1]))) {
             fprintf(output_file, "\tli $v0, %s\n", current->arg1); // Load constant directly
@@ -243,7 +282,7 @@ void evaluate_operations(TAC* current, int stack_offset) {
         // printf("%s",current->op);
         symbol* sym = lookup(current_scope_code_gen, current->result);
 
-        if (current->arg1[0] == 't') {
+        if (is_register_name(current->arg1)) {
             // If arg1 is already a temp register, directly store it into the variable
             char tempRegName[10];
             snprintf(tempRegName, sizeof(tempRegName), "$%s", current->arg1);
