@@ -61,7 +61,7 @@ void traverseAST(ASTNode* node, int level) {
         case NodeType_Stmt:
             printIndent(level);
             printf("Statement: %s %s\n", node->stmt.varName, node->stmt.operator);
-            traverseAST(node->stmt.expr, level + indentValue);
+            // traverseAST(node->stmt.expr, level + indentValue);
             break;
         case NodeType_AssignStmt:
             printIndent(level);
@@ -160,7 +160,7 @@ void traverseAST(ASTNode* node, int level) {
         case NodeType_IfStmt:
             printIndent(level);
             printf("If Statement\n");
-            traverseAST(node->ifStmt.IfStmtSignature, level + indentValue);
+            traverseAST(node->ifStmt.condition, level + indentValue);
             traverseAST(node->ifStmt.block, level + indentValue); // <- traverse
             break;
         case NodeType_LogicExpr:
@@ -382,7 +382,7 @@ void freeAST(ASTNode* node) {
             free(node->ifStmtSignature.condition);
             break;
         case NodeType_IfStmt:
-            free(node->ifStmt.IfStmtSignature);
+            free(node->ifStmt.condition);
             free(node->ifStmt.block);
             break;
         case NodeType_LogicExpr:
@@ -520,7 +520,7 @@ ASTNode* createNode(NodeType type) {
             newNode->typeCast.expr = NULL;
             break;
         case NodeType_IfStmt:
-            newNode->ifStmt.IfStmtSignature = NULL;
+            newNode->ifStmt.condition = NULL;
             newNode->ifStmt.block = NULL;
             break;
         case NodeType_IfStmtSignature:

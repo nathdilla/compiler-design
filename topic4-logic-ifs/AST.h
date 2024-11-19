@@ -205,7 +205,7 @@ typedef struct ASTNode {
         } logicExpr;
 
         struct IfStmt {
-            struct ASTNode* IfStmtSignature;
+            struct ASTNode* condition;
             struct ASTNode* block;
             char* false_label;
         } ifStmt;

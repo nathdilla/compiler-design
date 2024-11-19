@@ -84,7 +84,7 @@ symbol_table* current_scope = NULL;
 
 %printer { fprintf(yyoutput, "%s", $$); } ID;
 
-%type <ast> Program VarDecl VarDeclList FuncDecl FuncDeclList ParamList Param Block Stmt StmtList Expr BinOp WriteStmt ReturnStmt FuncSignature InputParamList InputParam ArrayDecl ArrayDeclList LogicExpr IfStmtSignature IfBlock IfStmt
+%type <ast> Program VarDecl VarDeclList FuncDecl FuncDeclList ParamList Param Block Stmt StmtList Expr BinOp WriteStmt ReturnStmt FuncSignature InputParamList InputParam ArrayDecl ArrayDeclList LogicExpr IfBlock IfStmt
 %start Program
 
 %left PLUS MINUS
@@ -467,24 +467,24 @@ LogicExpr
 						}
 
 IfStmt
-		: IfStmtSignature IfBlock {
+		: IF LPAREN LogicExpr RPAREN IfBlock {
 									printf("PARSER: Recognized if statement\n");
 									$$ = malloc(sizeof(ASTNode));
 									$$->type = NodeType_IfStmt;
-									$$->ifStmt.IfStmtSignature = $1;
-									$$->ifStmt.block = $2;
+									$$->ifStmt.condition = $3;
+									$$->ifStmt.block = $5;
 								}
 
-IfStmtSignature
-		: IF LPAREN LogicExpr RPAREN {
-									printf("PARSER: Recognized if statement signature\n");
-									$$ = malloc(sizeof(ASTNode));
-									$$->type = NodeType_IfStmtSignature;
-									$$->ifStmtSignature.condition = $3;
-								}
+// IfStmtSignature
+// 		: IF LPAREN LogicExpr RPAREN {
+// 									printf("PARSER: Recognized if statement signature\n");
+// 									$$ = malloc(sizeof(ASTNode));
+// 									$$->type = NodeType_IfStmtSignature;
+// 									$$->ifStmtSignature.condition = $3;
+// 								}
 
 IfBlock
-		: LCURBRACK StmtList RCURBRACK SEMICOLON {
+		: LCURBRACK StmtList RCURBRACK {
 									printf("PARSER: Recognized if block\n");
 									$$ = malloc(sizeof(ASTNode));
 									$$->type = NodeType_IfBlock;

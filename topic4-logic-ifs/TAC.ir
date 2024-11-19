@@ -1,11 +1,9 @@
 
 func main
 a declare
-a = 1
-if not t0 goto if_label_1468638776
+a = 2
+t0 = a + 1
+a = t0
 write a
-if_block end
-write a
-if_block end
 return 0
 

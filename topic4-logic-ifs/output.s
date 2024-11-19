@@ -13,18 +13,15 @@ main:
 	sw $zero, 0($sp)
 
 	# assignment of a
-	li $t1, 1
+	li $t1, 2
 	# store value of a
 	sw $t1, -12($fp)
-	li $t9, 1
-	li $t8, 2
-	seq $t0, $t9, $t8
-	beq $t0, $zero, if_label_1468638776
-	# write a
-	lw $a0, -12($fp)
-	li $v0, 1
-	syscall
-if_label_1468638776:
+	lw $t9, -12($fp)
+	li $t8, 1
+	add $t0, $t9, $t8
+	# assignment of a
+	# store value of a
+	sw $t0, -12($fp)
 	# write a
 	lw $a0, -12($fp)
 	li $v0, 1

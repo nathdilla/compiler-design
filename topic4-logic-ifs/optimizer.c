@@ -7,7 +7,7 @@ TAC *live_definitions[MAX_TAC];
 
 void optimize_TAC(TAC **head)
 {
-    constant_propagation(head);
+    // constant_propagation(head);
     constant_folding(head);
     // copy_Propagation(head);
     dead_code_elimination(head);

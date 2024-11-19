@@ -1,4 +1,5 @@
 a declare
-a = 1
-write a
+a = 2
+t0 = a + 1
+a = t0
 write a
