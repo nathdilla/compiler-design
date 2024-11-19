@@ -12,6 +12,7 @@ int arg_regs[10] = {0}; // Definition and initialization
 int arg_reg_index = 0;
 int allocated_arg_regs = -1;
 symbol_table* scope = NULL;
+unsigned long hash_index = 1234;
 
 bool buffering_tac = false;
 
@@ -95,6 +96,11 @@ void semantic_analysis(ASTNode* node, symbol_table* sym_table) {
                 left_type = node->expr.left->expr.expr_type;
             } else if (node->expr.left->type == NodeType_TypeCast) {
                 left_type = node->expr.left->typeCast.type;
+            } else if (node->expr.left->type == NodeType_SimpleID) {
+                symbol* sym = lookup(sym_table, node->expr.left->simpleID.name);
+                if (sym != NULL) {
+                    left_type = sym->type;
+                }
             }
 
             if (node->expr.right->type == NodeType_SimpleExpr) {
@@ -103,6 +109,11 @@ void semantic_analysis(ASTNode* node, symbol_table* sym_table) {
                 right_type = node->expr.right->expr.expr_type;
             } else if (node->expr.right->type == NodeType_TypeCast) {
                 right_type = node->expr.right->typeCast.type;
+            } else if (node->expr.right->type == NodeType_SimpleID) {
+                symbol* sym = lookup(sym_table, node->expr.right->simpleID.name);
+                if (sym != NULL) {
+                    right_type = sym->type;
+                }
             }
 
             if (strcmp(left_type, right_type) != 0) {
@@ -240,6 +251,27 @@ void semantic_analysis(ASTNode* node, symbol_table* sym_table) {
             }
             semantic_analysis(node->typeCast.expr, sym_table);
             // no checks necessary... for now
+            break;
+        case NodeType_IfStmt:
+            printf("Performing semantic analysis on if statement\n");
+            node->ifStmt.false_label = create_if_label();
+            node->ifStmt.block->ifBlock.false_label = node->ifStmt.false_label;
+            node->ifStmt.IfStmtSignature->ifStmtSignature.false_label = node->ifStmt.false_label;
+            semantic_analysis(node->ifStmt.IfStmtSignature, sym_table);
+            semantic_analysis(node->ifStmt.block, sym_table);
+            break;
+        case NodeType_IfStmtSignature:
+            printf("Performing semantic analysis on if statement signature\n");
+            semantic_analysis(node->ifStmtSignature.condition, sym_table);
+            break;
+        case NodeType_LogicExpr:
+            printf("Performing semantic analysis on logical expression\n");
+            semantic_analysis(node->logicExpr.left, sym_table);
+            semantic_analysis(node->logicExpr.right, sym_table);
+            break;
+        case NodeType_IfBlock:
+            printf("Performing semantic analysis on if block\n");
+            semantic_analysis(node->ifBlock.stmtList, sym_table);
             break;
         // ... handle other node types ...
         default:
@@ -429,6 +461,34 @@ TAC *tac_expr(ASTNode *expr, symbol_table *sym_table)
             break;
         }
 
+        case NodeType_LogicExpr: {
+            printf("Generating TAC for logical expression\n");
+            instruction->arg1 = create_operand(expr->logicExpr.left);
+            instruction->arg2 = create_operand(expr->logicExpr.right);
+            instruction->op = strdup(expr->logicExpr.operator);
+            instruction->result = create_temp_var();
+            expr->logicExpr.temp = instruction->result;
+            break;
+        }
+
+        case NodeType_IfStmtSignature: {
+            printf("Generating TAC for if statement\n");
+            instruction->arg1 = create_operand(expr->ifStmtSignature.condition);
+            instruction->arg2 = strdup("zero");
+            instruction->op = strdup("if");
+            instruction->result = expr->ifStmtSignature.false_label;
+            break;
+        }
+
+        case NodeType_IfBlock: {
+            // Generate TAC for the if block
+            
+            printf("Generating TAC for if block\n");
+            instruction->op = strdup("if_block");
+            instruction->result = expr->ifBlock.false_label;
+            break;
+        }
+
         default:
             free(instruction);
             return NULL;
@@ -468,9 +528,29 @@ char *create_float_temp_var()
     return tempVar;
 }
 
+char* create_if_label()
+{
+    // hash the scope name and use it as the label
+    // Simple djb2 hash function for the scope name
+    hash_index++;
+    unsigned long hash = hash_index;
+    int c;
+    const char *str = scope->scope_name;
+    while ((c = *str++))
+        hash = ((hash << 5) + hash) + c; // hash * 33 + c
+    // Create label string
+    char* label = malloc(50); // Allocate sufficient space
+    if (label != NULL) {
+        sprintf(label, "if_label_%lu", hash);
+    }
+    return label;
+}
+
 char* create_operand(ASTNode* node) {
     char buffer[20]; // Declare buffer here
     switch (node->type) {   
+        case NodeType_LogicExpr:
+            return node->logicExpr.temp;
         case NodeType_SimpleID: {
             symbol* sym = lookup(scope, node->simpleID.name);
             if (sym != NULL && sym->temp_var != NULL) {
@@ -567,6 +647,10 @@ void print_TAC_to_file(const char *filename, TAC *tac)
             fprintf(file, "%s[%s] = %s\n", current->result, current->arg2, current->arg1);
         } else if (strcmp(current->op, "array_access") == 0) {
             fprintf(file, "%s = %s[%s]\n", current->result, current->arg1, current->arg2);
+        } else if (strcmp(current->op, "if") == 0) {
+            fprintf(file, "if not %s goto %s\n", current->arg1, current->result);
+        } else if (strcmp(current->op, "if_block") == 0) {
+            fprintf(file, "if_block end\n");
         }
         current = current->next;
     }
@@ -678,6 +762,12 @@ void print_TAC(TAC* tac) {
             printf("%s[%s] = %s\n", tac->result, tac->arg2, tac->arg1);
         } else if (strcmp(tac->op, "array_access") == 0) {
             printf("%s = %s[%s]\n", tac->result, tac->arg1, tac->arg2);
+        } else if (strcmp(tac->op, "if") == 0) {
+            printf("if not %s goto %s\n", tac->arg1, tac->result);
+        } else if (strcmp(tac->op, "==") == 0) {
+            printf("%s = %s == %s\n", tac->result, tac->arg1, tac->arg2);
+        } else if (strcmp(tac->op, "if_block") == 0) {
+            printf("if_block end\n");
         }
 }
 

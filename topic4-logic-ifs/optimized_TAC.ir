@@ -1,7 +1,4 @@
 a declare
-b declare
-t0 li 3
-a = t0
-f1 li 2.600000
-b = f1
-write b
+a = 1
+write a
+write a

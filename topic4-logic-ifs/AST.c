@@ -152,6 +152,28 @@ void traverseAST(ASTNode* node, int level) {
             printf("Type Cast\n");
             traverseAST(node->typeCast.expr, level + indentValue);
             break;
+        case NodeType_IfStmtSignature:
+            printIndent(level);
+            printf("If Statement Signature\n");
+            traverseAST(node->ifStmtSignature.condition, level + indentValue);
+            break;
+        case NodeType_IfStmt:
+            printIndent(level);
+            printf("If Statement\n");
+            traverseAST(node->ifStmt.IfStmtSignature, level + indentValue);
+            traverseAST(node->ifStmt.block, level + indentValue); // <- traverse
+            break;
+        case NodeType_LogicExpr:
+            printIndent(level);
+            printf("Logic Expression: %s\n", node->logicExpr.operator);
+            traverseAST(node->logicExpr.left, level + indentValue);
+            traverseAST(node->logicExpr.right, level + indentValue);
+            break;
+        case NodeType_IfBlock:
+            printIndent(level);
+            printf("If Block\n");
+            traverseAST(node->ifBlock.stmtList, level + indentValue);
+            break;
     }
 }
 
@@ -239,6 +261,18 @@ void printASTNode(ASTNode* node) {
             break;
         case NodeType_TypeCast:
             printf("Type Cast\n");
+            break;
+        case NodeType_IfStmt:
+            printf("If Statement\n");
+            break;
+        case NodeType_LogicExpr:
+            printf("Logic Expression: %s\n", node->logicExpr.operator);
+            break;
+        case NodeType_IfBlock:
+            printf("If Block\n");
+            break;
+        case NodeType_IfStmtSignature:
+            printf("If Statement Signature\n");
             break;
     }
 } 
@@ -343,6 +377,21 @@ void freeAST(ASTNode* node) {
             break;
         case NodeType_TypeCast:
             free(node->typeCast.expr);
+            break;
+        case NodeType_IfStmtSignature:
+            free(node->ifStmtSignature.condition);
+            break;
+        case NodeType_IfStmt:
+            free(node->ifStmt.IfStmtSignature);
+            free(node->ifStmt.block);
+            break;
+        case NodeType_LogicExpr:
+            free(node->logicExpr.left);
+            free(node->logicExpr.right);
+            // free(node->logicExpr.operator);
+            break;
+        case NodeType_IfBlock:
+            free(node->ifBlock.stmtList);
             break;
     }
 
@@ -469,6 +518,21 @@ ASTNode* createNode(NodeType type) {
             newNode->typeCast.name = NULL;
             newNode->typeCast.type = NULL;
             newNode->typeCast.expr = NULL;
+            break;
+        case NodeType_IfStmt:
+            newNode->ifStmt.IfStmtSignature = NULL;
+            newNode->ifStmt.block = NULL;
+            break;
+        case NodeType_IfStmtSignature:
+            newNode->ifStmtSignature.condition = NULL;
+            break;
+        case NodeType_LogicExpr:
+            newNode->logicExpr.operator = NULL;  // Placeholder value
+            newNode->logicExpr.left = NULL;
+            newNode->logicExpr.right = NULL;
+            break;
+        case NodeType_IfBlock:
+            newNode->ifBlock.stmtList = NULL;
             break;
     }
 

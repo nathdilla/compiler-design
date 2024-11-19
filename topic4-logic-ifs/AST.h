@@ -37,6 +37,10 @@ typedef enum {
     NodeType_ArrayAssignStmt,
     NodeType_ArrayAccess,
     NodeType_TypeCast,
+    NodeType_IfStmt,
+    NodeType_IfStmtSignature,   
+    NodeType_LogicExpr,
+    NodeType_IfBlock,
 } NodeType;
 
 // Structure for AST nodes
@@ -192,6 +196,29 @@ typedef struct ASTNode {
             char* type;
             struct ASTNode* expr;
         } typeCast;
+
+        struct LogicExpr {
+            char* operator;
+            struct ASTNode* left;
+            struct ASTNode* right;
+            char* temp;
+        } logicExpr;
+
+        struct IfStmt {
+            struct ASTNode* IfStmtSignature;
+            struct ASTNode* block;
+            char* false_label;
+        } ifStmt;
+
+        struct IfStmtSignature {
+            struct ASTNode* condition;
+            char* false_label;
+        } ifStmtSignature;
+        
+        struct IfBlock {
+            struct ASTNode* stmtList;
+            char* false_label;
+        } ifBlock;
     };
 } ASTNode;
 

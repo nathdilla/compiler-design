@@ -12,29 +12,34 @@ main:
 	addi $sp, $sp, -4
 	sw $zero, 0($sp)
 
-	# allocate memory for b
-	addi $sp, $sp, -4
-	sw $zero, 0($sp)
-
-	li $t0, 3
 	# assignment of a
+	li $t1, 1
 	# store value of a
-	sw $t0, -12($fp)
-	li $t9, 0x40266666
-	mtc1 $t9, $f1
-	# assignment of b
-	# store value of b
-	s.s $f1, -16($fp)
-	# write b
-	l.s $f12, -16($fp)
-	li $v0, 2
+	sw $t1, -12($fp)
+	li $t9, 1
+	li $t8, 2
+	seq $t0, $t9, $t8
+	beq $t0, $zero, if_label_1468638776
+	# write a
+	lw $a0, -12($fp)
+	li $v0, 1
+	syscall
+if_label_1468638776:
+	# write a
+	lw $a0, -12($fp)
+	li $v0, 1
 	syscall
 
+	# return 0
 	li $v0, 0
 
+	# restore return address
 	lw $ra, 8($fp)
+	# restore frame pointer
 	lw $fp, 4($fp)
+	# deallocate stack space
 	addi $sp, $sp, 12
 	jr $ra
+# Exit program
 	li $v0, 10
 	syscall

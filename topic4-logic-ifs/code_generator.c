@@ -236,6 +236,7 @@ void evaluate_operations(TAC* current, int stack_offset) {
         // look up the symbol for the return value in the current scope
         printf("processing return\n");
         fprintf(output_file, "\n");   
+        fprintf(output_file, "\t# return %s\n", current->arg1);
         symbol* sym = lookup(current_scope_code_gen, current->arg1);
         if (sym && sym->is_param) {
             fprintf(output_file, "\tmove $v0, $%s\n", sym->temp_var);
@@ -250,8 +251,11 @@ void evaluate_operations(TAC* current, int stack_offset) {
         }
         
         fprintf(output_file, "\n");
+        fprintf(output_file, "\t# restore return address\n");
         fprintf(output_file, "\tlw $ra, 8($fp)\n"); // restore return address
+        fprintf(output_file, "\t# restore frame pointer\n");
         fprintf(output_file, "\tlw $fp, 4($fp)\n"); // restore frame pointer
+        fprintf(output_file, "\t# deallocate stack space\n");
         fprintf(output_file, "\taddi $sp, $sp, %d\n", stack_offset * -1); // deallocate stack space
         fprintf(output_file, "\tjr $ra\n"); // return
         current_scope_code_gen = current_scope_code_gen->parent;
@@ -311,6 +315,48 @@ void evaluate_operations(TAC* current, int stack_offset) {
         char offset_str[10];
         snprintf(offset_str, sizeof(offset_str), "%d", offset);
         fprintf(output_file, "\tlw $%s, -%s($sp)\n", current->result, offset_str);
+    } else if (strcmp(current->op, "==" ) == 0) {
+        // Modify the command below, to properly allocate registers for the operands
+        char arg1_reg[10];
+        char arg2_reg[10];
+
+        // Use t9 and t8 for temporary operations
+        char* temp_reg1 = "$t9"; // Designated temp register for arg1 if not a temp
+        char* temp_reg2 = "$t8"; // Designated temp register for arg2 if not a temp
+
+        if (is_register_name(current->arg1)) {
+        // arg1 is a temporary, so add $ in front
+        snprintf(arg1_reg, sizeof(arg1_reg), "$%s", current->arg1);
+        } else if (isdigit(current->arg1[0]) || (current->arg1[0] == '-' && isdigit(current->arg1[1]))) {
+        // arg1 is a constant, so load it into the designated temp register (t9)
+        fprintf(output_file, "\tli %s, %s\n", temp_reg1, current->arg1);
+        strcpy(arg1_reg, temp_reg1);
+        }
+        else {
+        // arg1 is not a temporary, so load it into the designated temp register (t9)
+        fprintf(output_file, "\tlw %s, %s\n", temp_reg1, current->arg1);
+        strcpy(arg1_reg, temp_reg1);
+        }
+
+        if (is_register_name(current->arg2)) {
+        // arg2 is a temporary, so add $ in front
+        snprintf(arg2_reg, sizeof(arg2_reg), "$%s", current->arg2);
+        } else if (isdigit(current->arg2[0]) || (current->arg2[0] == '-' && isdigit(current->arg2[1]))) {
+        // arg2 is a constant, so load it into the designated temp register (t8)
+        fprintf(output_file, "\tli %s, %s\n", temp_reg2, current->arg2);
+        strcpy(arg2_reg, temp_reg2);
+        } else {
+        // arg2 is not a temporary, so load it into the designated temp register (t8)
+        fprintf(output_file, "\tlw %s, %s\n", temp_reg2, current->arg2);
+        strcpy(arg2_reg, temp_reg2);
+        }
+
+        fprintf(output_file, "\tseq $%s, %s, %s\n", current->result, arg1_reg, arg2_reg);
+        // fprintf(output_file, "\tseq %s, %s, %s\n", current->arg1, current->arg2, current->result);
+    } else if (strcmp(current->op, "if" ) == 0) {
+        fprintf(output_file, "\tbeq $%s, $%s, %s\n", current->arg1, current->arg2, current->result);
+    } else if (strcmp(current->op, "if_block") == 0) {
+        fprintf(output_file, "%s:\n", current->result);
     }
 }
 
@@ -353,6 +399,7 @@ void generate_MIPS(TAC* tac_instructions) {
     }
 
     // Exit program
+    fprintf(output_file, "# Exit program\n");
     fprintf(output_file, "\tli $v0, 10\n\tsyscall\n");
 }
 

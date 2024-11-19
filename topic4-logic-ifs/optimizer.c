@@ -165,8 +165,9 @@ void constant_folding(TAC **head)
     TAC *current = *head;
     while (current != NULL)
     {
-        if (is_constant(current->arg1) && is_constant(current->arg2))
+        if (is_constant(current->arg1) && is_constant(current->arg2) && (strcmp(current->op, "+") == 0 || strcmp(current->op, "-") == 0 || strcmp(current->op, "*") == 0 || strcmp(current->op, "/") == 0))
         {
+            printf("consts");
             char *result_str = (char *)malloc(20);
             if (strcmp(current->type, "int") == 0) {
                 printf("int\n");

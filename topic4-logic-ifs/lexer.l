@@ -204,6 +204,54 @@ ws             {delim}+
 		  return DOT;
 		}
 
+"=="	{chars += 2;
+		  printf("%s : EQEQ\n", yytext);
+		  yylval.string = strdup(yytext); 
+		  return EQEQ;
+		}
+
+"!="	{chars += 2;
+		  printf("%s : NEQ\n", yytext);
+		  yylval.string = strdup(yytext); 
+		  return NEQ;
+		}
+
+"<"		{chars++;
+		  printf("%s : LT\n", yytext);
+		  yylval.string = strdup(yytext); 
+		  return LT;
+		}
+
+"<="	{chars += 2;
+		  printf("%s : LTEQ\n", yytext);
+		  yylval.string = strdup(yytext); 
+		  return LTEQ;
+		}
+
+">"		{chars++;
+		  printf("%s : GT\n", yytext);
+		  yylval.string = strdup(yytext); 
+		  return GT;
+		}
+
+">="	{chars += 2;
+		  printf("%s : GTEQ\n", yytext);
+		  yylval.string = strdup(yytext); 
+		  return GTEQ;
+		}
+
+"&&"	{chars += 2;
+		  printf("%s : AND\n", yytext);
+		  yylval.string = strdup(yytext); 
+		  return AND;
+		}
+
+"||"	{chars += 2;
+		  printf("%s : OR\n", yytext);
+		  yylval.string = strdup(yytext); 
+		  return OR;
+		}
+
 		
 
 \n		{lines++; chars=0;}

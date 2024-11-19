@@ -58,6 +58,15 @@ symbol_table* current_scope = NULL;
 %token <char> RPAREN
 %token <char> COMMA
 %token <char> DOT
+%token <char> EQEQ
+%token <char> NEQ
+%token <char> LT
+%token <char> GT
+%token <char> LTEQ
+%token <char> GTEQ
+%token <char> AND
+%token <char> OR
+%token <char> NOT
 %token <operator> EQ
 %token <operator> PLUS
 %token <operator> MINUS
@@ -75,7 +84,7 @@ symbol_table* current_scope = NULL;
 
 %printer { fprintf(yyoutput, "%s", $$); } ID;
 
-%type <ast> Program VarDecl VarDeclList FuncDecl FuncDeclList ParamList Param Block Stmt StmtList Expr BinOp WriteStmt ReturnStmt FuncSignature InputParamList InputParam ArrayDecl ArrayDeclList
+%type <ast> Program VarDecl VarDeclList FuncDecl FuncDeclList ParamList Param Block Stmt StmtList Expr BinOp WriteStmt ReturnStmt FuncSignature InputParamList InputParam ArrayDecl ArrayDeclList LogicExpr IfStmtSignature IfBlock IfStmt
 %start Program
 
 %left PLUS MINUS
@@ -339,6 +348,9 @@ Stmt
 									$$->arrayAssignStmt.index = strdup(buffer);
 									$$->arrayAssignStmt.expr = $6;
 								}
+	| 	IfStmt 				{
+									$$ = $1;
+								}
 ;
 
 Expr
@@ -444,6 +456,40 @@ WriteStmt : WRITE ID SEMICOLON {
 								}
 ;
 
+LogicExpr
+		: Expr EQEQ Expr {
+							printf("PARSER: Recognized equality expression\n");
+							$$ = malloc(sizeof(ASTNode));
+							$$->type = NodeType_LogicExpr;
+							$$->logicExpr.left = $1;
+							$$->logicExpr.right = $3;
+							$$->logicExpr.operator = "==";
+						}
+
+IfStmt
+		: IfStmtSignature IfBlock {
+									printf("PARSER: Recognized if statement\n");
+									$$ = malloc(sizeof(ASTNode));
+									$$->type = NodeType_IfStmt;
+									$$->ifStmt.IfStmtSignature = $1;
+									$$->ifStmt.block = $2;
+								}
+
+IfStmtSignature
+		: IF LPAREN LogicExpr RPAREN {
+									printf("PARSER: Recognized if statement signature\n");
+									$$ = malloc(sizeof(ASTNode));
+									$$->type = NodeType_IfStmtSignature;
+									$$->ifStmtSignature.condition = $3;
+								}
+
+IfBlock
+		: LCURBRACK StmtList RCURBRACK SEMICOLON {
+									printf("PARSER: Recognized if block\n");
+									$$ = malloc(sizeof(ASTNode));
+									$$->type = NodeType_IfBlock;
+									$$->ifBlock.stmtList = $2;
+								}
 %%
 
 int main() {

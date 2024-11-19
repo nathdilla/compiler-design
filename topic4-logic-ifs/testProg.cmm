@@ -1,8 +1,8 @@
 function int main() {
     int a;
-    float b;
-    a = 1 + (int)2.3;
-    b = 1.6 + (float)1;
-    write b;
+    a = 1;
+    if (a == 2) {
+        write a;
+    };
     return 0;
 }

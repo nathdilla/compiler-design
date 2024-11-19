@@ -50,19 +50,28 @@
      RPAREN = 266,
      COMMA = 267,
      DOT = 268,
-     EQ = 269,
-     PLUS = 270,
-     MINUS = 271,
-     STAR = 272,
-     BSLASH = 273,
-     BOOL = 274,
-     NUMBER = 275,
-     FLOAT = 276,
-     WRITE = 277,
-     RETURN = 278,
-     FUNC = 279,
-     ARRAY = 280,
-     IF = 281
+     EQEQ = 269,
+     NEQ = 270,
+     LT = 271,
+     GT = 272,
+     LTEQ = 273,
+     GTEQ = 274,
+     AND = 275,
+     OR = 276,
+     NOT = 277,
+     EQ = 278,
+     PLUS = 279,
+     MINUS = 280,
+     STAR = 281,
+     BSLASH = 282,
+     BOOL = 283,
+     NUMBER = 284,
+     FLOAT = 285,
+     WRITE = 286,
+     RETURN = 287,
+     FUNC = 288,
+     ARRAY = 289,
+     IF = 290
    };
 #endif
 /* Tokens.  */
@@ -77,19 +86,28 @@
 #define RPAREN 266
 #define COMMA 267
 #define DOT 268
-#define EQ 269
-#define PLUS 270
-#define MINUS 271
-#define STAR 272
-#define BSLASH 273
-#define BOOL 274
-#define NUMBER 275
-#define FLOAT 276
-#define WRITE 277
-#define RETURN 278
-#define FUNC 279
-#define ARRAY 280
-#define IF 281
+#define EQEQ 269
+#define NEQ 270
+#define LT 271
+#define GT 272
+#define LTEQ 273
+#define GTEQ 274
+#define AND 275
+#define OR 276
+#define NOT 277
+#define EQ 278
+#define PLUS 279
+#define MINUS 280
+#define STAR 281
+#define BSLASH 282
+#define BOOL 283
+#define NUMBER 284
+#define FLOAT 285
+#define WRITE 286
+#define RETURN 287
+#define FUNC 288
+#define ARRAY 289
+#define IF 290
 
 
 
@@ -106,7 +124,7 @@ typedef union YYSTYPE
 	struct ASTNode* ast;
 }
 /* Line 1529 of yacc.c.  */
-#line 110 "parser.tab.h"
+#line 128 "parser.tab.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
