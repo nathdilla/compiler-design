@@ -22,7 +22,6 @@ Recursively traverse the AST and perform semantic analysis
 
 void semantic_analysis(ASTNode* node, symbol_table* sym_table) {
     scope = sym_table;
-    TAC* tac;
     printf("%s  :   ", scope->scope_name);
     if (node == NULL) return;
 
@@ -32,28 +31,28 @@ void semantic_analysis(ASTNode* node, symbol_table* sym_table) {
             semantic_analysis(node->program.varDeclList, sym_table);
             semantic_analysis(node->program.funcDeclList, sym_table);
             semantic_analysis(node->program.stmtList, sym_table);
-            tac = tac_expr(node, sym_table);
+            tac_expr(node, sym_table);
             break;
         case NodeType_VarDeclList:
             printf("Performing semantic analysis on variable declaration list\n");
             semantic_analysis(node->varDeclList.varDecl, sym_table);
             semantic_analysis(node->varDeclList.varDeclList, sym_table);
-            tac = tac_expr(node, sym_table);
+            tac_expr(node, sym_table);
             break;
         case NodeType_VarDecl:
             printf("Performing semantic analysis on variable declaration\n");   
-            tac = tac_expr(node, sym_table);
+            tac_expr(node, sym_table);
             break;
         case NodeType_StmtList:
             printf("Performing semantic analysis on statement list\n");
             semantic_analysis(node->stmtList.stmt, sym_table);
             semantic_analysis(node->stmtList.stmtList, sym_table);
-            tac = tac_expr(node, sym_table);
+            tac_expr(node, sym_table);
             break;
         case NodeType_Stmt:
             printf("Performing semantic analysis on statement\n");
             semantic_analysis(node->stmt.expr, sym_table);
-            tac = tac_expr(node, sym_table);
+            tac_expr(node, sym_table);
             break;  
         case NodeType_AssignStmt:
             printf("Performing semantic analysis on assignment statement\n");
@@ -80,7 +79,7 @@ void semantic_analysis(ASTNode* node, symbol_table* sym_table) {
                     printf("Type match: %s\n", expr_type);
                 }
             }
-            tac = tac_expr(node, sym_table);
+            tac_expr(node, sym_table);
             break;
         case NodeType_Expr:
             printf("Performing semantic analysis on expression\n");
@@ -122,7 +121,7 @@ void semantic_analysis(ASTNode* node, symbol_table* sym_table) {
             }
 
             node->expr.expr_type = left_type;
-            tac = tac_expr(node, sym_table);
+            tac_expr(node, sym_table);
             break;
         // default:
         //     fprintf(stderr, "Unknown Node Type\n");
@@ -136,7 +135,7 @@ void semantic_analysis(ASTNode* node, symbol_table* sym_table) {
                 fprintf(stderr, "Semantic error: Variable %s has not been declared\n", node->varDecl.varName);
             }
             semantic_analysis(node->binOp.left, sym_table);
-            tac = tac_expr(node, sym_table);
+            tac_expr(node, sym_table);
             break;
         case NodeType_SimpleID:
             printf("Performing semantic analysis on simple ID\n");
@@ -144,12 +143,12 @@ void semantic_analysis(ASTNode* node, symbol_table* sym_table) {
             if (lookup(sym_table, node->simpleID.name) == NULL) {
                 fprintf(stderr, "Semantic error: Variable %s has not been declared\n", node->simpleID.name);
             }
-            tac = tac_expr(node, sym_table);
+            tac_expr(node, sym_table);
             break;
         case NodeType_SimpleExpr:
             printf("Performing semantic analysis on simple expression\n");
             // no checks necessary for number
-            tac = tac_expr(node, sym_table);
+            tac_expr(node, sym_table);
             break;
         case NodeType_WriteStmt:
             printf("Performing semantic analysis on write statement\n");
@@ -157,25 +156,24 @@ void semantic_analysis(ASTNode* node, symbol_table* sym_table) {
             if (lookup(sym_table, node->writeStmt.varName) == NULL) {
                 fprintf(stderr, "Semantic error: Variable %s has not been declared\n", node->simpleID.name);
             }
-            tac = tac_expr(node, sym_table);
+            tac_expr(node, sym_table);
             break;
         case NodeType_FuncDeclList:
             printf("Performing semantic analysis on function declaration list\n");
             semantic_analysis(node->funcDeclList.funcDecl, sym_table);
             semantic_analysis(node->funcDeclList.funcDeclList, sym_table);
-            tac = tac_expr(node, sym_table);
+            tac_expr(node, sym_table);
             break;
         case NodeType_FuncDecl:
             printf("Performing semantic analysis on function declaration\n");
             semantic_analysis(node->funcDecl.funcSignature, node->funcDecl.scope);
             semantic_analysis(node->funcDecl.paramList, node->funcDecl.scope);
             semantic_analysis(node->funcDecl.block, node->funcDecl.scope);
-            tac = tac_expr(node, sym_table);
-            // buffering_tac = false;
+            tac_expr(node, sym_table);
             break;
         case NodeType_FuncSignature:
             printf("Performing semantic analysis on function signature\n");
-            tac = tac_expr(node, sym_table);
+            tac_expr(node, sym_table);
             // no checks necessary... for now
             break;
         case NodeType_Block:
@@ -184,61 +182,61 @@ void semantic_analysis(ASTNode* node, symbol_table* sym_table) {
             semantic_analysis(node->block.arrayDeclList, sym_table);
             semantic_analysis(node->block.stmtList, sym_table);
             semantic_analysis(node->block.returnStmt, sym_table);
-            tac = tac_expr(node, sym_table);
+            tac_expr(node, sym_table);
             break;
         case NodeType_ReturnStmt:
             printf("Performing semantic analysis on return statement====================================\n");
             semantic_analysis(node->returnStmt.expr, sym_table);
             buffering_tac = true;
             allocated_arg_regs = -1;
-            tac = tac_expr(node, sym_table);
+            tac_expr(node, sym_table);
             break;
         case NodeType_ParamList:
             printf("Performing semantic analysis on parameter list\n");
             semantic_analysis(node->paramList.param, sym_table);
             semantic_analysis(node->paramList.paramList, sym_table);
-            tac = tac_expr(node, sym_table);
+            tac_expr(node, sym_table);
             break;
         case NodeType_Param:
             printf("Performing semantic analysis on parameter\n");
-            tac = tac_expr(node, sym_table);
+            tac_expr(node, sym_table);
             break;
         case NodeType_FuncCall:
             printf("Performing semantic analysis on function call\n");
             semantic_analysis(node->funcCall.inputParamList, sym_table);
-            tac = tac_expr(node, sym_table);
+            tac_expr(node, sym_table);
             // no checks necessary... for now
             break;
         case NodeType_InputParamList:
             printf("Performing semantic analysis on input parameter list\n");
             semantic_analysis(node->inputParamList.inputParam, sym_table);
             semantic_analysis(node->inputParamList.inputParamList, sym_table);
-            tac = tac_expr(node, sym_table);
+            tac_expr(node, sym_table);
             break;
         case NodeType_InputParam:
             printf("Performing semantic analysis on input parameter\n");
-            tac = tac_expr(node, sym_table);
+            tac_expr(node, sym_table);
             // no checks necessary... for now
             break;
         case NodeType_ArrayDeclList:
             printf("Performing semantic analysis on array declaration list\n");
             semantic_analysis(node->arrayDeclList.arrayDecl, sym_table);
             semantic_analysis(node->arrayDeclList.arrayDeclList, sym_table);
-            tac = tac_expr(node, sym_table);
+            tac_expr(node, sym_table);
             break;
         case NodeType_ArrayDecl:
             printf("Performing semantic analysis on array declaration\n");
-            tac = tac_expr(node, sym_table);
+            tac_expr(node, sym_table);
             // no checks necessary... for now
             break;
         case NodeType_ArrayAssignStmt:
             printf("Performing semantic analysis on array assignment statement\n");
             semantic_analysis(node->arrayAssignStmt.expr, sym_table);
-            tac = tac_expr(node, sym_table);
+            tac_expr(node, sym_table);
             break;
         case NodeType_ArrayAccess:
             printf("Performing semantic analysis on array access\n");
-            tac = tac_expr(node, sym_table);
+            tac_expr(node, sym_table);
             // no checks necessary... for now
             break;
         case NodeType_TypeCast:
@@ -270,39 +268,76 @@ void semantic_analysis(ASTNode* node, symbol_table* sym_table) {
                 }
             }
             semantic_analysis(node->typeCast.expr, sym_table);
-            tac = tac_expr(node, sym_table);
+            tac_expr(node, sym_table);
             // no checks necessary... for now
             break;
         case NodeType_IfStmt:
             printf("Performing semantic analysis on if statement\n");
-            node->ifStmt.false_label = create_if_label();
-            node->ifStmt.block->ifBlock.false_label = node->ifStmt.false_label;
-            // node->ifStmt.IfStmtSignature->ifStmtSignature.false_label = node->ifStmt.false_label;
+            if (node->ifStmt.start_label == NULL) {
+                node->ifStmt.start_label = create_if_label();
+            }
+            if (node->ifStmt.end_label == NULL) {
+                node->ifStmt.end_label = create_if_label();
+            }
+            node->ifStmt.else_label = create_if_label();
+            node->ifStmt.block_end_label = create_if_label();
+            node->ifStmt.block_start_label = create_if_label();
+            node->ifStmt.block->ifBlock.end_label = node->ifStmt.end_label;
+            node->ifStmt.block->ifBlock.start_label = node->ifStmt.block_start_label;
+            // node->ifStmt.block->ifBlock.end_label = node->ifStmt.block_end_label;
+            // node->ifStmt.elseIfList->elseIfList.end_label = node->ifStmt.end_label;
+            tac_if_header(node, sym_table);
             semantic_analysis(node->ifStmt.condition, sym_table);
-            tac = tac_expr(node, sym_table);
+            tac_expr(node, sym_table);
             semantic_analysis(node->ifStmt.block, sym_table);
-            break;
-        case NodeType_IfStmtSignature:
-            printf("Performing semantic analysis on if statement signature\n");
-            semantic_analysis(node->ifStmtSignature.condition, sym_table);
-            tac = tac_expr(node, sym_table);
+            if (node->ifStmt.elseIfList != NULL) {
+                node->ifStmt.elseIfList->elseIfList.start_label = node->ifStmt.else_label;
+                node->ifStmt.elseIfList->elseIfList.end_label = node->ifStmt.end_label;
+                semantic_analysis(node->ifStmt.elseIfList, sym_table);
+            }
+            if (node->ifStmt.elseStmt != NULL) {
+                node->ifStmt.elseStmt->elseStmt.start_label = node->ifStmt.else_label;
+                node->ifStmt.elseStmt->elseStmt.end_label = node->ifStmt.end_label;
+                semantic_analysis(node->ifStmt.elseStmt, sym_table);
+            }
+            if (node->ifStmt.isElseIf == false){
+                tac_condition(node, sym_table);
+            }
+            
             break;
         case NodeType_LogicExpr:
             printf("Performing semantic analysis on logical expression\n");
             semantic_analysis(node->logicExpr.left, sym_table);
             semantic_analysis(node->logicExpr.right, sym_table);
-            tac = tac_expr(node, sym_table);
+            tac_expr(node, sym_table);
             break;
         case NodeType_IfBlock:
             printf("Performing semantic analysis on if block\n");
+            tac_if_block_header(node, sym_table);
             semantic_analysis(node->ifBlock.stmtList, sym_table);
-            tac = tac_expr(node, sym_table);
+            tac_expr(node, sym_table);
+            break;
+        case NodeType_ElseIfList:
+            printf("Performing semantic analysis on else if list\n");
+            node->elseIfList.elseIf->ifStmt.start_label = node->elseIfList.start_label;
+            node->elseIfList.elseIf->ifStmt.end_label = node->elseIfList.end_label;
+            semantic_analysis(node->elseIfList.elseIf, sym_table);
+            semantic_analysis(node->elseIfList.elseIfList, sym_table);
+            tac_expr(node, sym_table);
+            break;
+        case NodeType_ElseStmt:
+            printf("Performing semantic analysis on else statement\n");
+            node->elseStmt.block->ifBlock.start_label = node->elseStmt.start_label;
+            node->elseStmt.block->ifBlock.end_label = node->elseStmt.end_label;
+            // tac_if_header(node, sym_table);
+            // tac_if_block_header(node, sym_table);
+            semantic_analysis(node->elseStmt.block, sym_table);
+            tac_expr(node, sym_table);
             break;
         default:
             fprintf(stderr, "Unknown Node Type\n");
     }
 
-    print_TAC(tac);
 
     if (node->type == NodeType_SimpleID)
     {
@@ -330,9 +365,86 @@ bool is_temp_var(const char *str)
     return false;
 }
 
+TAC *tac_if_block_header(ASTNode *expr, symbol_table *sym_table){
+    // Depending on your AST structure, generate the appropriate TAC
+    // If the TAC is generated successfully, append it to the global TAC list
+    // Return the generated TAC, so that it can be used by the caller, e.g. for printing
+    if (!expr)
+        return NULL;
+
+    TAC *instruction = (TAC *)malloc(sizeof(TAC));
+    if (!instruction)
+        return NULL;
+
+    instruction->scope = sym_table;
+    printf("Generating TAC in the scope %s\n", sym_table->scope_name);
+    instruction->op = strdup("if_block_head");
+    instruction->result = expr->ifBlock.start_label;
+
+    instruction->next = NULL; // Make sure to null-terminate the new instruction
+    // Append to the global TAC list
+    append_TAC(&tac_head, instruction);
+    print_TAC(instruction);
+
+    return instruction;
+}
+
+TAC *tac_if_header(ASTNode *expr, symbol_table *sym_table)
+{
+    // Depending on your AST structure, generate the appropriate TAC
+    // If the TAC is generated successfully, append it to the global TAC list
+    // Return the generated TAC, so that it can be used by the caller, e.g. for printing
+    if (!expr)
+        return NULL;
+
+    TAC *instruction = (TAC *)malloc(sizeof(TAC));
+    if (!instruction)
+        return NULL;
+
+    instruction->scope = sym_table;
+    printf("Generating TAC in the scope %s\n", sym_table->scope_name);
+    instruction->op = strdup("if_start");
+    if (expr->type == NodeType_IfStmt) {
+        instruction->result = expr->ifStmt.start_label;
+    } else if (expr->type == NodeType_ElseStmt) {
+        instruction->result = expr->elseStmt.start_label;
+    }
+    
+
+    instruction->next = NULL; // Make sure to null-terminate the new instruction
+    // Append to the global TAC list
+    append_TAC(&tac_head, instruction);
+    print_TAC(instruction);
+
+    return instruction;
+}
+
+TAC *tac_condition(ASTNode *expr, symbol_table *sym_table) {
+    // Depending on your AST structure, generate the appropriate TAC
+    // If the TAC is generated successfully, append it to the global TAC list
+    // Return the generated TAC, so that it can be used by the caller, e.g. for printing
+    if (!expr)
+        return NULL;
+
+    TAC *instruction = (TAC *)malloc(sizeof(TAC));
+    if (!instruction)
+        return NULL;
+
+    instruction->scope = sym_table;
+    printf("Generating TAC in the scope %s\n", sym_table->scope_name);
+    instruction->op = strdup("if_end");
+    instruction->result = expr->ifStmt.end_label;
+
+    instruction->next = NULL; // Make sure to null-terminate the new instruction
+    // Append to the global TAC list
+    append_TAC(&tac_head, instruction);
+    print_TAC(instruction);
+
+    return instruction;
+}
+
 TAC *tac_expr(ASTNode *expr, symbol_table *sym_table)
 {
-
     // Depending on your AST structure, generate the appropriate TAC
     // If the TAC is generated successfully, append it to the global TAC list
     // Return the generated TAC, so that it can be used by the caller, e.g. for printing
@@ -490,25 +602,20 @@ TAC *tac_expr(ASTNode *expr, symbol_table *sym_table)
             instruction->arg1 = create_operand(expr->ifStmt.condition);
             instruction->arg2 = strdup("zero");
             instruction->op = strdup("if");
-            instruction->result = expr->ifStmt.false_label;
-            break;
-        }
-
-        case NodeType_IfStmtSignature: {
-            printf("Generating TAC for if statement\n");
-            instruction->arg1 = create_operand(expr->ifStmtSignature.condition);
-            instruction->arg2 = strdup("zero");
-            instruction->op = strdup("if");
-            instruction->result = expr->ifStmtSignature.false_label;
+            instruction->result = expr->ifStmt.end_label;
+            if (expr->ifStmt.elseIfList != NULL) {
+                instruction->result = expr->ifStmt.else_label;
+            } else if (expr->ifStmt.elseStmt != NULL) {
+                instruction->result = expr->ifStmt.else_label;
+            }
             break;
         }
 
         case NodeType_IfBlock: {
             // Generate TAC for the if block
-            
             printf("Generating TAC for if block\n");
             instruction->op = strdup("if_block");
-            instruction->result = expr->ifBlock.false_label;
+            instruction->result = expr->ifBlock.end_label;
             break;
         }
 
@@ -518,13 +625,9 @@ TAC *tac_expr(ASTNode *expr, symbol_table *sym_table)
     }
     
     instruction->next = NULL; // Make sure to null-terminate the new instruction
-
     // Append to the global TAC list
     append_TAC(&tac_head, instruction);
-
-    // if (buffering_tac) {
-    //     push_TAC(&tac_buffer_head, instruction);
-    // }
+    print_TAC(instruction);
 
     return instruction;
 }
@@ -673,7 +776,13 @@ void print_TAC_to_file(const char *filename, TAC *tac)
         } else if (strcmp(current->op, "if") == 0) {
             fprintf(file, "if not %s goto %s\n", current->arg1, current->result);
         } else if (strcmp(current->op, "if_block") == 0) {
-            fprintf(file, "if_block end\n");
+            fprintf(file, "jump to %s\n", current->result);
+        } else if (strcmp(current->op, "if_end") == 0) {
+            fprintf(file, "if_end %s\n", current->result);
+        } else if (strcmp(current->op, "if_start") == 0) {
+            fprintf(file, "if_start %s\n", current->result);
+        } else if (strcmp(current->op, "if_block_head") == 0) {
+            fprintf(file, "if_block_head %s\n", current->result);
         }
         current = current->next;
     }
@@ -790,7 +899,13 @@ void print_TAC(TAC* tac) {
         } else if (strcmp(tac->op, "==") == 0) {
             printf("%s = %s == %s\n", tac->result, tac->arg1, tac->arg2);
         } else if (strcmp(tac->op, "if_block") == 0) {
-            printf("if_block end\n");
+            printf("jump to %s\n", tac->result);
+        } else if (strcmp(tac->op, "if_end") == 0) {
+            printf("if_end %s\n", tac->result);
+        } else if (strcmp(tac->op, "if_start") == 0) {
+            printf("if_start %s\n", tac->result);
+        } else if (strcmp(tac->op, "if_block_head") == 0) {
+            printf("if_block_head %s\n", tac->result);
         }
 }
 

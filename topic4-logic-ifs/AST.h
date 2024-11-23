@@ -41,6 +41,8 @@ typedef enum {
     NodeType_IfStmtSignature,   
     NodeType_LogicExpr,
     NodeType_IfBlock,
+    NodeType_ElseIfList,
+    NodeType_ElseStmt,
 } NodeType;
 
 // Structure for AST nodes
@@ -207,7 +209,14 @@ typedef struct ASTNode {
         struct IfStmt {
             struct ASTNode* condition;
             struct ASTNode* block;
-            char* false_label;
+            struct ASTNode* elseIfList;
+            struct ASTNode* elseStmt;
+            char* start_label;
+            char* block_start_label;
+            char* block_end_label;
+            char* end_label;
+            char* else_label;
+            bool isElseIf;
         } ifStmt;
 
         struct IfStmtSignature {
@@ -217,8 +226,24 @@ typedef struct ASTNode {
         
         struct IfBlock {
             struct ASTNode* stmtList;
-            char* false_label;
+            char* start_label;
+            char* end_label; // point to the end of the statement
+            char* block_label; // point to the next block
         } ifBlock;
+
+        struct ElseIfList {
+            struct ASTNode* elseIf;
+            struct ASTNode* elseIfList;
+            char* start_label;
+            char* end_label;
+            char* else_label;
+        } elseIfList;
+
+        struct ElseStmt {
+            struct ASTNode* block;
+            char* start_label;
+            char* end_label;
+        } elseStmt;
     };
 } ASTNode;
 

@@ -80,11 +80,12 @@ symbol_table* current_scope = NULL;
 %token <string> FUNC
 %token <string> ARRAY
 %token <string> IF
+%token <string> ELSE
 
 
 %printer { fprintf(yyoutput, "%s", $$); } ID;
 
-%type <ast> Program VarDecl VarDeclList FuncDecl FuncDeclList ParamList Param Block Stmt StmtList Expr BinOp WriteStmt ReturnStmt FuncSignature InputParamList InputParam ArrayDecl ArrayDeclList LogicExpr IfBlock IfStmt
+%type <ast> Program VarDecl VarDeclList FuncDecl FuncDeclList ParamList Param Block Stmt StmtList Expr BinOp WriteStmt ReturnStmt FuncSignature InputParamList InputParam ArrayDecl ArrayDeclList LogicExpr IfBlock IfStmt ElseIfList ElseStmt
 %start Program
 
 %left PLUS MINUS
@@ -467,21 +468,43 @@ LogicExpr
 						}
 
 IfStmt
-		: IF LPAREN LogicExpr RPAREN IfBlock {
+		: IF LPAREN LogicExpr RPAREN IfBlock ElseIfList {
 									printf("PARSER: Recognized if statement\n");
 									$$ = malloc(sizeof(ASTNode));
 									$$->type = NodeType_IfStmt;
 									$$->ifStmt.condition = $3;
 									$$->ifStmt.block = $5;
+									$$->ifStmt.elseIfList = $6;
+								}
+		| IF LPAREN LogicExpr RPAREN IfBlock ElseStmt {
+									printf("PARSER: Recognized if statement\n");
+									$$ = malloc(sizeof(ASTNode));
+									$$->type = NodeType_IfStmt;
+									$$->ifStmt.condition = $3;
+									$$->ifStmt.block = $5;
+									$$->ifStmt.elseStmt = $6;
 								}
 
-// IfStmtSignature
-// 		: IF LPAREN LogicExpr RPAREN {
-// 									printf("PARSER: Recognized if statement signature\n");
-// 									$$ = malloc(sizeof(ASTNode));
-// 									$$->type = NodeType_IfStmtSignature;
-// 									$$->ifStmtSignature.condition = $3;
-// 								}
+ElseIfList
+		: { $$ = NULL; }
+		| ELSE IfStmt ElseIfList	{ 
+										printf("PARSER: Recognized else if statement\n");
+										$$ = malloc(sizeof(ASTNode));
+										$$->type = NodeType_ElseIfList;
+										$$->elseIfList.elseIf = $2;
+										$$->elseIfList.elseIfList = $3;
+										$$->elseIfList.elseIf->ifStmt.isElseIf = true;
+									}
+
+ElseStmt
+		: { $$ = NULL; }
+		| ELSE IfBlock { 
+						printf("PARSER: Recognized else statement\n");
+						$$ = malloc(sizeof(ASTNode));
+						$$->type = NodeType_ElseStmt;
+						$$->elseStmt.block = $2;
+					}
+
 
 IfBlock
 		: LCURBRACK StmtList RCURBRACK {

@@ -162,6 +162,8 @@ void traverseAST(ASTNode* node, int level) {
             printf("If Statement\n");
             traverseAST(node->ifStmt.condition, level + indentValue);
             traverseAST(node->ifStmt.block, level + indentValue); // <- traverse
+            traverseAST(node->ifStmt.elseIfList, level + indentValue);
+            traverseAST(node->ifStmt.elseStmt, level + indentValue);
             break;
         case NodeType_LogicExpr:
             printIndent(level);
@@ -173,6 +175,17 @@ void traverseAST(ASTNode* node, int level) {
             printIndent(level);
             printf("If Block\n");
             traverseAST(node->ifBlock.stmtList, level + indentValue);
+            break;
+        case NodeType_ElseIfList:
+            printIndent(level);
+            printf("Else If List\n");
+            traverseAST(node->elseIfList.elseIf, level + indentValue);
+            traverseAST(node->elseIfList.elseIfList, level + indentValue);
+            break;
+        case NodeType_ElseStmt:
+            printIndent(level);
+            printf("Else Statement\n");
+            traverseAST(node->elseStmt.block, level + indentValue);
             break;
     }
 }
@@ -273,6 +286,12 @@ void printASTNode(ASTNode* node) {
             break;
         case NodeType_IfStmtSignature:
             printf("If Statement Signature\n");
+            break;
+        case NodeType_ElseIfList:
+            printf("Else If List\n");
+            break;
+        case NodeType_ElseStmt:
+            printf("Else Statement\n");
             break;
     }
 } 
@@ -384,6 +403,7 @@ void freeAST(ASTNode* node) {
         case NodeType_IfStmt:
             free(node->ifStmt.condition);
             free(node->ifStmt.block);
+            free(node->ifStmt.elseIfList);
             break;
         case NodeType_LogicExpr:
             free(node->logicExpr.left);
@@ -392,6 +412,13 @@ void freeAST(ASTNode* node) {
             break;
         case NodeType_IfBlock:
             free(node->ifBlock.stmtList);
+            break;
+        case NodeType_ElseIfList:
+            free(node->elseIfList.elseIf);
+            free(node->elseIfList.elseIfList);
+            break;
+        case NodeType_ElseStmt:
+            free(node->elseStmt.block);
             break;
     }
 
@@ -522,6 +549,10 @@ ASTNode* createNode(NodeType type) {
         case NodeType_IfStmt:
             newNode->ifStmt.condition = NULL;
             newNode->ifStmt.block = NULL;
+            newNode->ifStmt.elseIfList = NULL;
+            newNode->ifStmt.elseStmt = NULL;
+            newNode->ifStmt.start_label = NULL;
+            newNode->ifStmt.isElseIf = false;
             break;
         case NodeType_IfStmtSignature:
             newNode->ifStmtSignature.condition = NULL;
@@ -533,6 +564,14 @@ ASTNode* createNode(NodeType type) {
             break;
         case NodeType_IfBlock:
             newNode->ifBlock.stmtList = NULL;
+            break;
+        case NodeType_ElseIfList:
+            newNode->elseIfList.elseIf = NULL;
+            newNode->elseIfList.elseIfList = NULL;
+            break;
+
+        case NodeType_ElseStmt:
+            newNode->elseStmt.block = NULL;
             break;
     }
 

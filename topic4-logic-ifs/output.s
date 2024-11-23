@@ -13,19 +13,48 @@ main:
 	sw $zero, 0($sp)
 
 	# assignment of a
-	li $t1, 2
+	li $t1, 3
 	# store value of a
 	sw $t1, -12($fp)
+# IF STMT START
+if_label_1468638776:
 	lw $t9, -12($fp)
 	li $t8, 1
-	add $t0, $t9, $t8
-	# assignment of a
-	# store value of a
-	sw $t0, -12($fp)
+	seq $t0, $t9, $t8
+	beq $t0, $zero, if_label_1471010618
+# IF BLOCK START
+if_label_1473382460:
 	# write a
 	lw $a0, -12($fp)
 	li $v0, 1
 	syscall
+	j if_label_1469824697
+# IF STMT START
+if_label_1471010618:
+	lw $t9, -12($fp)
+	li $t8, 2
+	seq $t1, $t9, $t8
+	beq $t1, $zero, if_label_1474568381
+# IF BLOCK START
+if_label_1476940223:
+	# write a
+	lw $a0, -12($fp)
+	li $v0, 1
+	syscall
+	j if_label_1469824697
+# IF BLOCK START
+if_label_1474568381:
+	# assignment of a
+	li $t1, 10
+	# store value of a
+	sw $t1, -12($fp)
+	# write a
+	lw $a0, -12($fp)
+	li $v0, 1
+	syscall
+	j if_label_1469824697
+# IF STMT END
+if_label_1469824697:
 
 	# return 0
 	li $v0, 0

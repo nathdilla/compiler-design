@@ -101,6 +101,12 @@ ws             {delim}+
 		 yylval.string = strdup(yytext); 
 		 return IF;
 		}
+
+"else"	{words++; chars += strlen(yytext);
+		 printf("%s : ELSE\n", yytext);
+		 yylval.string = strdup(yytext); 
+		 return ELSE;
+		}
 			
 "="		{chars++;
 		 printf("%s : EQ\n", yytext);

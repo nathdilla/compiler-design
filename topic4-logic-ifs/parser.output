@@ -11,9 +11,16 @@ Terminals which are not used
    NOT
 
 
+Rules never reduced
+
+   50 ElseStmt: /* empty */
+
+
 State 2 conflicts: 3 shift/reduce, 1 reduce/reduce
 State 68 conflicts: 4 shift/reduce
+State 71 conflicts: 1 shift/reduce, 7 reduce/reduce
 State 78 conflicts: 4 shift/reduce
+State 88 conflicts: 1 shift/reduce
 
 
 Grammar
@@ -86,9 +93,16 @@ Grammar
 
    45 LogicExpr: Expr EQEQ Expr
 
-   46 IfStmt: IF LPAREN LogicExpr RPAREN IfBlock
+   46 IfStmt: IF LPAREN LogicExpr RPAREN IfBlock ElseIfList
+   47       | IF LPAREN LogicExpr RPAREN IfBlock ElseStmt
 
-   47 IfBlock: LCURBRACK StmtList RCURBRACK
+   48 ElseIfList: /* empty */
+   49           | ELSE IfStmt ElseIfList
+
+   50 ElseStmt: /* empty */
+   51         | ELSE IfBlock
+
+   52 IfBlock: LCURBRACK StmtList RCURBRACK
 
 
 Terminals, with rules where they appear
@@ -100,10 +114,10 @@ ID (259) 5 8 11 17 21 27 29 30 33 38 39 44
 SEMICOLON (260) 5 8 24 27 29 30 44
 LBRACK (261) 5 30 39
 RBRACK (262) 5 30 39
-LCURBRACK (263) 23 47
-RCURBRACK (264) 23 47
-LPAREN (265) 13 29 34 38 46
-RPAREN (266) 13 29 34 38 46
+LCURBRACK (263) 23 52
+RCURBRACK (264) 23 52
+LPAREN (265) 13 29 34 38 46 47
+RPAREN (266) 13 29 34 38 46 47
 COMMA (267) 16 20
 DOT (268)
 EQEQ (269) 45
@@ -127,59 +141,64 @@ WRITE (286) 44
 RETURN (287) 24
 FUNC (288) 11
 ARRAY (289) 5
-IF (290) 46
+IF (290) 46 47
+ELSE (291) 49 51
 
 
 Nonterminals, with rules where they appear
 
-$accept (36)
+$accept (37)
     on left: 0
-Program (37)
+Program (38)
     on left: 1 2, on right: 0
-ArrayDeclList (38)
+ArrayDeclList (39)
     on left: 3 4, on right: 4 23
-ArrayDecl (39)
+ArrayDecl (40)
     on left: 5, on right: 4
-VarDeclList (40)
+VarDeclList (41)
     on left: 6 7, on right: 1 2 7 23
-VarDecl (41)
+VarDecl (42)
     on left: 8, on right: 7
-FuncDeclList (42)
+FuncDeclList (43)
     on left: 9 10, on right: 1 10
-FuncSignature (43)
+FuncSignature (44)
     on left: 11, on right: 13
-FuncDecl (44)
+FuncDecl (45)
     on left: 13, on right: 10
-@1 (45)
+@1 (46)
     on left: 12, on right: 13
-ParamList (46)
+ParamList (47)
     on left: 14 15 16, on right: 13 16
-Param (47)
+Param (48)
     on left: 17, on right: 15 16
-InputParamList (48)
+InputParamList (49)
     on left: 18 19 20, on right: 20 29 38
-InputParam (49)
+InputParam (50)
     on left: 21 22, on right: 19 20
-Block (50)
+Block (51)
     on left: 23, on right: 13
-ReturnStmt (51)
+ReturnStmt (52)
     on left: 24, on right: 23
-StmtList (52)
-    on left: 25 26, on right: 1 2 23 26 47
-Stmt (53)
+StmtList (53)
+    on left: 25 26, on right: 1 2 23 26 52
+Stmt (54)
     on left: 27 28 29 30 31, on right: 26
-Expr (54)
+Expr (55)
     on left: 32 33 34 35 36 37 38 39, on right: 24 27 30 32 34 45
-BinOp (55)
+BinOp (56)
     on left: 40 41 42 43, on right: 32
-WriteStmt (56)
+WriteStmt (57)
     on left: 44, on right: 28
-LogicExpr (57)
-    on left: 45, on right: 46
-IfStmt (58)
-    on left: 46, on right: 31
-IfBlock (59)
-    on left: 47, on right: 46
+LogicExpr (58)
+    on left: 45, on right: 46 47
+IfStmt (59)
+    on left: 46 47, on right: 31 49
+ElseIfList (60)
+    on left: 48 49, on right: 46 49
+ElseStmt (61)
+    on left: 50 51, on right: 47
+IfBlock (62)
+    on left: 52, on right: 46 47 51
 
 
 state 0
@@ -269,7 +288,8 @@ state 7
 
 state 8
 
-   46 IfStmt: IF . LPAREN LogicExpr RPAREN IfBlock
+   46 IfStmt: IF . LPAREN LogicExpr RPAREN IfBlock ElseIfList
+   47       | IF . LPAREN LogicExpr RPAREN IfBlock ElseStmt
 
     LPAREN  shift, and go to state 23
 
@@ -412,7 +432,8 @@ state 22
 
 state 23
 
-   46 IfStmt: IF LPAREN . LogicExpr RPAREN IfBlock
+   46 IfStmt: IF LPAREN . LogicExpr RPAREN IfBlock ElseIfList
+   47       | IF LPAREN . LogicExpr RPAREN IfBlock ElseStmt
 
     ID      shift, and go to state 34
     LPAREN  shift, and go to state 35
@@ -581,7 +602,8 @@ state 42
 
 state 43
 
-   46 IfStmt: IF LPAREN LogicExpr . RPAREN IfBlock
+   46 IfStmt: IF LPAREN LogicExpr . RPAREN IfBlock ElseIfList
+   47       | IF LPAREN LogicExpr . RPAREN IfBlock ElseStmt
 
     RPAREN  shift, and go to state 58
 
@@ -715,7 +737,8 @@ state 57
 
 state 58
 
-   46 IfStmt: IF LPAREN LogicExpr RPAREN . IfBlock
+   46 IfStmt: IF LPAREN LogicExpr RPAREN . IfBlock ElseIfList
+   47       | IF LPAREN LogicExpr RPAREN . IfBlock ElseStmt
 
     LCURBRACK  shift, and go to state 70
 
@@ -836,7 +859,7 @@ state 69
 
 state 70
 
-   47 IfBlock: LCURBRACK . StmtList RCURBRACK
+   52 IfBlock: LCURBRACK . StmtList RCURBRACK
 
     ID     shift, and go to state 5
     WRITE  shift, and go to state 6
@@ -852,9 +875,29 @@ state 70
 
 state 71
 
-   46 IfStmt: IF LPAREN LogicExpr RPAREN IfBlock .
+   46 IfStmt: IF LPAREN LogicExpr RPAREN IfBlock . ElseIfList
+   47       | IF LPAREN LogicExpr RPAREN IfBlock . ElseStmt
 
-    $default  reduce using rule 46 (IfStmt)
+    ELSE  shift, and go to state 80
+
+    $end       reduce using rule 48 (ElseIfList)
+    $end       [reduce using rule 50 (ElseStmt)]
+    ID         reduce using rule 48 (ElseIfList)
+    ID         [reduce using rule 50 (ElseStmt)]
+    RCURBRACK  reduce using rule 48 (ElseIfList)
+    RCURBRACK  [reduce using rule 50 (ElseStmt)]
+    WRITE      reduce using rule 48 (ElseIfList)
+    WRITE      [reduce using rule 50 (ElseStmt)]
+    RETURN     reduce using rule 48 (ElseIfList)
+    RETURN     [reduce using rule 50 (ElseStmt)]
+    IF         reduce using rule 48 (ElseIfList)
+    IF         [reduce using rule 50 (ElseStmt)]
+    ELSE       [reduce using rule 48 (ElseIfList)]
+    ELSE       [reduce using rule 50 (ElseStmt)]
+    $default   reduce using rule 48 (ElseIfList)
+
+    ElseIfList  go to state 81
+    ElseStmt    go to state 82
 
 
 state 72
@@ -868,9 +911,9 @@ state 73
 
    13 FuncDecl: FuncSignature @1 LPAREN ParamList RPAREN . Block
 
-    LCURBRACK  shift, and go to state 80
+    LCURBRACK  shift, and go to state 83
 
-    Block  go to state 81
+    Block  go to state 84
 
 
 state 74
@@ -881,7 +924,7 @@ state 74
 
     $default  reduce using rule 14 (ParamList)
 
-    ParamList  go to state 82
+    ParamList  go to state 85
     Param      go to state 61
 
 
@@ -890,7 +933,7 @@ state 75
    30 Stmt: ID LBRACK NUMBER RBRACK EQ Expr . SEMICOLON
    32 Expr: Expr . BinOp Expr
 
-    SEMICOLON  shift, and go to state 83
+    SEMICOLON  shift, and go to state 86
     PLUS       shift, and go to state 52
     MINUS      shift, and go to state 53
     STAR       shift, and go to state 54
@@ -934,87 +977,148 @@ state 78
 
 state 79
 
-   47 IfBlock: LCURBRACK StmtList . RCURBRACK
+   52 IfBlock: LCURBRACK StmtList . RCURBRACK
 
-    RCURBRACK  shift, and go to state 84
+    RCURBRACK  shift, and go to state 87
 
 
 state 80
 
-   23 Block: LCURBRACK . ArrayDeclList VarDeclList StmtList ReturnStmt RCURBRACK
+   49 ElseIfList: ELSE . IfStmt ElseIfList
+   51 ElseStmt: ELSE . IfBlock
 
-    ARRAY  shift, and go to state 85
+    LCURBRACK  shift, and go to state 70
+    IF         shift, and go to state 8
 
-    $default  reduce using rule 3 (ArrayDeclList)
-
-    ArrayDeclList  go to state 86
-    ArrayDecl      go to state 87
+    IfStmt   go to state 88
+    IfBlock  go to state 89
 
 
 state 81
+
+   46 IfStmt: IF LPAREN LogicExpr RPAREN IfBlock ElseIfList .
+
+    $default  reduce using rule 46 (IfStmt)
+
+
+state 82
+
+   47 IfStmt: IF LPAREN LogicExpr RPAREN IfBlock ElseStmt .
+
+    $default  reduce using rule 47 (IfStmt)
+
+
+state 83
+
+   23 Block: LCURBRACK . ArrayDeclList VarDeclList StmtList ReturnStmt RCURBRACK
+
+    ARRAY  shift, and go to state 90
+
+    $default  reduce using rule 3 (ArrayDeclList)
+
+    ArrayDeclList  go to state 91
+    ArrayDecl      go to state 92
+
+
+state 84
 
    13 FuncDecl: FuncSignature @1 LPAREN ParamList RPAREN Block .
 
     $default  reduce using rule 13 (FuncDecl)
 
 
-state 82
+state 85
 
    16 ParamList: Param COMMA ParamList .
 
     $default  reduce using rule 16 (ParamList)
 
 
-state 83
+state 86
 
    30 Stmt: ID LBRACK NUMBER RBRACK EQ Expr SEMICOLON .
 
     $default  reduce using rule 30 (Stmt)
 
 
-state 84
+state 87
 
-   47 IfBlock: LCURBRACK StmtList RCURBRACK .
+   52 IfBlock: LCURBRACK StmtList RCURBRACK .
 
-    $default  reduce using rule 47 (IfBlock)
+    $default  reduce using rule 52 (IfBlock)
 
 
-state 85
+state 88
+
+   49 ElseIfList: ELSE IfStmt . ElseIfList
+
+    ELSE  shift, and go to state 93
+
+    ELSE      [reduce using rule 48 (ElseIfList)]
+    $default  reduce using rule 48 (ElseIfList)
+
+    ElseIfList  go to state 94
+
+
+state 89
+
+   51 ElseStmt: ELSE IfBlock .
+
+    $default  reduce using rule 51 (ElseStmt)
+
+
+state 90
 
     5 ArrayDecl: ARRAY . TYPE ID LBRACK NUMBER RBRACK SEMICOLON
 
-    TYPE  shift, and go to state 88
+    TYPE  shift, and go to state 95
 
 
-state 86
+state 91
 
    23 Block: LCURBRACK ArrayDeclList . VarDeclList StmtList ReturnStmt RCURBRACK
 
     $default  reduce using rule 6 (VarDeclList)
 
-    VarDeclList  go to state 89
+    VarDeclList  go to state 96
 
 
-state 87
+state 92
 
     4 ArrayDeclList: ArrayDecl . ArrayDeclList
 
-    ARRAY  shift, and go to state 85
+    ARRAY  shift, and go to state 90
 
     $default  reduce using rule 3 (ArrayDeclList)
 
-    ArrayDeclList  go to state 90
-    ArrayDecl      go to state 87
+    ArrayDeclList  go to state 97
+    ArrayDecl      go to state 92
 
 
-state 88
+state 93
+
+   49 ElseIfList: ELSE . IfStmt ElseIfList
+
+    IF  shift, and go to state 8
+
+    IfStmt  go to state 88
+
+
+state 94
+
+   49 ElseIfList: ELSE IfStmt ElseIfList .
+
+    $default  reduce using rule 49 (ElseIfList)
+
+
+state 95
 
     5 ArrayDecl: ARRAY TYPE . ID LBRACK NUMBER RBRACK SEMICOLON
 
-    ID  shift, and go to state 91
+    ID  shift, and go to state 98
 
 
-state 89
+state 96
 
     7 VarDeclList: VarDeclList . VarDecl
    23 Block: LCURBRACK ArrayDeclList VarDeclList . StmtList ReturnStmt RCURBRACK
@@ -1027,43 +1131,43 @@ state 89
     $default  reduce using rule 25 (StmtList)
 
     VarDecl    go to state 9
-    StmtList   go to state 92
+    StmtList   go to state 99
     Stmt       go to state 14
     WriteStmt  go to state 15
     IfStmt     go to state 16
 
 
-state 90
+state 97
 
     4 ArrayDeclList: ArrayDecl ArrayDeclList .
 
     $default  reduce using rule 4 (ArrayDeclList)
 
 
-state 91
+state 98
 
     5 ArrayDecl: ARRAY TYPE ID . LBRACK NUMBER RBRACK SEMICOLON
 
-    LBRACK  shift, and go to state 93
+    LBRACK  shift, and go to state 100
 
 
-state 92
+state 99
 
    23 Block: LCURBRACK ArrayDeclList VarDeclList StmtList . ReturnStmt RCURBRACK
 
-    RETURN  shift, and go to state 94
+    RETURN  shift, and go to state 101
 
-    ReturnStmt  go to state 95
+    ReturnStmt  go to state 102
 
 
-state 93
+state 100
 
     5 ArrayDecl: ARRAY TYPE ID LBRACK . NUMBER RBRACK SEMICOLON
 
-    NUMBER  shift, and go to state 96
+    NUMBER  shift, and go to state 103
 
 
-state 94
+state 101
 
    24 ReturnStmt: RETURN . Expr SEMICOLON
 
@@ -1073,29 +1177,29 @@ state 94
     NUMBER  shift, and go to state 37
     FLOAT   shift, and go to state 38
 
-    Expr  go to state 97
+    Expr  go to state 104
 
 
-state 95
+state 102
 
    23 Block: LCURBRACK ArrayDeclList VarDeclList StmtList ReturnStmt . RCURBRACK
 
-    RCURBRACK  shift, and go to state 98
+    RCURBRACK  shift, and go to state 105
 
 
-state 96
+state 103
 
     5 ArrayDecl: ARRAY TYPE ID LBRACK NUMBER . RBRACK SEMICOLON
 
-    RBRACK  shift, and go to state 99
+    RBRACK  shift, and go to state 106
 
 
-state 97
+state 104
 
    24 ReturnStmt: RETURN Expr . SEMICOLON
    32 Expr: Expr . BinOp Expr
 
-    SEMICOLON  shift, and go to state 100
+    SEMICOLON  shift, and go to state 107
     PLUS       shift, and go to state 52
     MINUS      shift, and go to state 53
     STAR       shift, and go to state 54
@@ -1104,28 +1208,28 @@ state 97
     BinOp  go to state 56
 
 
-state 98
+state 105
 
    23 Block: LCURBRACK ArrayDeclList VarDeclList StmtList ReturnStmt RCURBRACK .
 
     $default  reduce using rule 23 (Block)
 
 
-state 99
+state 106
 
     5 ArrayDecl: ARRAY TYPE ID LBRACK NUMBER RBRACK . SEMICOLON
 
-    SEMICOLON  shift, and go to state 101
+    SEMICOLON  shift, and go to state 108
 
 
-state 100
+state 107
 
    24 ReturnStmt: RETURN Expr SEMICOLON .
 
     $default  reduce using rule 24 (ReturnStmt)
 
 
-state 101
+state 108
 
     5 ArrayDecl: ARRAY TYPE ID LBRACK NUMBER RBRACK SEMICOLON .
 

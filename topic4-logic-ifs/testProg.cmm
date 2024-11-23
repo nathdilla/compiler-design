@@ -1,7 +1,13 @@
 function int main() {    
     int a;
-    a = 2;
-    a = a + 1;
-    write a;
+    a = 3;
+    if (a == 1) {
+        write a;
+    } else if (a == 2) {
+        write a;
+    } else {
+        a = 10;
+        write a;
+    }
     return 0;
 }

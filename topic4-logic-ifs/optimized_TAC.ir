@@ -1,5 +1,6 @@
 a declare
-a = 2
-t0 = a + 1
-a = t0
+a = 3
+write a
+write a
+a = 10
 write a

@@ -181,36 +181,38 @@ void evaluate_operations(TAC* current, int stack_offset) {
         char* temp_reg2 = "$t8"; // Designated temp register for arg2 if not a temp
 
         if (is_register_name(current->arg1)) {
-        // arg1 is a temporary, so add $ in front
-        snprintf(arg1_reg, sizeof(arg1_reg), "$%s", current->arg1);
+            // arg1 is a temporary, so add $ in front
+            snprintf(arg1_reg, sizeof(arg1_reg), "$%s", current->arg1);
         } else if (isdigit(current->arg1[0]) || (current->arg1[0] == '-' && isdigit(current->arg1[1]))) {
-        // arg1 is a constant, so load it into the designated temp register (t9)
-        fprintf(output_file, "\tli %s, %s\n", temp_reg1, current->arg1);
-        strcpy(arg1_reg, temp_reg1);
-        }
-        else {
-        // arg1 is not a temporary, so load it into the designated temp register (t9)
-        symbol* sym = lookup(current_scope_code_gen, current->arg1);
-        if (sym && sym->is_local) {
-            fprintf(output_file, "\tlw %s, %d($fp)\n", temp_reg1, sym->stack_offset);
+            // arg1 is a constant, so load it into the designated temp register (t9)
+            fprintf(output_file, "\tli %s, %s\n", temp_reg1, current->arg1);
+            strcpy(arg1_reg, temp_reg1);
         } else {
-            fprintf(output_file, "\tlw %s, var_%s\n", temp_reg1, current->arg1);
-        }
-        strcpy(arg1_reg, temp_reg1);
+            // arg1 is not a temporary, so load it into the designated temp register (t9)
+            symbol* sym = lookup(current_scope_code_gen, current->arg1);
+            if (sym && sym->is_local) {
+                fprintf(output_file, "\tlw %s, %d($fp)\n", temp_reg1, sym->stack_offset);
+            } else {
+                fprintf(output_file, "\tlw %s, var_%s\n", temp_reg1, current->arg1);
+            }
+            strcpy(arg1_reg, temp_reg1);
         }
 
         if (is_register_name(current->arg2)) {
-        // arg1 is a temporary, so add $ in front
-        snprintf(arg2_reg, sizeof(arg2_reg), "$%s", current->arg2);
+            // arg1 is a temporary, so add $ in front
+            snprintf(arg2_reg, sizeof(arg2_reg), "$%s", current->arg2);
         } else if (isdigit(current->arg2[0]) || (current->arg2[0] == '-' && isdigit(current->arg2[1]))) {
-        // arg1 is a constant, so load it into the designated temp register (t9)
-        fprintf(output_file, "\tli %s, %s\n", temp_reg2, current->arg2);
-        strcpy(arg2_reg, temp_reg2);
-        }
-        else {
-        // arg1 is not a temporary, so load it into the designated temp register (t9)
-        fprintf(output_file, "\tlw %s, %s\n", temp_reg2, current->arg2);
-        strcpy(arg2_reg, temp_reg2);
+            // arg1 is a constant, so load it into the designated temp register (t9)
+            fprintf(output_file, "\tli %s, %s\n", temp_reg2, current->arg2);
+            strcpy(arg2_reg, temp_reg2);
+        } else {
+            // arg1 is not a temporary, so load it into the designated temp register (t9)
+            symbol* sym = lookup(current_scope_code_gen, current->arg2);
+            if (sym && sym->is_local) {
+                fprintf(output_file, "\tlw %s, %d($fp)\n", temp_reg2, sym->stack_offset);
+            } else {
+                fprintf(output_file, "\tlw %s, var_%s\n", temp_reg2, current->arg2);
+            }
         }
 
         // Perform the addition with the appropriate registers
@@ -340,30 +342,38 @@ void evaluate_operations(TAC* current, int stack_offset) {
         char* temp_reg2 = "$t8"; // Designated temp register for arg2 if not a temp
 
         if (is_register_name(current->arg1)) {
-        // arg1 is a temporary, so add $ in front
-        snprintf(arg1_reg, sizeof(arg1_reg), "$%s", current->arg1);
+            // arg1 is a temporary, so add $ in front
+            snprintf(arg1_reg, sizeof(arg1_reg), "$%s", current->arg1);
         } else if (isdigit(current->arg1[0]) || (current->arg1[0] == '-' && isdigit(current->arg1[1]))) {
-        // arg1 is a constant, so load it into the designated temp register (t9)
-        fprintf(output_file, "\tli %s, %s\n", temp_reg1, current->arg1);
-        strcpy(arg1_reg, temp_reg1);
-        }
-        else {
-        // arg1 is not a temporary, so load it into the designated temp register (t9)
-        fprintf(output_file, "\tlw %s, %s\n", temp_reg1, current->arg1);
-        strcpy(arg1_reg, temp_reg1);
+            // arg1 is a constant, so load it into the designated temp register (t9)
+            fprintf(output_file, "\tli %s, %s\n", temp_reg1, current->arg1);
+            strcpy(arg1_reg, temp_reg1);
+        } else {
+            // arg1 is not a temporary, so load it into the designated temp register (t9)
+            symbol* sym = lookup(current_scope_code_gen, current->arg1);
+            if (sym && sym->is_local) {
+                fprintf(output_file, "\tlw %s, %d($fp)\n", temp_reg1, sym->stack_offset);
+            } else {
+                fprintf(output_file, "\tlw %s, var_%s\n", temp_reg1, current->arg1);
+            }
+            strcpy(arg1_reg, temp_reg1);
         }
 
         if (is_register_name(current->arg2)) {
-        // arg2 is a temporary, so add $ in front
-        snprintf(arg2_reg, sizeof(arg2_reg), "$%s", current->arg2);
+            // arg1 is a temporary, so add $ in front
+            snprintf(arg2_reg, sizeof(arg2_reg), "$%s", current->arg2);
         } else if (isdigit(current->arg2[0]) || (current->arg2[0] == '-' && isdigit(current->arg2[1]))) {
-        // arg2 is a constant, so load it into the designated temp register (t8)
-        fprintf(output_file, "\tli %s, %s\n", temp_reg2, current->arg2);
-        strcpy(arg2_reg, temp_reg2);
+            // arg1 is a constant, so load it into the designated temp register (t9)
+            fprintf(output_file, "\tli %s, %s\n", temp_reg2, current->arg2);
+            strcpy(arg2_reg, temp_reg2);
         } else {
-        // arg2 is not a temporary, so load it into the designated temp register (t8)
-        fprintf(output_file, "\tlw %s, %s\n", temp_reg2, current->arg2);
-        strcpy(arg2_reg, temp_reg2);
+            // arg1 is not a temporary, so load it into the designated temp register (t9)
+            symbol* sym = lookup(current_scope_code_gen, current->arg2);
+            if (sym && sym->is_local) {
+                fprintf(output_file, "\tlw %s, %d($fp)\n", temp_reg2, sym->stack_offset);
+            } else {
+                fprintf(output_file, "\tlw %s, var_%s\n", temp_reg2, current->arg2);
+            }
         }
 
         fprintf(output_file, "\tseq $%s, %s, %s\n", current->result, arg1_reg, arg2_reg);
@@ -371,6 +381,15 @@ void evaluate_operations(TAC* current, int stack_offset) {
     } else if (strcmp(current->op, "if" ) == 0) {
         fprintf(output_file, "\tbeq $%s, $%s, %s\n", current->arg1, current->arg2, current->result);
     } else if (strcmp(current->op, "if_block") == 0) {
+        fprintf(output_file, "\tj %s\n", current->result);
+    } else if (strcmp(current->op, "if_end") == 0) {
+        fprintf(output_file, "# IF STMT END\n");
+        fprintf(output_file, "%s:\n", current->result);
+    } else if (strcmp(current->op, "if_start") == 0) {
+        fprintf(output_file, "# IF STMT START\n");
+        fprintf(output_file, "%s:\n", current->result);
+    } else if (strcmp(current->op, "if_block_head") == 0) {
+        fprintf(output_file, "# IF BLOCK START\n");
         fprintf(output_file, "%s:\n", current->result);
     }
 }
