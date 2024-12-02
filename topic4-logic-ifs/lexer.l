@@ -107,6 +107,13 @@ ws             {delim}+
 		 yylval.string = strdup(yytext); 
 		 return ELSE;
 		}
+
+"while" {
+		 words++; chars += strlen(yytext);
+		 printf("%s : WHILE\n", yytext);
+		 yylval.string = strdup(yytext); 
+		 return WHILE;
+		}
 			
 "="		{chars++;
 		 printf("%s : EQ\n", yytext);

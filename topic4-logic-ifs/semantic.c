@@ -284,9 +284,7 @@ void semantic_analysis(ASTNode* node, symbol_table* sym_table) {
             node->ifStmt.block_start_label = create_if_label();
             node->ifStmt.block->ifBlock.end_label = node->ifStmt.end_label;
             node->ifStmt.block->ifBlock.start_label = node->ifStmt.block_start_label;
-            // node->ifStmt.block->ifBlock.end_label = node->ifStmt.block_end_label;
-            // node->ifStmt.elseIfList->elseIfList.end_label = node->ifStmt.end_label;
-            tac_if_header(node, sym_table);
+            tac_header(node, sym_table);
             semantic_analysis(node->ifStmt.condition, sym_table);
             tac_expr(node, sym_table);
             semantic_analysis(node->ifStmt.block, sym_table);
@@ -329,10 +327,24 @@ void semantic_analysis(ASTNode* node, symbol_table* sym_table) {
             printf("Performing semantic analysis on else statement\n");
             node->elseStmt.block->ifBlock.start_label = node->elseStmt.start_label;
             node->elseStmt.block->ifBlock.end_label = node->elseStmt.end_label;
-            // tac_if_header(node, sym_table);
-            // tac_if_block_header(node, sym_table);
             semantic_analysis(node->elseStmt.block, sym_table);
             tac_expr(node, sym_table);
+            break;
+        case NodeType_WhileStmt:
+            printf("Performing semantic analysis on while statement\n");
+            node->whileStmt.start_label = create_if_label();
+            node->whileStmt.end_label = create_if_label();
+            node->whileStmt.block_start_label = create_if_label();
+            node->whileStmt.block_end_label = create_if_label();
+            node->whileStmt.block->ifBlock.end_label = node->whileStmt.end_label;
+            node->whileStmt.block->ifBlock.start_label = node->whileStmt.block_start_label;
+            node->whileStmt.block->ifBlock.if_label = node->whileStmt.start_label;
+            node->whileStmt.block->ifBlock.isLoop = true;
+            tac_header(node, sym_table);
+            semantic_analysis(node->whileStmt.condition, sym_table);
+            tac_expr(node, sym_table);
+            semantic_analysis(node->whileStmt.block, sym_table);
+            tac_condition(node, sym_table);
             break;
         default:
             fprintf(stderr, "Unknown Node Type\n");
@@ -389,7 +401,7 @@ TAC *tac_if_block_header(ASTNode *expr, symbol_table *sym_table){
     return instruction;
 }
 
-TAC *tac_if_header(ASTNode *expr, symbol_table *sym_table)
+TAC *tac_header(ASTNode *expr, symbol_table *sym_table)
 {
     // Depending on your AST structure, generate the appropriate TAC
     // If the TAC is generated successfully, append it to the global TAC list
@@ -403,11 +415,14 @@ TAC *tac_if_header(ASTNode *expr, symbol_table *sym_table)
 
     instruction->scope = sym_table;
     printf("Generating TAC in the scope %s\n", sym_table->scope_name);
-    instruction->op = strdup("if_start");
     if (expr->type == NodeType_IfStmt) {
         instruction->result = expr->ifStmt.start_label;
+        instruction->op = strdup("if_start");
     } else if (expr->type == NodeType_ElseStmt) {
         instruction->result = expr->elseStmt.start_label;
+    } else if (expr->type == NodeType_WhileStmt) {
+        instruction->result = expr->whileStmt.start_label;
+        instruction->op = strdup("while_start");
     }
     
 
@@ -433,7 +448,11 @@ TAC *tac_condition(ASTNode *expr, symbol_table *sym_table) {
     instruction->scope = sym_table;
     printf("Generating TAC in the scope %s\n", sym_table->scope_name);
     instruction->op = strdup("if_end");
-    instruction->result = expr->ifStmt.end_label;
+    if (expr->type == NodeType_IfStmt) {
+        instruction->result = expr->ifStmt.end_label;
+    } else if (expr->type == NodeType_WhileStmt) {
+        instruction->result = expr->whileStmt.end_label;
+    }
 
     instruction->next = NULL; // Make sure to null-terminate the new instruction
     // Append to the global TAC list
@@ -611,11 +630,24 @@ TAC *tac_expr(ASTNode *expr, symbol_table *sym_table)
             break;
         }
 
+        case NodeType_WhileStmt: {
+            printf("Generating TAC for while statement\n");
+            instruction->arg1 = create_operand(expr->whileStmt.condition);
+            instruction->arg2 = strdup("zero");
+            instruction->op = strdup("while");
+            instruction->result = expr->whileStmt.end_label;
+            break;
+        }
+
         case NodeType_IfBlock: {
             // Generate TAC for the if block
             printf("Generating TAC for if block\n");
             instruction->op = strdup("if_block");
-            instruction->result = expr->ifBlock.end_label;
+            if (expr->ifBlock.isLoop) {
+                instruction->result = expr->ifBlock.if_label;
+            } else {
+                instruction->result = expr->ifBlock.end_label;
+            }
             break;
         }
 
@@ -783,6 +815,10 @@ void print_TAC_to_file(const char *filename, TAC *tac)
             fprintf(file, "if_start %s\n", current->result);
         } else if (strcmp(current->op, "if_block_head") == 0) {
             fprintf(file, "if_block_head %s\n", current->result);
+        } else if (strcmp(current->op, "while_start") == 0) {
+            fprintf(file, "while_start %s\n", current->result);
+        } else if (strcmp(current->op, "while") == 0) {
+            fprintf(file, "while %s %s %s\n", current->arg1, current->arg2, current->result);
         }
         current = current->next;
     }
@@ -898,6 +934,10 @@ void print_TAC(TAC* tac) {
             printf("if not %s goto %s\n", tac->arg1, tac->result);
         } else if (strcmp(tac->op, "==") == 0) {
             printf("%s = %s == %s\n", tac->result, tac->arg1, tac->arg2);
+        } else if (strcmp(tac->op, "<") == 0) {
+            printf("%s = %s < %s\n", tac->result, tac->arg1, tac->arg2);
+        } else if (strcmp(tac->op, ">") == 0) {
+            printf("%s = %s > %s\n", tac->result, tac->arg1, tac->arg2);
         } else if (strcmp(tac->op, "if_block") == 0) {
             printf("jump to %s\n", tac->result);
         } else if (strcmp(tac->op, "if_end") == 0) {
@@ -906,6 +946,10 @@ void print_TAC(TAC* tac) {
             printf("if_start %s\n", tac->result);
         } else if (strcmp(tac->op, "if_block_head") == 0) {
             printf("if_block_head %s\n", tac->result);
+        } else if (strcmp(tac->op, "while_start") == 0) {
+            printf("while_start %s\n", tac->result);
+        } else if (strcmp(tac->op, "while") == 0) {
+            printf("if not %s %s %s\n", tac->arg1, tac->arg2, tac->result);
         }
 }
 

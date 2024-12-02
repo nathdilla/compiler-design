@@ -1,21 +1,15 @@
 
 func main
 a declare
-a = 3
-if_start if_label_1468638776
-if not t0 goto if_label_1471010618
-if_block_head if_label_1473382460
+b declare
+a = 0
+while_start if_label_1468638776
+while t0 zero if_label_1469824697
+if_block_head if_label_1471010618
 write a
-jump to if_label_1469824697
-if_start if_label_1471010618
-if not t1 goto if_label_1474568381
-if_block_head if_label_1476940223
-write a
-jump to if_label_1469824697
-if_block_head if_label_1474568381
-a = 10
-write a
-jump to if_label_1469824697
+t1 = a + 1
+a = t1
+jump to if_label_1468638776
 if_end if_label_1469824697
 return 0
 

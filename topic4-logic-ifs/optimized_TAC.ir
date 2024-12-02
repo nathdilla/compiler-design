@@ -1,6 +1,6 @@
 a declare
-a = 3
+b declare
+a = 0
 write a
-write a
-a = 10
-write a
+t1 = a + 1
+a = t1

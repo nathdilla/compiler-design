@@ -53,7 +53,7 @@ void semantic_analysis(ASTNode* node, symbol_table* symTab);
 TAC* tac_expr(ASTNode* expr, symbol_table* sym_table); //returns the TAC for the expression to print on console
 TAC* tac_if_block_header(ASTNode* expr, symbol_table* sym_table);
 TAC* tac_condition(ASTNode* expr, symbol_table* sym_table);
-TAC* tac_if_header(ASTNode* expr, symbol_table* sym_table);
+TAC* tac_header(ASTNode* expr, symbol_table* sym_table);
 char* create_temp_var();
 char* create_float_temp_var();
 char* create_if_label();

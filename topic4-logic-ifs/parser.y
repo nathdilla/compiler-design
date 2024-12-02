@@ -81,11 +81,12 @@ symbol_table* current_scope = NULL;
 %token <string> ARRAY
 %token <string> IF
 %token <string> ELSE
+%token <string> WHILE
 
 
 %printer { fprintf(yyoutput, "%s", $$); } ID;
 
-%type <ast> Program VarDecl VarDeclList FuncDecl FuncDeclList ParamList Param Block Stmt StmtList Expr BinOp WriteStmt ReturnStmt FuncSignature InputParamList InputParam ArrayDecl ArrayDeclList LogicExpr IfBlock IfStmt ElseIfList ElseStmt
+%type <ast> Program VarDecl VarDeclList FuncDecl FuncDeclList ParamList Param Block Stmt StmtList Expr BinOp WriteStmt ReturnStmt FuncSignature InputParamList InputParam ArrayDecl ArrayDeclList LogicExpr IfBlock IfStmt ElseIfList ElseStmt WhileStmt
 %start Program
 
 %left PLUS MINUS
@@ -352,6 +353,9 @@ Stmt
 	| 	IfStmt 				{
 									$$ = $1;
 								}
+	| 	WhileStmt 				{
+									$$ = $1;
+								}
 ;
 
 Expr
@@ -466,6 +470,30 @@ LogicExpr
 							$$->logicExpr.right = $3;
 							$$->logicExpr.operator = "==";
 						}
+		| Expr GT Expr {
+							printf("PARSER: Recognized greater than expression\n");
+							$$ = malloc(sizeof(ASTNode));
+							$$->type = NodeType_LogicExpr;
+							$$->logicExpr.left = $1;
+							$$->logicExpr.right = $3;
+							$$->logicExpr.operator = ">";
+						}
+		| Expr LT Expr {
+							printf("PARSER: Recognized less than expression\n");
+							$$ = malloc(sizeof(ASTNode));
+							$$->type = NodeType_LogicExpr;
+							$$->logicExpr.left = $1;
+							$$->logicExpr.right = $3;
+							$$->logicExpr.operator = "<";
+						}
+
+WhileStmt : WHILE LPAREN LogicExpr RPAREN IfBlock {
+									printf("PARSER: Recognized while statement\n");
+									$$ = malloc(sizeof(ASTNode));
+									$$->type = NodeType_WhileStmt;
+									$$->whileStmt.condition = $3;
+									$$->whileStmt.block = $5;
+								}
 
 IfStmt
 		: IF LPAREN LogicExpr RPAREN IfBlock ElseIfList {

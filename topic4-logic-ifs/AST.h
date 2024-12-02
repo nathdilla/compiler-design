@@ -43,6 +43,7 @@ typedef enum {
     NodeType_IfBlock,
     NodeType_ElseIfList,
     NodeType_ElseStmt,
+    NodeType_WhileStmt
 } NodeType;
 
 // Structure for AST nodes
@@ -229,6 +230,8 @@ typedef struct ASTNode {
             char* start_label;
             char* end_label; // point to the end of the statement
             char* block_label; // point to the next block
+            char* if_label;
+            bool isLoop;
         } ifBlock;
 
         struct ElseIfList {
@@ -244,6 +247,15 @@ typedef struct ASTNode {
             char* start_label;
             char* end_label;
         } elseStmt;
+
+        struct WhileStmt {
+            struct ASTNode* condition;
+            struct ASTNode* block;
+            char* start_label;
+            char* block_start_label;
+            char* block_end_label;
+            char* end_label;
+        } whileStmt;
     };
 } ASTNode;
 

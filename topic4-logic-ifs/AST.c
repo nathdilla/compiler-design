@@ -187,6 +187,12 @@ void traverseAST(ASTNode* node, int level) {
             printf("Else Statement\n");
             traverseAST(node->elseStmt.block, level + indentValue);
             break;
+        case NodeType_WhileStmt:
+            printIndent(level);
+            printf("While Statement\n");
+            traverseAST(node->whileStmt.condition, level + indentValue);
+            traverseAST(node->whileStmt.block, level + indentValue);
+            break;
     }
 }
 
@@ -292,6 +298,9 @@ void printASTNode(ASTNode* node) {
             break;
         case NodeType_ElseStmt:
             printf("Else Statement\n");
+            break;
+        case NodeType_WhileStmt:
+            printf("While Statement\n");
             break;
     }
 } 
@@ -419,6 +428,10 @@ void freeAST(ASTNode* node) {
             break;
         case NodeType_ElseStmt:
             free(node->elseStmt.block);
+            break;
+        case NodeType_WhileStmt:
+            free(node->whileStmt.condition);
+            free(node->whileStmt.block);
             break;
     }
 
@@ -564,14 +577,18 @@ ASTNode* createNode(NodeType type) {
             break;
         case NodeType_IfBlock:
             newNode->ifBlock.stmtList = NULL;
+            newNode->ifBlock.isLoop = false;
             break;
         case NodeType_ElseIfList:
             newNode->elseIfList.elseIf = NULL;
             newNode->elseIfList.elseIfList = NULL;
             break;
-
         case NodeType_ElseStmt:
             newNode->elseStmt.block = NULL;
+            break;
+        case NodeType_WhileStmt:
+            newNode->whileStmt.condition = NULL;
+            newNode->whileStmt.block = NULL;
             break;
     }
 

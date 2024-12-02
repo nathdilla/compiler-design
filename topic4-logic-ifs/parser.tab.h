@@ -72,7 +72,8 @@
      FUNC = 288,
      ARRAY = 289,
      IF = 290,
-     ELSE = 291
+     ELSE = 291,
+     WHILE = 292
    };
 #endif
 /* Tokens.  */
@@ -110,6 +111,7 @@
 #define ARRAY 289
 #define IF 290
 #define ELSE 291
+#define WHILE 292
 
 
 
@@ -126,7 +128,7 @@ typedef union YYSTYPE
 	struct ASTNode* ast;
 }
 /* Line 1529 of yacc.c.  */
-#line 130 "parser.tab.h"
+#line 132 "parser.tab.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
