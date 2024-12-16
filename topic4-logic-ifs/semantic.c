@@ -15,6 +15,7 @@ symbol_table* scope = NULL;
 unsigned long hash_index = 1234;
 
 bool buffering_tac = false;
+char* current_while_label = NULL;
 
 /*
 Recursively traverse the AST and perform semantic analysis
@@ -166,22 +167,16 @@ void semantic_analysis(ASTNode* node, symbol_table* sym_table) {
             break;
         case NodeType_FuncDecl:
             printf("Performing semantic analysis on function declaration\n");
-            semantic_analysis(node->funcDecl.funcSignature, node->funcDecl.scope);
+            // no checks necessary... for now
+            tac_function_header(node, sym_table);
             semantic_analysis(node->funcDecl.paramList, node->funcDecl.scope);
             semantic_analysis(node->funcDecl.block, node->funcDecl.scope);
             tac_expr(node, sym_table);
             break;
-        case NodeType_FuncSignature:
-            printf("Performing semantic analysis on function signature\n");
-            tac_expr(node, sym_table);
-            // no checks necessary... for now
-            break;
         case NodeType_Block:
             printf("Performing semantic analysis on block\n");
             semantic_analysis(node->block.varDeclList, sym_table);
-            semantic_analysis(node->block.arrayDeclList, sym_table);
             semantic_analysis(node->block.stmtList, sym_table);
-            semantic_analysis(node->block.returnStmt, sym_table);
             tac_expr(node, sym_table);
             break;
         case NodeType_ReturnStmt:
@@ -343,8 +338,14 @@ void semantic_analysis(ASTNode* node, symbol_table* sym_table) {
             tac_header(node, sym_table);
             semantic_analysis(node->whileStmt.condition, sym_table);
             tac_expr(node, sym_table);
+            current_while_label = node->whileStmt.end_label;
             semantic_analysis(node->whileStmt.block, sym_table);
             tac_condition(node, sym_table);
+            current_while_label = NULL;
+            break;
+        case NodeType_BreakStmt:
+            printf("Performing semantic analysis on break statement\n");
+            tac_expr(node, sym_table);
             break;
         default:
             fprintf(stderr, "Unknown Node Type\n");
@@ -392,6 +393,34 @@ TAC *tac_if_block_header(ASTNode *expr, symbol_table *sym_table){
     printf("Generating TAC in the scope %s\n", sym_table->scope_name);
     instruction->op = strdup("if_block_head");
     instruction->result = expr->ifBlock.start_label;
+
+    instruction->next = NULL; // Make sure to null-terminate the new instruction
+    // Append to the global TAC list
+    append_TAC(&tac_head, instruction);
+    print_TAC(instruction);
+
+    return instruction;
+}
+
+TAC *tac_function_header(ASTNode *expr, symbol_table *sym_table){
+    // Depending on your AST structure, generate the appropriate TAC
+    // If the TAC is generated successfully, append it to the global TAC list
+    // Return the generated TAC, so that it can be used by the caller, e.g. for printing
+    if (!expr)
+        return NULL;
+
+    TAC *instruction = (TAC *)malloc(sizeof(TAC));
+    if (!instruction)
+        return NULL;
+
+    instruction->scope = sym_table;
+    printf("Generating TAC in the scope %s\n", sym_table->scope_name);
+    printf("Generating TAC for function declaration\n");
+    instruction->op = strdup("func");
+    instruction->result = strdup(expr->funcDecl.funcName);
+    instruction->scope = expr->funcDecl.scope;
+    buffering_tac = false;
+    allocated_arg_regs = -1;
 
     instruction->next = NULL; // Make sure to null-terminate the new instruction
     // Append to the global TAC list
@@ -515,6 +544,11 @@ TAC *tac_expr(ASTNode *expr, symbol_table *sym_table)
             {
                 sym->temp_var = instruction->arg1;
             }
+            if (strchr(instruction->arg1, '.') != NULL) {
+                instruction->type = "float";
+            } else {
+                instruction->type = "int";
+            }
             break;
         }
 
@@ -528,11 +562,11 @@ TAC *tac_expr(ASTNode *expr, symbol_table *sym_table)
             break;
         }
 
-        case NodeType_FuncSignature: {
+        case NodeType_FuncDecl: {
             printf("Generating TAC for function declaration\n");
-            instruction->op = strdup("func");
+            instruction->op = strdup("func_end");
             instruction->result = strdup(expr->funcDecl.funcName);
-            instruction->scope = expr->funcSignature.scope;
+            instruction->scope = expr->funcDecl.scope;
             buffering_tac = false;
             allocated_arg_regs = -1;
             break;
@@ -542,7 +576,7 @@ TAC *tac_expr(ASTNode *expr, symbol_table *sym_table)
             printf("Generating TAC for return statement\n");
             instruction->arg1 = create_operand(expr->returnStmt.expr);
             instruction->op = strdup("return");
-            instruction->result = "";
+            instruction->result = instruction->scope->scope_name;
             break;
         }
 
@@ -647,6 +681,15 @@ TAC *tac_expr(ASTNode *expr, symbol_table *sym_table)
                 instruction->result = expr->ifBlock.if_label;
             } else {
                 instruction->result = expr->ifBlock.end_label;
+            }
+            break;
+        }
+
+        case NodeType_BreakStmt: {
+            printf("Generating TAC for break statement\n");
+            instruction->op = strdup("break");
+            if (current_while_label != NULL) {
+                instruction->result = current_while_label;
             }
             break;
         }
@@ -780,7 +823,8 @@ void print_TAC_to_file(const char *filename, TAC *tac)
         else if (strcmp(current->op, "+") == 0 ||
                  strcmp(current->op, "-") == 0 ||
                  strcmp(current->op, "*") == 0 ||
-                 strcmp(current->op, "/") == 0)
+                 strcmp(current->op, "/") == 0 ||
+                 strcmp(current->op, "%") == 0)
         {
             fprintf(file, "%s = %s %s %s\n", current->result, current->arg1, current->op, current->arg2);
         }
@@ -790,8 +834,10 @@ void print_TAC_to_file(const char *filename, TAC *tac)
         } else if (strcmp(current->op, "func") == 0) {
             fprintf(file, "\n");
             fprintf(file, "func %s\n", current->result);
+        } else if (strcmp(current->op, "func_end") == 0) {
+            fprintf(file, "func_end %s\n", current->result);
         } else if (strcmp(current->op, "return") == 0) {
-            fprintf(file, "return %s\n", current->arg1);
+            fprintf(file, "return %s to %s\n", current->arg1, current->result);
             fprintf(file, "\n");
         } else if (strcmp(current->op, "param") == 0) {
             fprintf(file, "%s param %s\n", current->result, current->arg1);
@@ -819,6 +865,8 @@ void print_TAC_to_file(const char *filename, TAC *tac)
             fprintf(file, "while_start %s\n", current->result);
         } else if (strcmp(current->op, "while") == 0) {
             fprintf(file, "while %s %s %s\n", current->arg1, current->arg2, current->result);
+        } else if (strcmp(current->op, "break") == 0) {
+            fprintf(file, "break, jump to %s\n", current->result);
         }
         current = current->next;
     }
@@ -913,8 +961,10 @@ void print_TAC(TAC* tac) {
         } else if (strcmp(tac->op, "func") == 0) {
             printf("\n");
             printf("func %s\n", tac->result);
+        } else if (strcmp(tac->op, "func_end") == 0) {
+            printf("func_end %s\n", tac->result);
         } else if (strcmp(tac->op, "return") == 0) {
-            printf("return %s\n", tac->arg1);
+            printf("return %s to %s\n", tac->arg1, tac->result);
             printf("\n");
         } else if (strcmp(tac->op, "param") == 0) {
             printf("%s param %s\n", tac->result, tac->arg2);
@@ -938,6 +988,10 @@ void print_TAC(TAC* tac) {
             printf("%s = %s < %s\n", tac->result, tac->arg1, tac->arg2);
         } else if (strcmp(tac->op, ">") == 0) {
             printf("%s = %s > %s\n", tac->result, tac->arg1, tac->arg2);
+        } else if (strcmp(tac->op, ">=") == 0) {
+            printf("%s = %s >= %s\n", tac->result, tac->arg1, tac->arg2);
+        } else if (strcmp(tac->op, "<=") == 0) {
+            printf("%s = %s >= %s\n", tac->result, tac->arg1, tac->arg2);
         } else if (strcmp(tac->op, "if_block") == 0) {
             printf("jump to %s\n", tac->result);
         } else if (strcmp(tac->op, "if_end") == 0) {
@@ -950,6 +1004,8 @@ void print_TAC(TAC* tac) {
             printf("while_start %s\n", tac->result);
         } else if (strcmp(tac->op, "while") == 0) {
             printf("if not %s %s %s\n", tac->arg1, tac->arg2, tac->result);
+        } else if (strcmp(tac->op, "break") == 0) {
+            printf("break, jump to %s\n", tac->result);
         }
 }
 

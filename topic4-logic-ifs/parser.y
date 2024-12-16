@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include "AST.h"
 #include "symbol_table.h"
 #include "semantic.h"
@@ -67,6 +68,7 @@ symbol_table* current_scope = NULL;
 %token <char> AND
 %token <char> OR
 %token <char> NOT
+%token <char> MOD
 %token <operator> EQ
 %token <operator> PLUS
 %token <operator> MINUS
@@ -82,11 +84,12 @@ symbol_table* current_scope = NULL;
 %token <string> IF
 %token <string> ELSE
 %token <string> WHILE
+%token <string> BREAK
 
 
 %printer { fprintf(yyoutput, "%s", $$); } ID;
 
-%type <ast> Program VarDecl VarDeclList FuncDecl FuncDeclList ParamList Param Block Stmt StmtList Expr BinOp WriteStmt ReturnStmt FuncSignature InputParamList InputParam ArrayDecl ArrayDeclList LogicExpr IfBlock IfStmt ElseIfList ElseStmt WhileStmt
+%type <ast> Program VarDecl VarDeclList FuncDecl FuncDeclList ParamList Param Block Stmt StmtList Expr BinOp WriteStmt ReturnStmt InputParamList InputParam ArrayDecl ArrayDeclList LogicExpr IfBlock IfStmt ElseIfList ElseStmt WhileStmt BreakStmt
 %start Program
 
 %left PLUS MINUS
@@ -101,26 +104,18 @@ Program
 									root->type = NodeType_Program;
 									root->program.varDeclList = $1;
 									root->program.funcDeclList = $2;
-									root->program.stmtList = $3;
-									}
-		| VarDeclList StmtList { 
-									printf("The PARSER has started\n"); 
-									root = malloc(sizeof(ASTNode));
-									root->type = NodeType_Program;
-									root->program.varDeclList = $1;
-									root->program.stmtList = $2;
+									// root->program.stmtList = $3;
 									}
 ;
 
 ArrayDeclList
-		  	: 						{/*empty, i.e. it is possible not to declare an array*/}
+		  	: 						{$$ = NULL;}
 		  	| 	ArrayDecl ArrayDeclList {  
 									printf("PARSER: Recognized array declaration list\n"); 
 									$$ = malloc(sizeof(ASTNode));
 									$$->type = NodeType_ArrayDeclList;
 									$$->arrayDeclList.arrayDecl = $1;
 									$$->arrayDeclList.arrayDeclList = $2;
-									printASTNode($$);
 									}
 								
 ArrayDecl
@@ -141,14 +136,14 @@ ArrayDecl
 ;
 
 VarDeclList
-		  	: 						{/*empty, i.e. it is possible not to declare a variable*/}
+		  	: 						{$$ = NULL;}
 		  	| 	VarDeclList VarDecl {  
 									printf("PARSER: Recognized variable declaration list\n"); 
 									$$ = malloc(sizeof(ASTNode));
 									$$->type = NodeType_VarDeclList;
 									$$->varDeclList.varDecl = $1;
 									$$->varDeclList.varDeclList = $2;
-									printASTNode($$);
+									
 									}
 ;
 
@@ -172,51 +167,40 @@ VarDecl
 ;
 
 FuncDeclList
-		  	: 							{/*empty, i.e. it is possible not to declare a variable*/}
+		  	: 							{ $$ = NULL; }
 		  	| 	FuncDecl FuncDeclList 	{  
 										printf("PARSER: Recognized function declaration list\n"); 
 										$$ = malloc(sizeof(ASTNode));
 										$$->type = NodeType_FuncDeclList;
 										$$->funcDeclList.funcDecl = $1;
 										$$->funcDeclList.funcDeclList = $2;
-										printASTNode($$);
+										
 										}
 ;
 
-FuncSignature
-	  	:    	FUNC TYPE ID 	{ 
-								printf("PARSER: Recognized function signature\n");
-								$$ = malloc(sizeof(ASTNode));
-								$$->type = NodeType_FuncSignature;
-								$$->funcSignature.funcType = strdup($2);
-								$$->funcSignature.funcName = strdup($3);
-								}
-
 FuncDecl
-	  	:    	FuncSignature 
-				{
-					printf("PARSER: Entering function scope\n");
-					symbol_table* local_table = create_symbol_table(TABLE_SIZE, $1->funcSignature.funcName); 
-					$1->funcSignature.scope = local_table;
-					local_table->parent = current_scope;
-					previous_scope = current_scope;
-					current_scope = local_table; 
-				} 
-				LPAREN ParamList RPAREN Block
-				{ 
-					// Scopes will be made compile-time. runtime scopes will be dealt with in the future.
-					printf("PARSER: Recognized function declaration\n");
-					$$ = malloc(sizeof(ASTNode));
-					$$->type = NodeType_FuncDecl;
-					$$->funcDecl.funcType = strdup($1->funcSignature.funcType);
-					$$->funcDecl.funcName = strdup($1->funcSignature.funcName);
-					$$->funcDecl.funcSignature = $1;
-					$$->funcDecl.paramList = $4;
-					$$->funcDecl.block = $6;
-					$$->funcDecl.scope = current_scope;
-					printf("PARSER: Exiting function scope\n");
-					current_scope = previous_scope;
-				}
+		: FUNC TYPE ID 
+		{
+			// Create a local table for the function scope
+			printf("PARSER: Entering function scope\n");
+			symbol_table* local_table = create_symbol_table(TABLE_SIZE, strdup($3)); 
+			local_table->parent = current_scope;
+			previous_scope = current_scope;
+			current_scope = local_table; 
+		}
+		LPAREN ParamList RPAREN Block {
+			printf("PARSER: Recognized function declaration\n");
+
+			$$ = malloc(sizeof(ASTNode));
+			$$->type = NodeType_FuncDecl;
+			$$->funcDecl.funcType = strdup($2);
+			$$->funcDecl.funcName = strdup($3);
+			$$->funcDecl.paramList = $6;
+			$$->funcDecl.block = $8;
+			$$->funcDecl.scope = current_scope;
+
+			current_scope = previous_scope;
+		}
 ;
 
 ParamList
@@ -247,6 +231,7 @@ Param
 									add_symbol(current_scope, $2, $1);
 									print_table(current_scope);
 									}
+
 
 InputParamList
 		: 						{/*empty, i.e. it is possible not to have any input parameters*/}
@@ -284,7 +269,7 @@ InputParam
 ;
 
 Block
-	  	:    	LCURBRACK ArrayDeclList VarDeclList StmtList ReturnStmt RCURBRACK 					
+	  	:    	LCURBRACK ArrayDeclList VarDeclList StmtList RCURBRACK 					
 			{ 
 				printf("PARSER: Recognized block\n"); 
 				$$ = malloc(sizeof(ASTNode));
@@ -292,7 +277,6 @@ Block
 				$$->block.varDeclList = $3;
 				$$->block.arrayDeclList = $2;
 				$$->block.stmtList = $4;
-				$$->block.returnStmt = $5;
 			}
 
 ;
@@ -305,14 +289,33 @@ ReturnStmt
 										$$->returnStmt.expr = $2;
 										}
 
+BreakStmt
+	  	:    	BREAK SEMICOLON 	{ 
+									printf("PARSER: Recognized break statement\n");
+									$$ = malloc(sizeof(ASTNode));
+									$$->type = NodeType_BreakStmt;
+									}
+		;
 StmtList
-	   	:   				{/*empty, i.e. it is possible not to have any statement*/}
+	   	:   				{$$ = NULL;}
 	   	| 	Stmt StmtList 	{ printf("PARSER: Recognized statement list\n");
 							$$ = malloc(sizeof(ASTNode));
 							$$->type = NodeType_StmtList;
 							$$->stmtList.stmt = $1;
 							$$->stmtList.stmtList = $2;
 							}
+		| 	ReturnStmt StmtList 	{ printf("PARSER: Recognized statement list with return\n");
+									$$ = malloc(sizeof(ASTNode));
+									$$->type = NodeType_StmtList;
+									$$->stmtList.stmt = $1;
+									$$->stmtList.stmtList = $2;
+									}
+		|	BreakStmt StmtList 	{ printf("PARSER: Recognized statement list with break\n");
+									$$ = malloc(sizeof(ASTNode));
+									$$->type = NodeType_StmtList;
+									$$->stmtList.stmt = $1;
+									$$->stmtList.stmtList = $2;
+									}
 ;
 
 Stmt
@@ -453,6 +456,13 @@ BinOp: BSLASH {
 				printf("WARNING: Remember to check for division by zero during semantic analysis or code generation\n");
 }
 
+BinOp: MOD {
+    printf("PARSER: Recognized binary operation (modulus)\n");
+    $$ = malloc(sizeof(ASTNode));
+    $$->type = NodeType_BinOp;
+    $$->binOp.operator = '%';  /* Literal '%' directly */
+}
+
 WriteStmt : WRITE ID SEMICOLON {
 									printf("PARSER: Recognized write statement\n");
 									$$ = malloc(sizeof(ASTNode));
@@ -485,6 +495,22 @@ LogicExpr
 							$$->logicExpr.left = $1;
 							$$->logicExpr.right = $3;
 							$$->logicExpr.operator = "<";
+						}
+		| Expr GTEQ Expr {
+							printf("PARSER: Recognized greater than or equal expression\n");
+							$$ = malloc(sizeof(ASTNode));
+							$$->type = NodeType_LogicExpr;
+							$$->logicExpr.left = $1;
+							$$->logicExpr.right = $3;
+							$$->logicExpr.operator = ">=";
+						}
+		| Expr LTEQ Expr {
+							printf("PARSER: Recognized less than or equal expression\n");
+							$$ = malloc(sizeof(ASTNode));
+							$$->type = NodeType_LogicExpr;
+							$$->logicExpr.left = $1;
+							$$->logicExpr.right = $3;
+							$$->logicExpr.operator = "<=";
 						}
 
 WhileStmt : WHILE LPAREN LogicExpr RPAREN IfBlock {
@@ -545,7 +571,11 @@ IfBlock
 
 int main() {
     // Initialize file or input source
-    yyin = fopen("testProg.cmm", "r");
+
+	// Record start time
+    clock_t start_time = clock();
+
+    yyin = fopen("testProg2.cmm", "r");
 	printf("Creating scope stack..\n");
 	create_scope_stack();
 	printf("Creating global symbol table..\n");
@@ -577,6 +607,12 @@ int main() {
 		finalize_code_generator("output.s");
 		
         freeAST(root);
+
+		// Record end time
+		clock_t end_time = clock();
+		// Calculate and display elapsed time
+		double elapsed_time = (double)(end_time - start_time) / CLOCKS_PER_SEC;
+		printf("Compilation time: %.4f seconds\n", elapsed_time);
     } else {
         fprintf(stderr, "Parsing failed\n");
     }

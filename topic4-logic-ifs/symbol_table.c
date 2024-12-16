@@ -71,7 +71,7 @@ void add_symbol(symbol_table* table, char* name, char* type) {
 symbol* lookup(symbol_table* table, char* name) {
     // Traverse through the scope chain (table and its parents)
     while (table != NULL) {
-        printf("Looking up %s in current scope\n", name);
+        printf("Looking up %s in scope, %s\n", name, table->scope_name);
         
         unsigned int hashval = hash(table, name);
         

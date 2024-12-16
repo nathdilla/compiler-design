@@ -34,6 +34,35 @@ void traverseAST(ASTNode* node, int level) {
             printIndent(level);
             printf("Variable Declaration: %s %s\n", node->varDecl.varType, node->varDecl.varName);
             break;
+        case NodeType_FuncDeclList:
+            printIndent(level);
+            printf("Function Declaration List\n");
+            traverseAST(node->funcDeclList.funcDecl, level + indentValue);
+            traverseAST(node->funcDeclList.funcDeclList, level + indentValue);
+            break;
+        case NodeType_FuncDecl:
+            printIndent(level);
+            printf("Function Declaration: %s %s\n", node->funcDecl.funcType, node->funcDecl.funcName);
+            traverseAST(node->funcDecl.paramList, level + indentValue);
+            traverseAST(node->funcDecl.block, level + indentValue);
+            break;
+        case NodeType_ParamList:
+            printIndent(level);
+            printf("Parameter List\n");
+            traverseAST(node->paramList.param, level + indentValue);
+            traverseAST(node->paramList.paramList, level + indentValue);
+            break;
+        case NodeType_Param:
+            printIndent(level);
+            printf("Parameter: %s %s\n", node->param.varName, node->param.varType);
+            break;
+        case NodeType_Block:
+            printIndent(level);
+            printf("Block\n");
+            traverseAST(node->block.varDeclList, level + indentValue);
+            traverseAST(node->block.arrayDeclList, level + indentValue);
+            traverseAST(node->block.stmtList, level + indentValue);
+            break;
         case NodeType_SimpleExpr:
             printIndent(level);
             printf("Simple Expression: %s\n", node->simpleExpr.number);
@@ -74,45 +103,14 @@ void traverseAST(ASTNode* node, int level) {
             traverseAST(node->binOp.left, level + indentValue);
             traverseAST(node->binOp.right, level + indentValue);
             break;
-        case NodeType_FuncDeclList:
-            printIndent(level);
-            printf("Function Declaration List\n");
-            traverseAST(node->funcDeclList.funcDecl, level + indentValue);
-            traverseAST(node->funcDeclList.funcDeclList, level + indentValue);
-            break;
-        case NodeType_FuncDecl:
-            printIndent(level);
-            printf("Function Declaration: %s\n", node->funcDecl.funcName);
-            traverseAST(node->funcDecl.funcSignature, level + indentValue);
-            traverseAST(node->funcDecl.block, level + indentValue);
-            traverseAST(node->funcDecl.paramList, level + indentValue);
-            break;
-        case NodeType_FuncSignature:
-            printIndent(level);
-            printf("Function Signature: %s %s\n", node->funcSignature.funcName, node->funcSignature.funcType);
-            break;
-        case NodeType_Block:
-            printIndent(level);
-            printf("Block\n");
-            traverseAST(node->block.varDeclList, level + indentValue);
-            traverseAST(node->block.arrayDeclList, level + indentValue);
-            traverseAST(node->block.stmtList, level + indentValue);
-            traverseAST(node->block.returnStmt, level + indentValue);
-            break;
         case NodeType_ReturnStmt:
             printIndent(level);
             printf("Return\n");
             traverseAST(node->returnStmt.expr, level + indentValue);
             break;
-        case NodeType_ParamList:
+        case NodeType_BreakStmt:
             printIndent(level);
-            printf("Parameter List\n");
-            traverseAST(node->paramList.param, level + indentValue);
-            traverseAST(node->paramList.paramList, level + indentValue);
-            break;
-        case NodeType_Param:
-            printIndent(level);
-            printf("Parameter: %s %s\n", node->param.varName, node->param.varType);
+            printf("Break\n");
             break;
         case NodeType_FuncCall:
             printIndent(level);
@@ -193,6 +191,7 @@ void traverseAST(ASTNode* node, int level) {
             traverseAST(node->whileStmt.condition, level + indentValue);
             traverseAST(node->whileStmt.block, level + indentValue);
             break;
+
     }
 }
 
@@ -241,9 +240,6 @@ void printASTNode(ASTNode* node) {
             break;
         case NodeType_FuncDecl:
             printf("Function Declaration: %s\n", node->funcDecl.funcName);
-            break;
-        case NodeType_FuncSignature:
-            printf("Function Signature: %s %s\n", node->funcSignature.funcName, node->funcSignature.funcType);
             break;
         case NodeType_Block:
             printf("Block\n");
@@ -301,6 +297,9 @@ void printASTNode(ASTNode* node) {
             break;
         case NodeType_WhileStmt:
             printf("While Statement\n");
+            break;
+        case NodeType_BreakStmt:
+            printf("Break\n");
             break;
     }
 } 
@@ -362,10 +361,6 @@ void freeAST(ASTNode* node) {
             free(node->funcDecl.funcSignature);
             free(node->funcDecl.paramList);
             free(node->funcDecl.block);
-            break;
-        case NodeType_FuncSignature:
-            free(node->funcSignature.funcName);
-            free(node->funcSignature.funcType);
             break;
         case NodeType_Block:
             free(node->block.varDeclList);
@@ -432,6 +427,8 @@ void freeAST(ASTNode* node) {
         case NodeType_WhileStmt:
             free(node->whileStmt.condition);
             free(node->whileStmt.block);
+            break;
+        case NodeType_BreakStmt:
             break;
     }
 
@@ -507,10 +504,6 @@ ASTNode* createNode(NodeType type) {
             newNode->funcDecl.funcSignature = NULL;
             newNode->funcDecl.block = NULL;
             newNode->funcDecl.paramList = NULL;
-            break;
-        case NodeType_FuncSignature:
-            newNode->funcSignature.funcName = NULL;
-            newNode->funcSignature.funcType = NULL;
             break;
         case NodeType_Block:
             newNode->block.varDeclList = NULL;
@@ -589,6 +582,8 @@ ASTNode* createNode(NodeType type) {
         case NodeType_WhileStmt:
             newNode->whileStmt.condition = NULL;
             newNode->whileStmt.block = NULL;
+            break;
+        case NodeType_BreakStmt:
             break;
     }
 

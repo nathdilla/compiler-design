@@ -1,15 +1,61 @@
+globalCounter declare
 
 func main
-a declare
-b declare
-a = 0
-while_start if_label_1468638776
-while t0 zero if_label_1469824697
-if_block_head if_label_1471010618
-write a
-t1 = a + 1
-a = t1
-jump to if_label_1468638776
-if_end if_label_1469824697
-return 0
+intCounter declare
+result declare
+globalCounter = 10
+t0 call modLoop
+return 0 to main
 
+func_end main
+
+func processInt
+a0 param num
+if_start if_label_1896863326232863709
+if not t2 goto if_label_1899926484203392607
+if_block_head if_label_1902989642173921505
+return 10 to processInt
+
+jump to if_label_1898394905218128158
+if_start if_label_1899926484203392607
+if not t3 goto if_label_1904521221159185954
+if_block_head if_label_1907584379129714852
+return 20 to processInt
+
+jump to if_label_1898394905218128158
+if_start if_label_1904521221159185954
+if not t4 goto if_label_1909115958114979301
+if_block_head if_label_1912179116085508199
+return 30 to processInt
+
+jump to if_label_1898394905218128158
+if_block_head if_label_1909115958114979301
+return 40 to processInt
+
+jump to if_label_1898394905218128158
+if_end if_label_1898394905218128158
+func_end processInt
+
+func modLoop
+globalCounter = 1
+while_start if_label_53247815434552
+while t5 zero if_label_53290433877529
+if_block_head if_label_53333052320506
+if_start if_label_53418289206460
+t6 = globalCounter % 2
+if not t7 goto if_label_53460907649437
+if_block_head if_label_53588762978368
+write globalCounter
+jump to if_label_53460907649437
+if_end if_label_53460907649437
+t8 = globalCounter + 1
+globalCounter = t8
+if_start if_label_53631381421345
+if not t9 goto if_label_53673999864322
+if_block_head if_label_53801855193253
+break, jump to if_label_53290433877529
+jump to if_label_53673999864322
+if_end if_label_53673999864322
+jump to if_label_53247815434552
+if_end if_label_53290433877529
+func_end modLoop

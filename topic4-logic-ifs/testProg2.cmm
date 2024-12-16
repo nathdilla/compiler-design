@@ -1,0 +1,45 @@
+// Author: Nathan Dilla 
+// Desc: This program demonstrates the 'impressive' capabilities of this compiler
+// with extra loops and modulus.
+
+// Function prototypes
+
+int globalCounter;
+
+function int main() {
+    int intCounter;
+    int result;
+
+    globalCounter = 10;
+
+    modLoop();
+
+    return 0;
+}
+
+// Function to process integers
+function int processInt(int num) {
+    if (num == 1) {
+        return 10; // Return 10 if the number is equal to 1
+    } else if (num < 3) {
+        return 20; // Return 20 if the number is less than 3
+    } else if (num > 3) {
+        return 30; // Return 30 if the number is greater than 3
+    } else {
+        return 40; // Return 40 if the number is exactly 3
+    }
+}
+
+function void modLoop() {
+    // Loop with `>=` to count down from 5
+    globalCounter = 1;
+    while (globalCounter <= 20) {
+        if (globalCounter % 2 == 0) {
+            write globalCounter;  // Output only even numbers
+        }
+        globalCounter = globalCounter + 1;
+        if (globalCounter == 16) {
+            break;
+        }
+    }
+}

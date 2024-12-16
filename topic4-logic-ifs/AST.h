@@ -17,7 +17,6 @@ typedef enum {
     NodeType_SimpleExpr,
     NodeType_SimpleID,
     NodeType_Expr, 
-    NodeType_FuncSignature,
     NodeType_FuncDecl,
     NodeType_FuncDeclList,
     NodeType_ParamList,
@@ -43,7 +42,8 @@ typedef enum {
     NodeType_IfBlock,
     NodeType_ElseIfList,
     NodeType_ElseStmt,
-    NodeType_WhileStmt
+    NodeType_WhileStmt,
+    NodeType_BreakStmt,
 } NodeType;
 
 // Structure for AST nodes
@@ -99,12 +99,6 @@ typedef struct ASTNode {
             struct ASTNode* funcSignature;
             symbol_table* scope;    
         } funcDecl;
-
-        struct {
-            char* funcName;
-            char* funcType;
-            symbol_table* scope;
-        } funcSignature;
 
         struct {
             struct ASTNode* param;
@@ -256,6 +250,10 @@ typedef struct ASTNode {
             char* block_end_label;
             char* end_label;
         } whileStmt;
+
+        struct BreakStmt {
+            char* label;
+        } breakStmt;
     };
 } ASTNode;
 

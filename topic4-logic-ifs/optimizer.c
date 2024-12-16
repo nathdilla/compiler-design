@@ -8,9 +8,9 @@ TAC *live_definitions[MAX_TAC];
 void optimize_TAC(TAC **head)
 {
     // constant_propagation(head);
-    constant_folding(head);
+    // constant_folding(head);
     // copy_Propagation(head);
-    dead_code_elimination(head);
+    // dead_code_elimination(head);
 }
 
 int live_definitions_count = 0;

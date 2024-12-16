@@ -1,10 +1,12 @@
-function int main() {    
-    int a;
-    int b;
-    a = 0;
-    while (a < 5) {
-        write a;
-        a = a + 1;
+/* This is the
+main function */
+function void main() {
+    int x;
+    float y;
+    x = 5;
+    y = 3.0;
+    if (x <= 5) {
+        write x;
     }
-    return 0;
+    write y;
 }

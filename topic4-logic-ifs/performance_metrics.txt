@@ -1,0 +1,10 @@
+testProg2.cmm 
+Compilation time: 0.0034 seconds
+Instructions: 567
+Execution time: instructions * cycle time = 333.5 nanoseconds
+
+adaptedTest.cmm
+Compilation time: 0.0118 seconds
+Execution time: N/A
+
+github link: https://github.com/nathdilla/compiler-design/tree/if-statements

@@ -25,8 +25,10 @@ void finalize_code_generator(const char* output_filename);
 
 // Allocate a register
 int allocate_register();
+int allocate_float_register();
 
 // Deallocate a register
 void deallocate_register(int regIndex);
+void deallocate_float_register(int regIndex);
 
 #endif // CODE_GENERATOR_H

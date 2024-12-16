@@ -21,18 +21,22 @@ NUMBER         [+-]?{digit}+
 FLOAT          [+-]?{digit}+"."{digit}+(E[+\-]?{digit}+)?
 ws             {delim}+
 
+
 %%
-"/*"    				{
-							int c;
-							while((c = input()) != 0) {
-								if(c == '*') {
-									if((c = input()) == '/')
-										break;
-									else
-										unput(c);
-								}
-							}
-						}
+"/*"    				{ 
+                            // Block comment handling
+                            int c;
+                            while((c = input()) != 0) {
+                                if(c == '*') {
+                                    if((c = input()) == '/')
+                                        break; // End of block comment
+                                    else
+                                        unput(c); // Not the end, put back
+                                }
+                            }
+                        }
+
+"//".*                  { /* Single-line comment: discard the rest of the line */ }
 						
 "int"	{words++; chars += strlen(yytext);
 		 printf("%s : TYPE\n", yytext);
@@ -82,6 +86,12 @@ ws             {delim}+
 		 printf("%s : RETURN\n", yytext);
 		 yylval.string = strdup(yytext);
 		 return RETURN;
+		}
+
+"break" {words++; chars += strlen(yytext);
+		 printf("%s : BREAK\n", yytext);
+		 yylval.string = strdup(yytext); 
+		 return BREAK;
 		}
 
 "function" {words++; chars += strlen(yytext);
@@ -143,6 +153,12 @@ ws             {delim}+
 		 printf("%s : BSLASH\n", yytext);
 		 yylval.operator = strdup(yytext);
 		 return BSLASH;
+		}
+
+"%"		{chars++;
+		 printf("%s : MOD\n", yytext);
+		 yylval.operator = strdup(yytext);
+		 return MOD;
 		}
 
 {ID}	{words++; chars += strlen(yytext);

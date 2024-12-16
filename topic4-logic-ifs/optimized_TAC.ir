@@ -1,6 +1,8 @@
-a declare
-b declare
-a = 0
-write a
-t1 = a + 1
-a = t1
+globalCounter declare
+intCounter declare
+result declare
+globalCounter = 10
+globalCounter = 1
+write globalCounter
+t8 = globalCounter + 1
+globalCounter = t8

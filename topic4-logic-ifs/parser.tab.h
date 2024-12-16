@@ -59,21 +59,23 @@
      AND = 275,
      OR = 276,
      NOT = 277,
-     EQ = 278,
-     PLUS = 279,
-     MINUS = 280,
-     STAR = 281,
-     BSLASH = 282,
-     BOOL = 283,
-     NUMBER = 284,
-     FLOAT = 285,
-     WRITE = 286,
-     RETURN = 287,
-     FUNC = 288,
-     ARRAY = 289,
-     IF = 290,
-     ELSE = 291,
-     WHILE = 292
+     MOD = 278,
+     EQ = 279,
+     PLUS = 280,
+     MINUS = 281,
+     STAR = 282,
+     BSLASH = 283,
+     BOOL = 284,
+     NUMBER = 285,
+     FLOAT = 286,
+     WRITE = 287,
+     RETURN = 288,
+     FUNC = 289,
+     ARRAY = 290,
+     IF = 291,
+     ELSE = 292,
+     WHILE = 293,
+     BREAK = 294
    };
 #endif
 /* Tokens.  */
@@ -97,28 +99,30 @@
 #define AND 275
 #define OR 276
 #define NOT 277
-#define EQ 278
-#define PLUS 279
-#define MINUS 280
-#define STAR 281
-#define BSLASH 282
-#define BOOL 283
-#define NUMBER 284
-#define FLOAT 285
-#define WRITE 286
-#define RETURN 287
-#define FUNC 288
-#define ARRAY 289
-#define IF 290
-#define ELSE 291
-#define WHILE 292
+#define MOD 278
+#define EQ 279
+#define PLUS 280
+#define MINUS 281
+#define STAR 282
+#define BSLASH 283
+#define BOOL 284
+#define NUMBER 285
+#define FLOAT 286
+#define WRITE 287
+#define RETURN 288
+#define FUNC 289
+#define ARRAY 290
+#define IF 291
+#define ELSE 292
+#define WHILE 293
+#define BREAK 294
 
 
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 41 "parser.y"
+#line 42 "parser.y"
 {
 	int number;
 	float fval;
@@ -128,7 +132,7 @@ typedef union YYSTYPE
 	struct ASTNode* ast;
 }
 /* Line 1529 of yacc.c.  */
-#line 132 "parser.tab.h"
+#line 136 "parser.tab.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
